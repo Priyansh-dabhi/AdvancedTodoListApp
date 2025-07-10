@@ -26,19 +26,19 @@ const Home = () => {
         });
         }
     };
-    //fetching users
-    // useEffect(()=> {
-    //     const fetchUser = async () => {
-    //         const user = await getCurrentUser();
-    //         if(user){
-    //             setUsername(user.name);
-    //         }
-    //     }
-    //     fetchUser();
-    // },[])
+    // fetching users
+    useEffect(()=> {
+        const fetchUser = async () => {
+            const user = await getCurrentUser();
+            if(user){
+                setUsername(user.name);
+            }
+        }
+        fetchUser();
+    },[])
     return (
         <View style={styles.container}>
-      <Text style={styles.title}>Welcome {username}to Home Screen 🎉 </Text>
+      <Text style={styles.title}>Welcome <Text style={{color:'#f02e65'}}>{username}</Text> to Home Screen 🎉 </Text>
 
       <Pressable style={styles.logoutBtn} onPress={handleLogout}>
         <Text style={styles.logoutText}>Logout</Text>
