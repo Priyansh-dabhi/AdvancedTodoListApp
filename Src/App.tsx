@@ -5,6 +5,7 @@ import { AuthContext, AuthProvider } from './Context/AppwriteContext';
 import AuthStack from './Routes/AuthStack';
 import AppStack from './Routes/AppStack';
 import { getCurrentUser } from './Service/Service'; // 👈 Make sure this fetches Appwrite user
+import SideDrawer from './Components/SideDrawer';
 
 const AppInner = () => {
   const { isLoggedIn, setIsLoggedIn } = useContext(AuthContext);
@@ -33,7 +34,7 @@ const AppInner = () => {
 
   return (
     <NavigationContainer>
-      {isLoggedIn ? <AppStack /> : <AuthStack />}
+      {isLoggedIn ? <AppStack/> : <AuthStack />}
     </NavigationContainer>
   );
 };
@@ -45,6 +46,7 @@ function App() {
     <AuthProvider>
       <AppInner />
     </AuthProvider>
+
   );
 }
 
