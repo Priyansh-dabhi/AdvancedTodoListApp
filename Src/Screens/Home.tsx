@@ -3,6 +3,8 @@ import React ,{useContext, useEffect, useState} from 'react'
 import { AuthContext } from '../Context/AppwriteContext';
 import { getCurrentUser, logout } from '../Service/Service';
 import Snackbar from 'react-native-snackbar';
+import { createDrawerNavigator } from '@react-navigation/drawer'
+import { NavigationContainer } from '@react-navigation/native';
 
 
 
@@ -37,13 +39,17 @@ const Home = () => {
         fetchUser();
     },[])
     return (
-        <View style={styles.container}>
-      <Text style={styles.title}>Welcome <Text style={{color:'#f02e65'}}>{username}</Text> to Home Screen 🎉 </Text>
 
-      <Pressable style={styles.logoutBtn} onPress={handleLogout}>
-        <Text style={styles.logoutText}>Logout</Text>
-      </Pressable>
-    </View>
+        <View style={styles.container}>
+            <Text style={styles.title}>Welcome <Text style={{color:'#f02e65'}}>{username}</Text> to Home Screen 🎉 </Text>
+
+            <Pressable style={styles.logoutBtn} onPress={handleLogout}>
+                <Text style={styles.logoutText}>Logout</Text>
+            </Pressable>                    
+        </View>
+        
+            
+
     )
 }
 

@@ -3,6 +3,7 @@ import React, { Profiler } from 'react'
 import { DrawerContentScrollView, DrawerItemList } from '@react-navigation/drawer';
 import { createDrawerNavigator } from '@react-navigation/drawer'
 import Home from '../Screens/Home';
+import Profile from '../Screens/Profile';
 
 
 // ✅ Optional: Custom Drawer Component
@@ -22,13 +23,18 @@ const SideDrawer = () => {
   return (
     <Drawer.Navigator 
     initialRouteName='Home' 
-    drawerContent={(props) => <CustomDrawerContent{...props}/>}
+    // drawerContent={(props) => <CustomDrawerContent{...props}/>}
     screenOptions={{
       headerShown:true,
     }}>
       <Drawer.Screen 
       name='Home'
       component={Home}
+      
+      />
+      <Drawer.Screen 
+      name='Profile'
+      component={Profile}
       
       />
     </Drawer.Navigator>

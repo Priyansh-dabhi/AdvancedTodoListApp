@@ -18,17 +18,6 @@ const AppInner = () => {
       if (user) setIsLoggedIn(true);
     }
   };
-
-  const listener = Linking.addEventListener('url', async ({ url }) => {
-    if (url?.startsWith('appwrite://auth')) {
-      const user = await getCurrentUser();
-      if (user) setIsLoggedIn(true);
-    }
-  });
-
-  checkDeepLink();
-
-  return () => listener.remove();
 }, []);
 
 
