@@ -5,40 +5,41 @@ import Home from '../Screens/Home'
 import { createNativeStackNavigator } from '@react-navigation/native-stack'
 import { createDrawerNavigator } from '@react-navigation/drawer'
 import Routes from './Routes'
+import Profile from '../Screens/Profile'
 
+//Drawer component
 
 const Drawer  = createDrawerNavigator();
 
 const SideDrawer = () => {
   return (
-    <Drawer.Navigator>
+    <Drawer.Navigator initialRouteName={Routes.Home}>
       <Drawer.Screen 
       name={Routes.Home}
       component={Home}
       />
+      <Drawer.Screen 
+      name={Routes.Profile}
+      component={Profile}
+      />
     </Drawer.Navigator>
   )
 }
+
+//Stack
 
 const Stack = createNativeStackNavigator();
 
 const AppStack = () => {
   return (
     <Stack.Navigator 
-    initialRouteName='Home'
+    initialRouteName={Routes.DRAWER_HOME}
     
     screenOptions={{
         headerTitleAlign:'center',
-        headerShown:true
+        headerShown:false
     }}
     >
-      {/* <Stack.Screen
-      name={Routes.Home}
-      component={Home}
-      options={{
-        
-      }}
-      /> */}
       <Stack.Screen
       name={Routes.DRAWER_HOME}
       component={SideDrawer}
