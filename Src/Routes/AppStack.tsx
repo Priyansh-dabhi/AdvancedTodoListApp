@@ -2,11 +2,34 @@ import { StyleSheet, Text, View } from 'react-native'
 import React ,{useState,useEffect}from 'react'
 import { getCurrentUser } from '../Service/Service'
 import Home from '../Screens/Home'
+//navigation
 import { createNativeStackNavigator } from '@react-navigation/native-stack'
 import { createDrawerNavigator } from '@react-navigation/drawer'
+import { createBottomTabNavigator } from '@react-navigation/bottom-tabs'
 import Routes from './Routes'
 import Profile from '../Screens/Profile'
 
+// Bottom Tab component 
+
+const Tab = createBottomTabNavigator();
+
+const My_Tab = () => {
+  return(
+    <Tab.Navigator initialRouteName='Home'
+    screenOptions={{
+      headerShown:false
+    }}>
+      <Tab.Screen
+        name={Routes.Home}
+        component={Home}
+      />
+      <Tab.Screen
+        name={Routes.Profile}
+        component={Profile}
+      />
+    </Tab.Navigator>
+  );
+}
 
 //Drawer component
 
@@ -30,10 +53,13 @@ const gettingUserName = () => {
 const userName = gettingUserName();
 
   return (
-    <Drawer.Navigator initialRouteName={Routes.Home}>
+    <Drawer.Navigator initialRouteName={Routes.TabHome}>
       <Drawer.Screen 
-      name={Routes.Home}
-      component={Home}
+      name={Routes.TabHome}
+      component={My_Tab}
+      options={{
+        headerShown:true
+      }}
       />
       <Drawer.Screen 
       name={Routes.Profile}
@@ -64,6 +90,11 @@ const AppStack = () => {
       <Stack.Screen
       name={Routes.DRAWER_HOME}
       component={SideDrawer}
+      />
+      <Stack.Screen
+      name={Routes.TabHome}
+      component={My_Tab}
+      
       />
     </Stack.Navigator>
   )

@@ -7,33 +7,38 @@ import AppStack from './Routes/AppStack';
 import { getCurrentUser } from './Service/Service'; // 👈 Make sure this fetches Appwrite user
 import SideDrawer from './Components/SideDrawer';
 
-const AppInner = () => {
-  const { isLoggedIn, setIsLoggedIn } = useContext(AuthContext);
+// const AppInner = () => {
+//   const { isLoggedIn, setIsLoggedIn } = useContext(AuthContext);
 
-  useEffect(() => {
-  const checkDeepLink = async () => {
-    const url = await Linking.getInitialURL();
-    if (url?.startsWith('appwrite://auth')) {
-      const user = await getCurrentUser();
-      if (user) setIsLoggedIn(true);
-    }
-  };
-}, []);
+//   useEffect(() => {
+//   const checkDeepLink = async () => {
+//     const url = await Linking.getInitialURL();
+//     if (url?.startsWith('appwrite://auth')) {
+//       const user = await getCurrentUser();
+//       if (user) setIsLoggedIn(true);
+//     }
+//   };
+// }, []);
 
 
-  return (
-    <NavigationContainer>
-      {isLoggedIn ? <AppStack/> : <AuthStack />}
-    </NavigationContainer>
-  );
-};
+//   return (
+//     <NavigationContainer>
+//       {isLoggedIn ? <AppStack/> : <AuthStack />}
+//     </NavigationContainer>
+//   );
+// };
 
 function App() {
   const isDarkMode = useColorScheme() === 'dark';
 
   return (
+    // <AuthProvider>
+    //   <AppInner />
+    // </AuthProvider>
     <AuthProvider>
-      <AppInner />
+      <NavigationContainer>
+        <AppStack/>
+      </NavigationContainer>
     </AuthProvider>
 
   );
