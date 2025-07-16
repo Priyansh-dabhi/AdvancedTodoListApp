@@ -5,11 +5,14 @@ import { NativeStackScreenProps } from '@react-navigation/native-stack';
 import { createAccount } from '../Service/Service'
 import Snackbar from 'react-native-snackbar';
 import { AuthContext } from '../Context/AppwriteContext';
+import Routes, { AppStackParamList } from '../Routes/Routes';
+import { useNavigation } from '@react-navigation/native';
 
 
-type signupScreenProps = NativeStackScreenProps<AuthStackParamList, 'Signup'>;
+// type signupScreenProps = NativeStackScreenProps<AppStackParamList, 'Signup'>;
 
-const Signup = ({navigation}:signupScreenProps) => {
+
+const Signup = () => {
 //context
     const {setIsLoggedIn} = useContext(AuthContext)
 // states
@@ -18,6 +21,7 @@ const [email, setEmail] = useState('');
 const [password, setPassword] = useState('');
 const [repeatPassword, setRepeatPassword] = useState('');
 const [error, setError] = useState('');
+const usenavigation = useNavigation<any>();
 
 //Signup Logic Function
 
@@ -123,7 +127,7 @@ const handleSignup = async () => {
 
         {/* Login navigation */}
         <Pressable
-            onPress={() => navigation.navigate('Login')}
+            onPress={() => usenavigation.navigate(Routes.Login)}
             style={styles.loginContainer}>
             <Text style={styles.haveAccountLabel}>
             Already have an account?{'  '}

@@ -6,19 +6,22 @@ import { login } from '../Service/Service';
 import { AuthContext } from '../Context/AppwriteContext';
 import Snackbar from 'react-native-snackbar';
 //google signin
-import { googleSignIn } from '../Service/Service';
+// import { googleSignIn } from '../Service/Service';
 import GoogleButton from '../Components/GoogleButton';
+import Routes, { AppStackParamList } from '../Routes/Routes';
+import { useNavigation } from '@react-navigation/native';
 
 //Navigation
-type loginScreenProps = NativeStackScreenProps<AuthStackParamList,'Login'>;
+// type loginScreenProps = NativeStackScreenProps<AppStackParamList,'Login'>;
 
-const Login = ({navigation}: loginScreenProps) => {
+const Login = () => {
 
 const { setIsLoggedIn } = useContext(AuthContext);
 
 const [email, setEmail] = useState('');
 const [password, setPassword] = useState('');
 const [error, setError] = useState('');
+const usenavigation = useNavigation<any>();
 
 //  Handle Login Logic:
 const handleLogin = async() => {
@@ -36,7 +39,8 @@ const handleLogin = async() => {
                 Snackbar.show({
                 text: 'Login successful!',
                 duration: Snackbar.LENGTH_SHORT,
-            });
+                });
+            usenavigation.navigate(Routes.DRAWER_HOME);
             }else{
                 setError("Login Failed!");
             }
@@ -87,14 +91,14 @@ const handleLogin = async() => {
 
             {/* Sign up navigation */}
             <Pressable
-            onPress={() => navigation.navigate('Signup')}
+            onPress={() => usenavigation.navigate(Routes.Signup)}
             style={styles.signUpContainer}>
             <Text style={styles.noAccountLabel}>
                 Don't have an account?{'  '}
                 <Text style={styles.signUpLabel}>Create an account</Text>
             </Text>
             </Pressable>
-            <GoogleButton onPress={googleSignIn}/>
+            {/* <GoogleButton onPress={googleSignIn}/> */}
         </View>
         </KeyboardAvoidingView>
     )

@@ -6,9 +6,10 @@ import Home from '../Screens/Home'
 import { createNativeStackNavigator } from '@react-navigation/native-stack'
 import { createDrawerNavigator } from '@react-navigation/drawer'
 import { createBottomTabNavigator } from '@react-navigation/bottom-tabs'
-import Routes from './Routes'
+import Routes, { AppStackParamList } from './Routes'
 import Profile from '../Screens/Profile'
-
+import Login from '../Screens/Login'
+import Signup from '../Screens/Signup'
 // Bottom Tab component 
 
 const Tab = createBottomTabNavigator();
@@ -37,8 +38,8 @@ const Drawer  = createDrawerNavigator();
 
 const SideDrawer = () => {
   //username
+const [username, setUsername] = useState('');
 const gettingUserName = () => {
-    const [username, setUsername] = useState('');
         useEffect(()=> {
             const fetchUser = async () => {
                 const user = await getCurrentUser();
@@ -75,11 +76,11 @@ const userName = gettingUserName();
 
 //Stack
 
-const Stack = createNativeStackNavigator();
+const Stack = createNativeStackNavigator<AppStackParamList>();
 
 const AppStack = () => {
   return (
-    <Stack.Navigator 
+    <Stack.Navigator  
     initialRouteName={Routes.DRAWER_HOME}
     
     screenOptions={{
@@ -94,7 +95,15 @@ const AppStack = () => {
       <Stack.Screen
       name={Routes.TabHome}
       component={My_Tab}
-      
+      />
+
+      <Stack.Screen
+        name={Routes.Login}
+        component={Login} // ✅ Add this
+      />
+      <Stack.Screen
+        name={Routes.Signup}
+        component={Signup} // ✅ Add this
       />
     </Stack.Navigator>
   )

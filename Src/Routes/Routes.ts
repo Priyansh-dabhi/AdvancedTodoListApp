@@ -6,13 +6,17 @@ export type AppStackParamList = {
     DrawerHome:undefined
     Profile:undefined
     TabHome:undefined
+    Login:undefined
+    Signup:undefined
 }
 
 const Routes =  {
     Home:'Home',
     DRAWER_HOME: 'DrawerHome',
     Profile: 'Profile',
-    TabHome: 'TabHome'
-}
+    TabHome: 'TabHome',
+    Login: "Login",
+    Signup: "Signup"
+}as const;
 
 export default Routes
