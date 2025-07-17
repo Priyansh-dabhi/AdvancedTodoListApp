@@ -31,7 +31,7 @@ const AddTaskModal = ({ isVisible, onClose, onCreate }: Props) => {
             <Text style={styles.title}>Create New Task</Text>
             <TextInput
             style={styles.input}
-            placeholder="Enter task..."
+            placeholder="Enter a task..."
             value={task}
             onChangeText={setTask}
             />
