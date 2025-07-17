@@ -36,15 +36,15 @@ const Profile = () => {
           }
       };
       // fetching users
-      useEffect(()=> {
-          const fetchUser = async () => {
-              const user = await getCurrentUser();
-              if(user){
-                  setUsername(user.name);
-              }
-          }
-          fetchUser();
-      },[])
+        useEffect(()=> {
+            const fetchUser = async () => {
+                const user = await getCurrentUser();
+                if(user){
+                    setUsername(user.name);
+                }
+            }
+            fetchUser();
+        },[])
   return (
     <View style={styles.container}>
                 <Text style={styles.title}>Welcome <Text style={{color:'#f02e65'}}>{username}</Text> to Home Screen 🎉 </Text>
