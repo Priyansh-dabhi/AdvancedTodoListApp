@@ -6,9 +6,9 @@ import Snackbar from 'react-native-snackbar';
 import { createDrawerNavigator } from '@react-navigation/drawer'
 import { NavigationContainer } from '@react-navigation/native';
 import { ScrollView } from 'react-native-gesture-handler';
-// Icons
+// Icons & task library:
 import Icon from 'react-native-vector-icons/Ionicons';
-
+import AddTaskModalButton from '../Components/AddTaskModalButton';
 
 const Home = () => {
     // const [username, setUsername] = useState('');
@@ -40,6 +40,21 @@ const Home = () => {
     //     }
     //     fetchUser();
     // },[])
+
+    // TaskInput:
+    type Task = {
+    id: number;          // or string if you use UUID
+    title: string;
+    description?: string;
+    completed?: boolean;
+};
+    const [tasks, setTasks] = useState<Task[]>([]);
+    const [modalVisible, setModalVisible] = useState(false);
+    const handleCreateTask = (task:Task) => {
+        setTasks(prev => [...prev, task]);
+    };
+
+
     return (
 
         <View style={styles.container}>
@@ -60,6 +75,8 @@ const Home = () => {
                     <Icon name="add" size={38} color="white" />
 
                 </TouchableOpacity>
+                {/* Bottom Modal */}
+
         </View>
         
             
