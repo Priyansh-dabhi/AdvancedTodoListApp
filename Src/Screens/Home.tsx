@@ -8,7 +8,7 @@ import { NavigationContainer } from '@react-navigation/native';
 import { ScrollView } from 'react-native-gesture-handler';
 // Icons & task library:
 import Icon from 'react-native-vector-icons/Ionicons';
-import AddTaskModalButton from '../Components/AddTaskModalButton';
+import AddTaskModal from '../Components/AddTaskModal';
 
 const Home = () => {
     // const [username, setUsername] = useState('');
@@ -70,13 +70,17 @@ const Home = () => {
                 {/* Floating "+" button */}
                 <TouchableOpacity
                     style={styles.fab}
-                    // onPress={() => setModalVisible(true)}
+                    onPress={() => setModalVisible(true)}
                 >
                     <Icon name="add" size={38} color="white" />
 
                 </TouchableOpacity>
                 {/* Bottom Modal */}
-
+            <AddTaskModal
+                isVisible={modalVisible}
+                onClose={() => setModalVisible(false)}
+                onCreate={()=>handleCreateTask}
+            />
         </View>
         
             

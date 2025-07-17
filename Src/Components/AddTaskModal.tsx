@@ -9,7 +9,7 @@ type Props = {
     onCreate: (task: string) => void;
 };
 
-const AddTaskModalButton = ({ isVisible, onClose, onCreate }: Props) => {
+const AddTaskModal = ({ isVisible, onClose, onCreate }: Props) => {
     const [task, setTask] = useState('');
 
     const handleCreate = () => {
@@ -41,7 +41,7 @@ const AddTaskModalButton = ({ isVisible, onClose, onCreate }: Props) => {
     );
 };
 
-export default AddTaskModalButton;
+export default AddTaskModal;
 
 const styles = StyleSheet.create({
   modal: {
