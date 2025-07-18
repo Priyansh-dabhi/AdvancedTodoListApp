@@ -56,8 +56,7 @@ const Home = () => {
     const handleCreateTask = (task:Task)  => {
         setTasks(prev => [...prev, task]);
     return task;
-    };
-
+    } ;
 
     return (
 
@@ -91,9 +90,6 @@ const Home = () => {
                 onCreate={handleCreateTask}
             />
         </View>
-        
-            
-
     )
 }
 
