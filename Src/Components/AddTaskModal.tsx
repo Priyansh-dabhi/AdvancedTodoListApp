@@ -2,11 +2,12 @@
 import React, { useState } from 'react';
 import { View, Text, TextInput, Button, StyleSheet } from 'react-native';
 import Modal from 'react-native-modal';
+import {Task} from '../Types/Task'
 
 type Props = {
     isVisible: boolean;
     onClose: () => void;
-    onCreate: (task: string) => void;
+    onCreate: (task: Task) => Task;
 };
 
 const AddTaskModal = ({ isVisible, onClose, onCreate }: Props) => {
@@ -14,7 +15,12 @@ const AddTaskModal = ({ isVisible, onClose, onCreate }: Props) => {
 
     const handleCreate = () => {
         if (task.trim() !== '') {
-        onCreate(task);
+          const newTask:Task = {
+            id: Date.now(),
+            title: task.trim(),
+            completed:false
+          }
+        onCreate(newTask);
         setTask('');
         onClose();
         }

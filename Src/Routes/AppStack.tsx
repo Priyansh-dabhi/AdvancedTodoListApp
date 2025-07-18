@@ -15,6 +15,21 @@ import Signup from '../Screens/Signup'
 const Tab = createBottomTabNavigator();
 
 const My_Tab = () => {
+    //username
+const [username, setUsername] = useState('');
+const gettingUserName = () => {
+        useEffect(()=> {
+            const fetchUser = async () => {
+                const user = await getCurrentUser();
+                if(user){
+                    setUsername(user.name);
+                }
+            }
+            fetchUser();
+        },[])
+    return(username);
+}
+const userName = gettingUserName();
   return(
     <Tab.Navigator initialRouteName='Home'
     screenOptions={{
@@ -27,6 +42,11 @@ const My_Tab = () => {
       <Tab.Screen
         name={Routes.Profile}
         component={Profile}
+        // options={{
+        //   headerShown: true,
+        //   headerTitle: userName 
+          
+        // }}
       />
     </Tab.Navigator>
   );

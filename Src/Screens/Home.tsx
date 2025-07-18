@@ -1,4 +1,4 @@
-import { StyleSheet, Text, View, Pressable, TouchableOpacity } from 'react-native'
+import { StyleSheet, Text, View, Pressable, TouchableOpacity, FlatList } from 'react-native'
 import React ,{useContext, useEffect, useState} from 'react'
 import { AuthContext } from '../Context/AppwriteContext';
 import { getCurrentUser, logout } from '../Service/Service';
@@ -9,6 +9,9 @@ import { ScrollView } from 'react-native-gesture-handler';
 // Icons & task library:
 import Icon from 'react-native-vector-icons/Ionicons';
 import AddTaskModal from '../Components/AddTaskModal';
+
+//Task Types
+import { Task } from '../Types/Task';
 
 const Home = () => {
     // const [username, setUsername] = useState('');
@@ -41,17 +44,18 @@ const Home = () => {
     //     fetchUser();
     // },[])
 
-    // TaskInput:
-    type Task = {
-    id: number;          // or string if you use UUID
-    title: string;
-    description?: string;
-    completed?: boolean;
-};
+//     // TaskInput:
+//     type Task = {
+//     id: number;          // or string if you use UUID
+//     title: string;
+//     description?: string;
+//     completed?: boolean;
+// };
     const [tasks, setTasks] = useState<Task[]>([]);
     const [modalVisible, setModalVisible] = useState(false);
-    const handleCreateTask = (task:Task) => {
+    const handleCreateTask = (task:Task)  => {
         setTasks(prev => [...prev, task]);
+    return task;
     };
 
 
@@ -64,9 +68,14 @@ const Home = () => {
                 <Text style={styles.logoutText}>Logout</Text>
             </Pressable>                     */}
 
-            <ScrollView>
-                <Text>Hello</Text>
-            </ScrollView>
+            {/* List of tasks */}
+                <FlatList
+                    data={tasks}
+                    keyExtractor={(item, index) => index.toString()}
+                    renderItem={({ item }) => <Text style={styles.taskItem}>{item.title}</Text>}
+                    contentContainerStyle={{ padding: 20 }}
+                    style={styles.flatList}
+                />
                 {/* Floating "+" button */}
                 <TouchableOpacity
                     style={styles.fab}
@@ -79,7 +88,7 @@ const Home = () => {
             <AddTaskModal
                 isVisible={modalVisible}
                 onClose={() => setModalVisible(false)}
-                onCreate={()=>handleCreateTask}
+                onCreate={handleCreateTask}
             />
         </View>
         
@@ -125,5 +134,16 @@ const styles = StyleSheet.create({
         alignItems: 'center',
         elevation: 6,
 
+    },
+    taskItem: {
+        
+        fontSize: 16,
+        paddingVertical: 8,
+        borderBottomWidth: 1,
+        borderColor: '#ccc',
+    },
+    flatList: {
+        width: '100%',
+        // borderWidth: 1,
     },
 })
