@@ -80,7 +80,7 @@ const Home = () => {
                     style={styles.fab}
                     onPress={() => setModalVisible(true)}
                 >
-                    <Icon name="add" size={38} color="white" />
+                    <Icon name="add" size={32} color="white" />
 
                 </TouchableOpacity>
                 {/* Bottom Modal */}
