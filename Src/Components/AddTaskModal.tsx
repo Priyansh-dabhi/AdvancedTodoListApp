@@ -12,7 +12,6 @@ type Props = {
 
 const AddTaskModal = ({ isVisible, onClose, onCreate }: Props) => {
     const [task, setTask] = useState('');
-
     const handleCreate = () => {
         if (task.trim() !== '') {
           const newTask:Task = {
