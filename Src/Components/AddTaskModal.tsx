@@ -1,3 +1,7 @@
+/*  1. Task Title
+    2. day Month date, year 
+    3. category*/
+
 // components/AddTaskModal.tsx
 import React, { useState } from 'react';
 import { View, Text, TextInput, Button, StyleSheet } from 'react-native';
@@ -14,9 +18,18 @@ const AddTaskModal = ({ isVisible, onClose, onCreate }: Props) => {
     const [task, setTask] = useState('');
     const handleCreate = () => {
         if (task.trim() !== '') {
-          const newTask:Task = {
-            id: Date.now(),
+          const today = new Date();
+          const options: Intl.DateTimeFormatOptions = {
+              weekday: 'long',
+              month: 'long',
+              day: 'numeric',
+              year: 'numeric'
+          };
+          const formattedDate = today.toLocaleDateString('en-US', options);
+          const newTask: Task = {
+            id: formattedDate, // Set appropriate id logic here
             title: task.trim(),
+            // category: ["No Category"], // Assuming category is an array of strings
             completed:false
           }
         onCreate(newTask);

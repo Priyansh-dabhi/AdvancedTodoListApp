@@ -1,7 +1,7 @@
     // TaskInput:
 export type Task = {
-    id: number;          // or string if you use UUID
+    id: string;          // or string if you use UUID
     title: string;
-    description?: string;
+    category?: [string];
     completed?: boolean;
 };

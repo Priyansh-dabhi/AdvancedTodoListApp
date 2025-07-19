@@ -75,6 +75,7 @@ const userName = gettingUserName();
 
   return (
     <Drawer.Navigator initialRouteName={Routes.TabHome}>
+      
       <Drawer.Screen 
       name={Routes.TabHome}
       component={My_Tab}

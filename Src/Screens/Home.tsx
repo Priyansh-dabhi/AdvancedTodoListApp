@@ -71,8 +71,8 @@ const Home = () => {
                 <FlatList
                     data={tasks}
                     keyExtractor={(item, index) => index.toString()}
-                    renderItem={({ item }) => <Text style={styles.taskItem}>{item.title}</Text>}
-                    contentContainerStyle={{ padding: 20 }}
+                    renderItem={({ item }) => <Text style={styles.taskItem}>{item.title}{item.id}</Text>}
+                    contentContainerStyle={{ padding: 20,borderWidth:1,marginLeft:15,marginRight:15,marginBottom:20 }}
                     style={styles.flatList}
                 />
                 {/* Floating "+" button */}
