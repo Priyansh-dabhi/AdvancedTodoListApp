@@ -71,8 +71,13 @@ const Home = () => {
                 <FlatList
                     data={tasks}
                     keyExtractor={(item, index) => index.toString()}
-                    renderItem={({ item }) => <Text style={styles.taskItem}>{item.title}{item.id}</Text>}
-                    contentContainerStyle={{ padding: 20,borderWidth:1,marginLeft:15,marginRight:15,marginBottom:20 }}
+                    renderItem={({ item }) => (
+                    <View style={styles.taskCard}>
+                        <Text style={styles.taskItem}>{item.title}</Text>
+                        <Text style={styles.taskItem}>{item.id}</Text> 
+                    </View>)
+                }   
+                    contentContainerStyle={{ padding: 10,marginLeft:15,marginRight:15,marginBottom:20 }}
                     style={styles.flatList}
                 />
                 {/* Floating "+" button */}
@@ -131,6 +136,19 @@ const styles = StyleSheet.create({
         elevation: 6,
 
     },
+    taskCard: {
+        borderWidth: 1,
+        borderColor: '#ccc',
+        borderRadius: 10,
+        padding: 15,
+        marginBottom: 15,
+        backgroundColor: '#f9f9f9',
+        shadowColor: '#000',
+        shadowOffset: { width: 0, height: 2 },
+        shadowOpacity: 0.1,
+        shadowRadius: 5,
+        elevation: 3, // for Android shadow
+},
     taskItem: {
         
         fontSize: 16,
