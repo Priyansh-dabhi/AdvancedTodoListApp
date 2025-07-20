@@ -1,4 +1,4 @@
-import { StyleSheet, Text, View, Pressable, TouchableOpacity, FlatList } from 'react-native'
+import { StyleSheet, Text, View, Pressable, TouchableOpacity, FlatList, Button } from 'react-native'
 import React ,{useContext, useEffect, useState} from 'react'
 import { AuthContext } from '../Context/AppwriteContext';
 import { getCurrentUser, logout } from '../Service/Service';
@@ -9,48 +9,12 @@ import { ScrollView } from 'react-native-gesture-handler';
 // Icons & task library:
 import Icon from 'react-native-vector-icons/Ionicons';
 import AddTaskModal from '../Components/AddTaskModal';
-
 //Task Types
 import { Task } from '../Types/Task';
 
-const Home = () => {
-    // const [username, setUsername] = useState('');
-    // const { setIsLoggedIn } = useContext(AuthContext);
-    // // handling logout
-    // const handleLogout = async () => {
-    //     try {
-    //     await logout();
-    //     setIsLoggedIn(false);
-    //     Snackbar.show({
-    //         text: 'Logged out successfully!',
-    //         duration: Snackbar.LENGTH_SHORT,
-    //     });
-    //     } catch (err) {
-    //     console.log('Logout Error:', err);
-    //     Snackbar.show({
-    //         text: 'Logout failed',
-    //         duration: Snackbar.LENGTH_SHORT,
-    //     });
-    //     }
-    // };
-    // // fetching users
-    // useEffect(()=> {
-    //     const fetchUser = async () => {
-    //         const user = await getCurrentUser();
-    //         if(user){
-    //             setUsername(user.name);
-    //         }
-    //     }
-    //     fetchUser();
-    // },[])
 
-//     // TaskInput:
-//     type Task = {
-//     id: number;          // or string if you use UUID
-//     title: string;
-//     description?: string;
-//     completed?: boolean;
-// };
+const Home = () => {
+
     const [tasks, setTasks] = useState<Task[]>([]);
     const [modalVisible, setModalVisible] = useState(false);
     const handleCreateTask = (task:Task)  => {
@@ -68,14 +32,27 @@ const Home = () => {
             </Pressable>                     */}
 
             {/* List of tasks */}
+                {/* <ScrollView horizontal={true} style={{marginTop:20,marginBottom:20 ,borderWidth:1, }}>
+                    <TouchableOpacity style={{backgroundColor:'red'}}><Text>Add</Text></TouchableOpacity>
+                    
+                </ScrollView> */}
                 <FlatList
                     data={tasks}
                     keyExtractor={(item, index) => index.toString()}
+                    // style={{ width: '100%',borderWidth:1 }}  
                     renderItem={({ item }) => (
-                    <View style={styles.taskCard}>
-                        <Text style={styles.taskItem}>{item.title}</Text>
-                        <Text style={styles.taskItem}>{item.id}</Text> 
-                    </View>)
+                    <TouchableOpacity 
+                    delayPressIn={100}
+                    delayPressOut={100}
+                    delayLongPress={500}
+                    hitSlop={{ top: 10, bottom: 10, left: 20, right: 20 }}
+                    >
+                        <View style={styles.taskCard}>
+                            <Text style={styles.taskItem}>{item.title}</Text>
+                            <Text style={styles.taskItem}>{item.id}</Text> 
+                        </View>
+                    </TouchableOpacity>
+                    )
                 }   
                     contentContainerStyle={{ padding: 10,marginLeft:15,marginRight:15,marginBottom:20 }}
                     style={styles.flatList}
@@ -127,7 +104,8 @@ const styles = StyleSheet.create({
         position: 'absolute',
         right: 20,
         bottom: 30,
-        backgroundColor: '#1E90FF',
+        // backgroundColor: '#1E90FF',
+        backgroundColor: '#FF6B6B',
         width: 70,
         height: 70,
         borderRadius: 35, // Half of width/height
@@ -143,18 +121,15 @@ const styles = StyleSheet.create({
         padding: 15,
         marginBottom: 15,
         backgroundColor: '#f9f9f9',
-        shadowColor: '#000',
-        shadowOffset: { width: 0, height: 2 },
-        shadowOpacity: 0.1,
-        shadowRadius: 5,
-        elevation: 3, // for Android shadow
+        // shadowColor: '#000',
+        // shadowOffset: { width: 0, height: 2 },
+        // shadowOpacity: 0.1,
+        // shadowRadius: 15,
+        // elevation: 3, // for Android shadow
 },
     taskItem: {
-        
         fontSize: 16,
         paddingVertical: 8,
-        borderBottomWidth: 1,
-        borderColor: '#ccc',
     },
     flatList: {
         width: '100%',

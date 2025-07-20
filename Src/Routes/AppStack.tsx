@@ -15,6 +15,7 @@
   // icons library
   import { DrawerActions,useNavigation } from '@react-navigation/native';
   import Ionicons from 'react-native-vector-icons/Ionicons';
+import Temperary from '../Screens/Temperary'
 
 
 
@@ -63,7 +64,7 @@
 
         <Tab.Screen
           name="Menu"
-          component={View} // dummy component
+          component={Home} // dummy component
           options={{
             tabBarButton: () => (
               <TouchableOpacity
@@ -94,6 +95,15 @@
             ),
           }}
         />
+        <Tab.Screen
+          name={Routes.Temperary}
+          component={Temperary}
+          options={{
+            tabBarIcon: ({ color, size }) => (
+              <Ionicons name="calendar-outline" color={color} size={size} />
+            ),
+          }}
+        />
       </Tab.Navigator>
     );
   }
@@ -112,7 +122,8 @@
           headerTitleAlign:'center',
           headerShown:true,
           headerStyle: {
-              backgroundColor: '#f02e65',
+              // backgroundColor: '#f02e65',
+              backgroundColor: '#FF6B6B',
           },
       }}
       >

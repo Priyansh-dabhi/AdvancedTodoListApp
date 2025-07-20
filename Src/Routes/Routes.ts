@@ -8,6 +8,7 @@ export type AppStackParamList = {
     TabHome:undefined
     Login:undefined
     Signup:undefined
+    Temperary:undefined
 }
 
 const Routes =  {
@@ -16,7 +17,8 @@ const Routes =  {
     Profile: 'Profile',
     TabHome: 'TabHome',
     Login: "Login",
-    Signup: "Signup"
+    Signup: "Signup",
+    Temperary: "Temperary"
 }as const;
 
 export default Routes
