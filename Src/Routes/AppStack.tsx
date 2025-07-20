@@ -16,6 +16,7 @@
   import { DrawerActions,useNavigation } from '@react-navigation/native';
   import Ionicons from 'react-native-vector-icons/Ionicons';
 import Temperary from '../Screens/Temperary'
+import EditProfile from '../Screens/EditProfile'
 
 
 
@@ -90,6 +91,7 @@ import Temperary from '../Screens/Temperary'
           name={Routes.Profile}
           component={Profile}
           options={{
+            
             tabBarIcon: ({ color, size }) => (
               <Ionicons name="person" color={color} size={size} />
             ),
@@ -130,7 +132,9 @@ import Temperary from '../Screens/Temperary'
         <Stack.Screen
         name={Routes.DRAWER_HOME}
         component={SideDrawer}
-        
+        options={{
+          headerShown: false, // Hide the header for the drawer
+        }}
         />
         {/* <Stack.Screen
         name={Routes.TabHome}
@@ -144,6 +148,15 @@ import Temperary from '../Screens/Temperary'
         <Stack.Screen
           name={Routes.Signup}
           component={Signup} 
+        />
+        <Stack.Screen
+          name={Routes.EditProfile}
+          component={EditProfile} 
+          options={{
+            headerBackTitle:'Back',
+            
+            headerTitle:'Edit Profile',
+          }}
         />
       </Stack.Navigator>
     )
