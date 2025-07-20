@@ -10,15 +10,20 @@
   import Profile from '../Screens/Profile'
   import Login from '../Screens/Login'
   import Signup from '../Screens/Signup'
-
   // User Detail
-  import { userName } from '../Components/GettingUserDetail'
+  import  GettingUserDetail  from '../Components/GettingUserDetail'
+  // icons library
+  import { DrawerActions,useNavigation } from '@react-navigation/native';
+  import Ionicons from 'react-native-vector-icons/Ionicons';
+
+
+
   //Drawer component
 
   const Drawer  = createDrawerNavigator();
 
   const SideDrawer = () => {
-
+    const userName = GettingUserDetail();
     return (
       <Drawer.Navigator initialRouteName={Routes.TabHome} >
         
@@ -33,7 +38,7 @@
         name={Routes.Profile}
         component={Profile}
         options={{
-          // headerShown:false
+          headerShown:true,
           headerTitle:userName
         }}
         />
@@ -44,8 +49,6 @@
 
 
   // Bottom Tab component 
-  import { DrawerActions,useNavigation } from '@react-navigation/native';
-  import Ionicons from 'react-native-vector-icons/Ionicons';
   const Tab = createBottomTabNavigator();
 
 
@@ -60,7 +63,7 @@
 
         <Tab.Screen
           name="Menu"
-          component={() => null} // Empty component; we only want the icon
+          component={View} // dummy component
           options={{
             tabBarButton: () => (
               <TouchableOpacity
