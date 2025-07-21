@@ -1,21 +1,37 @@
 import {View,Text,TextInput,StyleSheet,TouchableOpacity,Image,ScrollView,} from 'react-native'
-import React from 'react'
+import React, { useState } from 'react'
 import Icon from 'react-native-vector-icons/MaterialCommunityIcons';
+import EditProfileModal from '../Components/EditProfileModal';
 
 
 const EditProfile = () => {
+    const[modalVisible, setModalVisible] = useState(false);
+    const [avatarUri, setAvatarUri] = useState('https://cdn-icons-png.flaticon.com/512/706/706830.png');
+
     return (
         <ScrollView style={styles.container}>
 
         <View style={styles.avatarContainer}>
-            <Image
-            source={{
-                uri: 'https://cdn-icons-png.flaticon.com/512/706/706830.png',
-            }}
-            style={styles.avatar}
-            />
+            <TouchableOpacity onPress={() => {setModalVisible(true)}}>
+                {avatarUri ? (
+                    <Image source={{ uri: avatarUri }} style={styles.avatar} />
+                    ) : (
+                    <View style={[styles.avatar, { backgroundColor: '#ccc' }]} />
+                )}
+            </TouchableOpacity>
             <Text style={styles.name}>John Doe</Text>
         </View>
+        <EditProfileModal
+        isVisible={modalVisible}
+        onClose={() => setModalVisible(false)}
+        onCreate={() => {}}
+        onImageSelected={(uri) => {
+            console.log("Selected URI:", uri);
+            setAvatarUri(uri);
+            setModalVisible(false);
+            }
+        }
+        />
 
         <View style={styles.inputContainer}>
             <Icon name="account-outline" size={20} color="#555" style={styles.icon} />
