@@ -6,6 +6,8 @@ import AuthStack from './Routes/AuthStack';
 import AppStack from './Routes/AppStack';
 import { getCurrentUser } from './Service/Service'; // 👈 Make sure this fetches Appwrite user
 import SideDrawer from './Components/SideDrawer';
+import { GestureHandlerRootView } from 'react-native-gesture-handler';
+
 
 // const AppInner = () => {
 //   const { isLoggedIn, setIsLoggedIn } = useContext(AuthContext);

@@ -14,7 +14,7 @@ const gettingUserName = () => {
         },[])
     return username;
 }
-const gettingUserEmail = () => {
+export const gettingUserEmail = () => {
     const [email, setEmail] = useState(''); 
     useEffect(()=> {
         const fetchUser = async () => {
