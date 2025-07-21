@@ -22,31 +22,31 @@ import EditProfile from '../Screens/EditProfile'
 
   //Drawer component
 
-  const Drawer  = createDrawerNavigator();
+  // const Drawer  = createDrawerNavigator();
 
-  const SideDrawer = () => {
-    const userName = GettingUserDetail();
-    return (
-      <Drawer.Navigator initialRouteName={Routes.TabHome} >
+  // const SideDrawer = () => {
+  //   const userName = GettingUserDetail();
+  //   return (
+  //     <Drawer.Navigator initialRouteName={Routes.TabHome} >
         
-        <Drawer.Screen 
-        name={Routes.TabHome}
-        component={My_Tab}
-        options={{
-          headerShown:false
-        }}
-        />
-        <Drawer.Screen 
-        name={Routes.Profile}
-        component={Profile}
-        options={{
-          headerShown:true,
-          headerTitle:userName
-        }}
-        />
-      </Drawer.Navigator>
-    )
-  }
+  //       <Drawer.Screen 
+  //       name={Routes.TabHome}
+  //       component={My_Tab}
+  //       options={{
+  //         headerShown:false
+  //       }}
+  //       />
+  //       <Drawer.Screen 
+  //       name={Routes.Profile}
+  //       component={Profile}
+  //       options={{
+  //         headerShown:true,
+  //         headerTitle:userName
+  //       }}
+  //       />
+  //     </Drawer.Navigator>
+  //   )
+  // }
 
 
 
@@ -58,25 +58,11 @@ import EditProfile from '../Screens/EditProfile'
   const My_Tab = () => {
     const navigation = useNavigation<any>();
     return(
-      <Tab.Navigator initialRouteName='Home'
+      <Tab.Navigator initialRouteName= {Routes.Home}
       screenOptions={{
         headerShown:false
       }}>
 
-        <Tab.Screen
-          name="Menu"
-          component={Home} // dummy component
-          options={{
-            tabBarButton: () => (
-              <TouchableOpacity
-                onPress={() => navigation.openDrawer()}
-                style={{ alignItems: 'center', justifyContent: 'center', padding: 10 }}
-              >
-                <Ionicons name="menu" size={28} color="black" />
-              </TouchableOpacity>
-            ),
-          }}
-        />
 
         <Tab.Screen
           name={Routes.Home}
@@ -118,7 +104,7 @@ import EditProfile from '../Screens/EditProfile'
   const AppStack = () => {
     return (
       <Stack.Navigator  
-      initialRouteName={Routes.DRAWER_HOME}
+      
       
       screenOptions={{
           headerTitleAlign:'center',
@@ -129,17 +115,20 @@ import EditProfile from '../Screens/EditProfile'
           },
       }}
       >
-        <Stack.Screen
+        {/* <Stack.Screen
         name={Routes.DRAWER_HOME}
         component={SideDrawer}
         options={{
           headerShown: false, // Hide the header for the drawer
         }}
-        />
-        {/* <Stack.Screen
+        /> */}
+        <Stack.Screen
         name={Routes.TabHome}
         component={My_Tab}
-        /> */}
+        options={{
+          headerShown: false, // Hide the header for the tab navigator
+        }}
+        />
 
         <Stack.Screen
           name={Routes.Login}
