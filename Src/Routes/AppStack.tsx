@@ -17,7 +17,7 @@
   import Ionicons from 'react-native-vector-icons/Ionicons';
 import Temperary from '../Screens/Temperary'
 import EditProfile from '../Screens/EditProfile'
-
+import Map from '../Screens/Google Maps/Map'
 
 
   //Drawer component
@@ -147,6 +147,14 @@ import EditProfile from '../Screens/EditProfile'
             headerTitle:'Edit Profile',
           }}
         />
+        <Stack.Screen
+          name={Routes.Map}
+          component={Map} 
+          options={{
+            headerBackTitle:'Back',
+            headerTitle:'Google Map',
+          }}
+          />
       </Stack.Navigator>
     )
   }
