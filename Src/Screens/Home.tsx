@@ -6,6 +6,7 @@ import Snackbar from 'react-native-snackbar';
 import { createDrawerNavigator } from '@react-navigation/drawer'
 import { NavigationContainer } from '@react-navigation/native';
 import { ScrollView } from 'react-native-gesture-handler';
+import DateTimePicker from '@react-native-community/datetimepicker';
 // Icons & task library:
 import Icon from 'react-native-vector-icons/Ionicons';
 import AddTaskModal from '../Components/AddTaskModal';
@@ -14,6 +15,21 @@ import { Task } from '../Types/Task';
 
 
 const Home = () => {
+
+    //Greeting the user
+    const [greeting, setGreeting] = useState('');
+    useEffect(()=> {
+        const date = new Date();
+        const hours = date.getHours(); 
+        if (hours < 12) {
+            setGreeting('Good Morning');
+        } else if (hours < 18) {
+            setGreeting('Good Afternoon');
+        } else {
+            setGreeting('Good Evening');
+        }
+    },[])
+    
 
     const [tasks, setTasks] = useState<Task[]>([]);
     const [modalVisible, setModalVisible] = useState(false);
@@ -36,6 +52,13 @@ const Home = () => {
                     <TouchableOpacity style={{backgroundColor:'red'}}><Text>Add</Text></TouchableOpacity>
                     
                 </ScrollView> */}
+                <View style={styles.headerContainer}>
+                    <View style={styles.headerLeft}>
+                        <Text style={styles.welcomeText}>{greeting} 👋</Text>
+                        <Text style={styles.usernameText}>Let's manage your tasks!</Text>
+                    </View>
+    
+                </View>                                 
                 <FlatList
                     data={tasks}
                     keyExtractor={(item, index) => index.toString()}
@@ -49,7 +72,7 @@ const Home = () => {
                     >
                         <View style={styles.taskCard}>
                             <Text style={styles.taskItem}>{item.title}</Text>
-                            <Text style={styles.taskItem}>{item.id}</Text> 
+                            <Text style={styles.taskItem}>{item.date}</Text> 
                         </View>
                     </TouchableOpacity>
                     )
@@ -84,6 +107,32 @@ const styles = StyleSheet.create({
         alignItems: 'center',
         backgroundColor: '#fff',
     },
+    headerContainer: {
+        
+        width: '100%',
+        paddingTop: 60,
+        paddingBottom: 20,
+        paddingHorizontal: 20,
+        backgroundColor: '#FF6B6B',
+        flexDirection: 'row',
+        justifyContent: 'space-between',
+        alignItems: 'center',
+        borderBottomWidth: 1,
+        borderBottomColor: '#eee',
+        },
+        headerLeft: {
+        flexDirection: 'column',
+        },
+        welcomeText: {
+        fontSize: 22,
+        fontWeight: '600',
+        color: '#333',
+        },
+        usernameText: {
+        fontSize: 16,
+        color: '#333  ',
+        marginTop: 2,
+        },
     title: {
         fontSize: 24,
         marginBottom: 30,
