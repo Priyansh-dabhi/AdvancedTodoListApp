@@ -17,7 +17,7 @@
   import Ionicons from 'react-native-vector-icons/Ionicons';
 import Temperary from '../Screens/Temperary'
 import EditProfile from '../Screens/EditProfile'
-import Map from '../Screens/Google Maps/Map'
+import Map from '../Screens/GoogleMaps/Map'
 
 
   //Drawer component
@@ -89,6 +89,15 @@ import Map from '../Screens/Google Maps/Map'
           options={{
             tabBarIcon: ({ color, size }) => (
               <Ionicons name="calendar-outline" color={color} size={size} />
+            ),
+          }}
+        />
+        <Tab.Screen
+          name={Routes.Map}
+          component={Map}
+          options={{
+            tabBarIcon: ({ color, size }) => (
+              <Ionicons name="compass" color={color} size={size} />
             ),
           }}
         />
