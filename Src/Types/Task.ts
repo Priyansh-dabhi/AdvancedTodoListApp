@@ -4,4 +4,5 @@ export type Task = {
     title: string;
     category?: [string];
     completed?: boolean;
+    date?: string;      // optional, if you want to track when the task was created
 };

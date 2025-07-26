@@ -7,6 +7,7 @@ import AppStack from './Routes/AppStack';
 import { getCurrentUser } from './Service/Service'; // 👈 Make sure this fetches Appwrite user
 import SideDrawer from './Components/SideDrawer';
 import { GestureHandlerRootView } from 'react-native-gesture-handler';
+import { createTables, getDBConnection } from './Screens/DB/Database';
 
 
 // const AppInner = () => {
@@ -32,6 +33,18 @@ import { GestureHandlerRootView } from 'react-native-gesture-handler';
 
 function App() {
   const isDarkMode = useColorScheme() === 'dark';
+    useEffect(() => {
+    const initDB = async () => {
+      try {
+        const db = await getDBConnection();
+        await createTables(db);
+      } catch (error) {
+        console.error('DB Init Error:', error);
+      }
+    };
+
+    initDB();
+  }, []);
 
   return (
     // <AuthProvider>

@@ -14,6 +14,7 @@ import AddTaskModal from '../Components/AddTaskModal';
 import { Task } from '../Types/Task';
 
 
+
 const Home = () => {
 
     //Greeting the user

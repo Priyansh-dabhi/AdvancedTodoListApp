@@ -5,6 +5,8 @@ import { AuthContext } from '../Context/AppwriteContext';
 import Snackbar from 'react-native-snackbar';
 import { logout } from '../Service/Service';
 import Routes from '../Routes/Routes';
+//user
+
 
 const Temperary = () => {
     const [username, setUsername] = useState('');
@@ -37,6 +39,9 @@ const Temperary = () => {
                     <Pressable style={styles.logoutBtn} onPress={handleLogout}>
                         <Text style={styles.logoutText}>Logout</Text>
                     </Pressable> 
+                    <Text>
+
+                    </Text>
         </View>
     )
 }

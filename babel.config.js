@@ -1,6 +1,16 @@
+// babel.config.js
 module.exports = {
   presets: ['module:@react-native/babel-preset'],
   plugins: [
-    'react-native-reanimated/plugin', 
+    [
+      'module-resolver',
+      {
+        root: ['./'],
+        alias: {
+          '@': './', // NOT './src'
+        },
+      },
+    ],
+    'react-native-reanimated/plugin',
   ],
 };

@@ -12,7 +12,7 @@ import CategoryPopup from './CategoryPopup';
 import { Task } from '../Types/Task';
 import Calendar from './Calender';
 import Time from './Time';
-import Map from '../Screens/Google Maps/Map';
+import Map from '../Screens/GoogleMaps/Map';
 import Routes from '../Routes/Routes';
 import { useNavigation } from '@react-navigation/native';
 

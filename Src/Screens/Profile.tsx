@@ -36,14 +36,14 @@ const Profile = () => {
                 <View style={{flexDirection: 'row', alignItems: 'center', justifyContent:'space-between', width: '100%'}}>
                     <Text style={{marginBottom: 12}}></Text>
                     <Pressable onPress={() => navigation.navigate(Routes.EditProfile)}>
-                        <Ionicons name='create-outline' size={24} color="#555" style={{ position: 'absolute', top: 10, right: 10 }} />
+                        <Ionicons name='create-outline' size={26} color="#555" style={{ position: 'absolute', top: 10, right: 10,paddingLeft:8,paddingBottom:8 }} />
                     </Pressable>
                 </View>
             </View>
         <ScrollView contentContainerStyle={{ paddingBottom: 40 }}>
             {/* Profile Info */}
             <View style={styles.profileContainer}>
-                <Image source={require('../Assets/Images/Pic3.jpg')} style={styles.avatar} />
+                <Image source={require('../../assets/icons/target.png')} style={styles.avatar} />
                 <Text style={styles.name}>{user.name}</Text>
                 <Text style={styles.email}>{user.email}</Text>
             </View>

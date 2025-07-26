@@ -28,4 +28,17 @@ export const gettingUserEmail = () => {
     return email;
 }
 
+// GettingUserDetail.ts
+// Pure async function (no hooks)
+export const getUserName = async (): Promise<string> => {
+    const user = await getCurrentUser();
+    return user?.name ?? '';
+};
+
+export const getUserEmail = async (): Promise<string> => {
+    const user = await getCurrentUser();
+    return user?.email ?? '';
+};
+
+
 export default gettingUserName;
