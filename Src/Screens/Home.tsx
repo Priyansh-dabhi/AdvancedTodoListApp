@@ -5,7 +5,7 @@ import { getCurrentUser, logout } from '../Service/Service';
 import Snackbar from 'react-native-snackbar';
 import { createDrawerNavigator } from '@react-navigation/drawer'
 import { NavigationContainer } from '@react-navigation/native';
-import { ScrollView } from 'react-native-gesture-handler';
+import { ScrollView, TextInput } from 'react-native-gesture-handler';
 import DateTimePicker from '@react-native-community/datetimepicker';
 // Icons & task library:
 import Icon from 'react-native-vector-icons/Ionicons';
@@ -19,7 +19,13 @@ const Home = () => {
 
     //Greeting the user
     const [greeting, setGreeting] = useState('');
-    useEffect(()=> {
+    
+        const [tasks, setTasks] = useState<Task[]>([]);
+        const [modalVisible, setModalVisible] = useState(false);
+        const [searchQuery, setSearchQuery] = useState('');
+
+        // Greeting the user
+        useEffect(()=> {
         const date = new Date();
         const hours = date.getHours(); 
         if (hours < 12) {
@@ -31,9 +37,6 @@ const Home = () => {
         }
     },[])
     
-
-    const [tasks, setTasks] = useState<Task[]>([]);
-    const [modalVisible, setModalVisible] = useState(false);
     const handleCreateTask = (task:Task)  => {
         setTasks(prev => [...prev, task]);
     return task;
@@ -58,10 +61,21 @@ const Home = () => {
                         <Text style={styles.welcomeText}>{greeting} 👋</Text>
                         <Text style={styles.usernameText}>Let's manage your tasks!</Text>
                     </View>
+
     
                 </View>                                 
+                    <View style={styles.searchContainer}>
+                        <Icon name="search" size={20} color="#888" style={{ marginRight: 8 }} />
+                        <TextInput
+                            placeholder="Search tasks..."
+                            placeholderTextColor="#888"
+                            style={styles.searchInput}
+                            value={searchQuery}
+                            onChangeText={setSearchQuery}
+                        />
+                    </View>
                 <FlatList
-                    data={tasks}
+                    data={tasks.filter(task => task.title.toLowerCase().includes(searchQuery.toLowerCase()))}
                     keyExtractor={(item, index) => index.toString()}
                     // style={{ width: '100%',borderWidth:1 }}  
                     renderItem={({ item }) => (
@@ -185,4 +199,30 @@ const styles = StyleSheet.create({
         width: '100%',
         // borderWidth: 1,
     },
+    // Search bar styles
+    searchContainer: {
+        borderWidth: 1,
+        flexDirection: 'row',
+        alignItems: 'center',
+        backgroundColor: '#fff',
+        paddingHorizontal: 15,
+        paddingVertical: 10,
+        borderRadius: 25,
+        marginTop: 15,
+        marginBottom: 10,
+        marginLeft: 10,
+        marginRight: 10,
+        elevation: 4,
+        shadowColor: '#000',
+        shadowOffset: { width: 0, height: 2 },
+        shadowOpacity: 0.1,
+        shadowRadius: 3,
+        },
+
+    searchInput: {
+    flex: 1,
+    fontSize: 16,
+    color: '#333',
+    },
+
 })
