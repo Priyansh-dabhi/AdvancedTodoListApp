@@ -15,6 +15,7 @@ import Time from './Time';
 import Map from '../Screens/GoogleMaps/Map';
 import Routes from '../Routes/Routes';
 import { useNavigation } from '@react-navigation/native';
+import CameraAndGallery from './CameraAndGallery';
 
 type Props = {
     isVisible: boolean;
@@ -39,6 +40,9 @@ const AddTaskModal = ({ isVisible, onClose, onCreate }: Props) => {
 
     const [task, setTask] = useState('');
     const [selectedCategory, setSelectedCategory] = useState('No Category');
+    const [takePhoto, setTakePhoto] = useState('No Photo');
+    const [cameraModalVisible,setCameraModalVisible] =useState(false);
+    const [imgUri, setImgUri] = useState('');
     const [selectedDate, setSelectedDate] = useState<Date | null>(null);
     const [categoryModalVisible, setCategoryModalVisible] = useState(false);
     const [timeModalVisible, setTimeModalVisible] = useState(false);
@@ -73,7 +77,7 @@ const AddTaskModal = ({ isVisible, onClose, onCreate }: Props) => {
             onClose();
         }
     };
-
+    
     const handleDateChange = (event: any, date?: Date) => {
         setShowDatePicker(false);
         if (date) {
@@ -137,7 +141,24 @@ const AddTaskModal = ({ isVisible, onClose, onCreate }: Props) => {
                     }}
                     categories={categoryOptions}
                 />
-
+                {/* Take Photo */}
+                <TouchableOpacity
+                    onPress={() => setCameraModalVisible(true)}
+                    style={styles.row}
+                >
+                    <Ionicons name="camera-outline" size={22} color="black" />
+                    <Text style={styles.rowText}>{takePhoto}</Text>
+                </TouchableOpacity>
+                <CameraAndGallery 
+                isVisible={cameraModalVisible}
+                onCreate={() => {}}
+                onClose={()=> setCameraModalVisible(false)}
+                onImageSelected={(uri)=> {
+                  setImgUri(uri)
+                  setTakePhoto('Photo Selected');
+                  setCameraModalVisible(false)
+                  ;}}
+                />
                 {/* Date Picker */}
                 <TouchableOpacity style={styles.row} onPress={() => setShowDatePicker(true)}>
                     <Ionicons name="calendar-outline" size={22} color="black" />
