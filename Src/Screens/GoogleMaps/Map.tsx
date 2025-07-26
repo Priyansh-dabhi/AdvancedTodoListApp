@@ -1,12 +1,5 @@
 import React, { useState, useCallback, useRef } from 'react';
-import {
-  PermissionsAndroid,
-  Platform,
-  View,
-  StyleSheet,
-  TouchableOpacity,
-  Image,
-} from 'react-native';
+import {PermissionsAndroid,Platform,View,StyleSheet,TouchableOpacity,Image,} from 'react-native';
 import MapView, { Marker, PROVIDER_GOOGLE, Region } from 'react-native-maps';
 import Geolocation from '@react-native-community/geolocation';
 import { useFocusEffect, useIsFocused, } from '@react-navigation/native';
@@ -46,7 +39,14 @@ const MapScreen = () => {
           longitudeDelta: 0.01,
         });
         console.log('Live location fetched');
-        
+        if(mapRef.current){
+          mapRef.current.animateToRegion({ latitude
+            ,longitude
+            ,latitudeDelta:0.01
+            ,longitudeDelta:0.01
+          },1000)
+        console.log('current position focused');
+        }
       },
       error => {
         console.warn('Live location error:', error.message);
@@ -64,9 +64,11 @@ const MapScreen = () => {
     <View style={styles.container}>
       {isFocused && region && (
         <MapView
+          ref={mapRef}
           provider={PROVIDER_GOOGLE}
           style={styles.map}
           initialRegion={region}
+          // onRegionChangeComplete={(reg)=> {setRegion(reg)}}
           // showsUserLocation={true}
         >
           <Marker coordinate={region}>
@@ -104,14 +106,16 @@ const MapScreen = () => {
     shadowOffset: { width: 0, height: 2 },
     shadowOpacity: 0.3,
     shadowRadius: 3,
-  }}>
-        <Image source={icons.target} 
+  }}
+  onPress={fetchLocation}>
+        <Image source={icons.target2} 
         style={{
       width: 24,
       height: 24,
       resizeMode: 'contain',
       tintColor: '#000',
-    }} 
+    }}
+    
     />
       </TouchableOpacity>
     </View>
