@@ -44,10 +44,12 @@ const AddTaskModal = ({ isVisible, onClose, onCreate }: Props) => {
     const [cameraModalVisible,setCameraModalVisible] =useState(false);
     const [imgUri, setImgUri] = useState('');
     const [selectedDate, setSelectedDate] = useState<Date | null>(null);
+    const [selectedTime, setSelectedTime] = useState<Date | null>(null);
     const [categoryModalVisible, setCategoryModalVisible] = useState(false);
     const [timeModalVisible, setTimeModalVisible] = useState(false);
     const [showDatePicker, setShowDatePicker] = useState(false);
     const [showTimePicker, setShowTimePicker] = useState(false);
+    const [selectLocation, setSelectLocation] = useState('Select Location');
 
     const categoryOptions = ['Work', 'Personal', 'Wishlist', 'Birthday', 'No Category'];
 
@@ -77,7 +79,15 @@ const AddTaskModal = ({ isVisible, onClose, onCreate }: Props) => {
             onClose();
         }
     };
-    
+    // Modal close
+    const handleModalClose = () => {
+      onClose();
+      setSelectedCategory('No Category');
+      setTakePhoto('No Photo');
+      setSelectedDate(null);
+      setSelectedTime(null);
+      setSelectLocation('Select Location');
+    }
     const handleDateChange = (event: any, date?: Date) => {
         setShowDatePicker(false);
         if (date) {
@@ -91,17 +101,17 @@ const AddTaskModal = ({ isVisible, onClose, onCreate }: Props) => {
     const handleTimeChange = (event: any, time?: Date) => {
         setShowTimePicker(false);
         if (time) {
-            const existing = selectedDate || new Date();
+            const existing = selectedTime || new Date();
             existing.setHours(time.getHours());
             existing.setMinutes(time.getMinutes());
-            setSelectedDate(new Date(existing));
+            setSelectedTime(new Date(existing));
         }
     };
 
     return (
         <Modal
             isVisible={isVisible}
-            onBackdropPress={onClose}
+            onBackdropPress={handleModalClose}
             backdropOpacity={0.5}
             style={styles.modal}
             onModalHide={()=> {
@@ -171,11 +181,11 @@ const AddTaskModal = ({ isVisible, onClose, onCreate }: Props) => {
                 <TouchableOpacity style={styles.row} onPress={() => setShowTimePicker(true)}>
                   <Ionicons name="time-outline" size={22} color="black" />
                   <Text style={styles.rowText}>
-                    {selectedDate
-                      ? `${(selectedDate.getHours() % 12 || 12)}:${selectedDate
+                    {selectedTime
+                      ? `${(selectedTime.getHours() % 12 || 12)}:${selectedTime
                           .getMinutes()
                           .toString()
-                          .padStart(2, '0')} ${selectedDate.getHours() >= 12 ? 'PM' : 'AM'}`
+                          .padStart(2, '0')} ${selectedTime.getHours() >= 12 ? 'PM' : 'AM'}`
                       : 'Select Time'}
                   </Text>
                   
@@ -187,7 +197,7 @@ const AddTaskModal = ({ isVisible, onClose, onCreate }: Props) => {
                     onClose();
                   }}>
                     <Ionicons name="location-outline" size={22} color="black" />
-                    <Text style={styles.rowText}>Select Location</Text>
+                    <Text style={styles.rowText}>{selectLocation}</Text>
                 </TouchableOpacity>
 
                 {/* Inline Android Date Picker */}
