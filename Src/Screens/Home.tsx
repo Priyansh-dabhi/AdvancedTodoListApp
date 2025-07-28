@@ -1,10 +1,8 @@
-import { StyleSheet, Text, View, Pressable, TouchableOpacity, FlatList, Button } from 'react-native'
+import { StyleSheet, Text, View, Pressable, TouchableOpacity, FlatList, Button, } from 'react-native'
+import BouncyCheckbox from 'react-native-bouncy-checkbox'
 import React ,{useContext, useEffect, useState} from 'react'
 import { AuthContext } from '../Context/AppwriteContext';
 import { getCurrentUser, logout } from '../Service/Service';
-import Snackbar from 'react-native-snackbar';
-import { createDrawerNavigator } from '@react-navigation/drawer'
-import { NavigationContainer } from '@react-navigation/native';
 import { ScrollView, TextInput } from 'react-native-gesture-handler';
 import DateTimePicker from '@react-native-community/datetimepicker';
 // Icons & task library:
@@ -12,8 +10,6 @@ import Icon from 'react-native-vector-icons/Ionicons';
 import AddTaskModal from '../Components/AddTaskModal';
 //Task Types
 import { Task } from '../Types/Task';
-
-
 
 const Home = () => {
 
@@ -30,7 +26,7 @@ const Home = () => {
         const hours = date.getHours(); 
         if (hours < 12) {
             setGreeting('Good Morning');
-        } else if (hours < 18) {
+        } else if (hours < 17) {
             setGreeting('Good Afternoon');
         } else {
             setGreeting('Good Evening');
@@ -63,17 +59,22 @@ const Home = () => {
                     </View>
 
     
-                </View>                                 
-                    <View style={styles.searchContainer}>
-                        <Icon name="search" size={20} color="#888" style={{ marginRight: 8 }} />
-                        <TextInput
-                            placeholder="Search tasks..."
-                            placeholderTextColor="#888"
-                            style={styles.searchInput}
-                            value={searchQuery}
-                            onChangeText={setSearchQuery}
-                        />
-                    </View>
+                    <View style={styles.searchRow}>
+                        <View style={styles.searchContainer}>
+                            <TextInput
+                                placeholder="Search tasks..."
+                                placeholderTextColor="#888"
+                                style={styles.searchInput}
+                                value={searchQuery}
+                                onChangeText={setSearchQuery}
+                            />
+                        </View>
+                            <TouchableOpacity style={styles.searchButton}>
+                                <Icon name="search" size={30} color="#FF6B6B" style={{ marginRight: 8 ,marginLeft:8}} />
+                            </TouchableOpacity>
+                        </View>
+                    </View>   
+
                 <FlatList
                     data={tasks.filter(task => task.title.toLowerCase().includes(searchQuery.toLowerCase()))}
                     keyExtractor={(item, index) => index.toString()}
@@ -86,6 +87,12 @@ const Home = () => {
                     hitSlop={{ top: 10, bottom: 10, left: 20, right: 20 }}
                     >
                         <View style={styles.taskCard}>
+                            <View style={{alignItems:'center',justifyContent:'center'}}>
+                                <BouncyCheckbox
+                                fillColor='#FF6B6B'
+
+                                />
+                            </View>
                             <Text style={styles.taskItem}>{item.title}</Text>
                             <Text style={styles.taskItem}>{item.date}</Text> 
                         </View>
@@ -109,6 +116,7 @@ const Home = () => {
                 onClose={() => setModalVisible(false)}
                 onCreate={handleCreateTask}
             />
+            
         </View>
     )
 }
@@ -118,36 +126,87 @@ export default Home
 const styles = StyleSheet.create({
     container: {
         flex: 1,
-        justifyContent: 'center',
-        alignItems: 'center',
+        // justifyContent: 'center',
+        // alignItems: 'center',
         backgroundColor: '#fff',
+
     },
     headerContainer: {
         
+        borderWidth: 1,
         width: '100%',
-        paddingTop: 60,
+        paddingTop: 45,
         paddingBottom: 20,
         paddingHorizontal: 20,
         backgroundColor: '#FF6B6B',
-        flexDirection: 'row',
-        justifyContent: 'space-between',
-        alignItems: 'center',
-        borderBottomWidth: 1,
-        borderBottomColor: '#eee',
-        },
-        headerLeft: {
+        // flexDirection: 'row',
         flexDirection: 'column',
-        },
-        welcomeText: {
-        fontSize: 22,
+        // justifyContent: 'center',
+        // alignItems: 'center',
+        borderBottomWidth: 1,
+        borderBottomColor: '#000000',
+    },
+    headerLeft: {
+        flexDirection: 'column',
+        // borderWidth: 1,
+    },
+    welcomeText: {
+        fontSize: 20,
         fontWeight: '600',
         color: '#333',
-        },
-        usernameText: {
-        fontSize: 16,
+    },
+    usernameText: {
+        fontSize: 14,
         color: '#333  ',
         marginTop: 2,
+    },
+    // Search bar styles
+    searchRow: {
+        flexDirection: 'row',
+        alignItems: 'center',
+        marginTop: 15,
+    },
+    searchContainer: {
+        borderWidth: 1,
+        flex: 1,
+        flexDirection: 'row',
+        alignItems: 'center',
+        backgroundColor: '#fff',
+        paddingHorizontal: 15,
+        marginRight: 10,
+        height: 55,
+        // width: '50%',
+        // width: 10,
+        paddingVertical: 5,
+        borderRadius: 12,
+        elevation: 4,
+        shadowColor: '#000',
+        shadowOffset: { width: 0, height: 2 },
+        shadowOpacity: 0.1,
+        shadowRadius: 3,
+        // marginRight: 10, // gives space between input and button
+    },
+
+    searchInput: {
+        flex: 1,
+        fontSize: 16,
+        color: '#333',
+    },
+        searchButton: {
+            borderWidth: 1,
+            width: 55,
+            height: 55,
+            backgroundColor: '#fff',
+            borderRadius: 12,
+            alignItems: 'center',
+            justifyContent: 'center',
+            elevation: 4,
+            shadowColor: '#000',
+            shadowOffset: { width: 0, height: 2 },
+            shadowOpacity: 0.1,
+            shadowRadius: 3,
         },
+    
     title: {
         fontSize: 24,
         marginBottom: 30,
@@ -179,6 +238,7 @@ const styles = StyleSheet.create({
 
     },
     taskCard: {
+        flexDirection:'row',
         borderWidth: 1,
         borderColor: '#ccc',
         borderRadius: 10,
@@ -198,31 +258,6 @@ const styles = StyleSheet.create({
     flatList: {
         width: '100%',
         // borderWidth: 1,
-    },
-    // Search bar styles
-    searchContainer: {
-        borderWidth: 1,
-        flexDirection: 'row',
-        alignItems: 'center',
-        backgroundColor: '#fff',
-        paddingHorizontal: 15,
-        paddingVertical: 10,
-        borderRadius: 25,
-        marginTop: 15,
-        marginBottom: 10,
-        marginLeft: 10,
-        marginRight: 10,
-        elevation: 4,
-        shadowColor: '#000',
-        shadowOffset: { width: 0, height: 2 },
-        shadowOpacity: 0.1,
-        shadowRadius: 3,
-        },
-
-    searchInput: {
-    flex: 1,
-    fontSize: 16,
-    color: '#333',
     },
 
 })
