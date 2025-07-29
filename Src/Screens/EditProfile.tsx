@@ -26,7 +26,7 @@ const EditProfile = () => {
         onClose={() => setModalVisible(false)}
         onCreate={() => {}}
         onImageSelected={(uri) => {
-            console.log("Selected URI:", uri);
+            console.log("Selected URI:", uri); 
             setAvatarUri(uri);
             setModalVisible(false);
             }

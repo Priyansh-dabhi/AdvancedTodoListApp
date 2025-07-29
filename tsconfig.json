@@ -6,6 +6,6 @@
     "paths": {
       "@/*": ["./*"],
     },
-    "types": ["nativewind/types"],
+    // "types": ["nativewind/types"],
   }
 }
