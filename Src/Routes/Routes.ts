@@ -11,6 +11,7 @@ export type AppStackParamList = {
     Temperary:undefined
     EditProfile:undefined
     Map:undefined
+    EditTask:undefined
 }
 
 const Routes =  {
@@ -22,7 +23,8 @@ const Routes =  {
     Signup: "Signup",
     Temperary: "Temperary",
     EditProfile: "EditProfile"
-    ,Map: "Map"
+    ,Map: "Map",
+    EditTask: 'EditTask'
 }as const;
 
 export default Routes

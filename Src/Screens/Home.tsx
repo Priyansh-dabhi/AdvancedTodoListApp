@@ -10,9 +10,11 @@ import Icon from 'react-native-vector-icons/Ionicons';
 import AddTaskModal from '../Components/AddTaskModal';
 //Task Types
 import { Task } from '../Types/Task';
+import Routes from '../Routes/Routes';
+import { useNavigation } from '@react-navigation/native';
 
 const Home = () => {
-
+    const navigation = useNavigation<any>();
     //Greeting the user
     const [greeting, setGreeting] = useState('');
     
@@ -85,6 +87,7 @@ const Home = () => {
                     delayPressOut={100}
                     delayLongPress={500}
                     hitSlop={{ top: 10, bottom: 10, left: 20, right: 20 }}
+                    onPress={()=> {navigation.navigate(Routes.EditTask)}}
                     >
                         <View style={styles.taskCard}>
                             <View style={{alignItems:'center',justifyContent:'center'}}>
@@ -93,8 +96,10 @@ const Home = () => {
 
                                 />
                             </View>
-                            <Text style={styles.taskItem}>{item.title}</Text>
-                            <Text style={styles.taskItem}>{item.date}</Text> 
+                            <View style={{flex:1}}>
+                                <Text style={styles.taskItem}>{item.title}</Text>
+                                <Text style={styles.taskItem}>{item.date}</Text> 
+                            </View>
                         </View>
                     </TouchableOpacity>
                     )
@@ -253,7 +258,7 @@ const styles = StyleSheet.create({
 },
     taskItem: {
         fontSize: 16,
-        paddingVertical: 8,
+        // paddingVertical: 4,
     },
     flatList: {
         width: '100%',

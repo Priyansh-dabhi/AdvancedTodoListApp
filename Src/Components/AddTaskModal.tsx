@@ -197,6 +197,7 @@ const AddTaskModal = ({ isVisible, onClose, onCreate }: Props) => {
                     onClose();
                   }}>
                     <Ionicons name="location-outline" size={22} color="black" />
+                    {/* onPress= {()=> {navigation.navigate(Routes.EditTask)}} */}
                     <Text style={styles.rowText}>{selectLocation}</Text>
                 </TouchableOpacity>
 

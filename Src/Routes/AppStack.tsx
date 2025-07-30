@@ -18,6 +18,7 @@
 import Temperary from '../Screens/Temperary'
 import EditProfile from '../Screens/EditProfile'
 import Map from '../Screens/GoogleMaps/Map'
+import EditTask from '../Screens/EditTask'
 
 
   //Drawer component
@@ -162,6 +163,14 @@ import Map from '../Screens/GoogleMaps/Map'
           options={{
             headerBackTitle:'Back',
             headerTitle:'Google Map',
+          }}
+          />
+        <Stack.Screen
+          name={Routes.EditTask}
+          component={EditTask} 
+          options={{
+            headerBackTitle:'Back',
+            headerTitle:'Edit Task',
           }}
           />
       </Stack.Navigator>
