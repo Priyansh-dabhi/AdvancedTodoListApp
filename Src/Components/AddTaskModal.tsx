@@ -134,7 +134,7 @@ const AddTaskModal = ({ isVisible, onClose, onCreate }: Props) => {
                 <Button title="Create Task" onPress={handleCreate} />
 
                 {/* Category Selector */}
-                <TouchableOpacity
+                {/* <TouchableOpacity
                     onPress={() => setCategoryModalVisible(true)}
                     style={styles.row}
                 >
@@ -150,7 +150,7 @@ const AddTaskModal = ({ isVisible, onClose, onCreate }: Props) => {
                         setCategoryModalVisible(false);
                     }}
                     categories={categoryOptions}
-                />
+                /> */}
                 {/* Take Photo */}
                 <TouchableOpacity
                     onPress={() => setCameraModalVisible(true)}
