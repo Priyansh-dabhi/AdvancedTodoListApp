@@ -4,35 +4,48 @@ import { useContext, useEffect } from 'react';
 import { AuthContext, AuthProvider } from './Context/AppwriteContext';
 import AuthStack from './Routes/AuthStack';
 import AppStack from './Routes/AppStack';
-import { getCurrentUser } from './Service/Service'; // 👈 Make sure this fetches Appwrite user
-import SideDrawer from './Components/SideDrawer';
+import { getCurrentUser } from './Service/Service'; // 
 import { GestureHandlerRootView } from 'react-native-gesture-handler';
+// database
 // import { createTables, getDBConnection } from './DB/Database';
+import SQLite from 'react-native-sqlite-storage'
 
 
 // const AppInner = () => {
-//   const { isLoggedIn, setIsLoggedIn } = useContext(AuthContext);
-
-//   useEffect(() => {
-//   const checkDeepLink = async () => {
-//     const url = await Linking.getInitialURL();
-//     if (url?.startsWith('appwrite://auth')) {
-//       const user = await getCurrentUser();
-//       if (user) setIsLoggedIn(true);
-//     }
-//   };
-// }, []);
-
-
-//   return (
-//     <NavigationContainer>
-//       {isLoggedIn ? <AppStack/> : <AuthStack />}
-//     </NavigationContainer>
-//   );
-// };
-
+  //   const { isLoggedIn, setIsLoggedIn } = useContext(AuthContext);
+  
+  //   useEffect(() => {
+    //   const checkDeepLink = async () => {
+      //     const url = await Linking.getInitialURL();
+      //     if (url?.startsWith('appwrite://auth')) {
+        //       const user = await getCurrentUser();
+        //       if (user) setIsLoggedIn(true);
+        //     }
+        //   };
+        // }, []);
+        
+        
+        //   return (
+          //     <NavigationContainer>
+          //       {isLoggedIn ? <AppStack/> : <AuthStack />}
+          //     </NavigationContainer>
+          //   );
+          // };
+          
 function App() {
-  const isDarkMode = useColorScheme() === 'dark';
+      // useEffect(() => {
+      //   const db = SQLite.openDatabase({
+      //       name: 'todolist.db', location: 'default'
+      //   }
+      //   ,()=> { // call backfor success
+      //     Alert.alert('database created');
+      //     console.log('Database created successfully');
+      //   }, (error)=>{ // call back for error
+      //       Alert.alert('error'+error);
+      //       console.log('error'+error);
+      //   });
+      // })
+      const isDarkMode = useColorScheme() === 'dark';
   //   useEffect(() => {
   //   const initDB = async () => {
   //     try {
