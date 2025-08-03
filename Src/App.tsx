@@ -9,7 +9,7 @@ import { GestureHandlerRootView } from 'react-native-gesture-handler';
 // database
 // import { createTables, getDBConnection } from './DB/Database';
 import SQLite from 'react-native-sqlite-storage'
-
+import { initDB } from './DB/Database';
 
 // const AppInner = () => {
   //   const { isLoggedIn, setIsLoggedIn } = useContext(AuthContext);
@@ -33,31 +33,11 @@ import SQLite from 'react-native-sqlite-storage'
           // };
           
 function App() {
-      // useEffect(() => {
-      //   const db = SQLite.openDatabase({
-      //       name: 'todolist.db', location: 'default'
-      //   }
-      //   ,()=> { // call backfor success
-      //     Alert.alert('database created');
-      //     console.log('Database created successfully');
-      //   }, (error)=>{ // call back for error
-      //       Alert.alert('error'+error);
-      //       console.log('error'+error);
-      //   });
-      // })
-      const isDarkMode = useColorScheme() === 'dark';
-  //   useEffect(() => {
-  //   const initDB = async () => {
-  //     try {
-  //       const db = await getDBConnection();
-  //       await createTables(db);
-  //     } catch (error) {
-  //       console.error('DB Init Error:', error);
-  //     }
-  //   };
 
-  //   initDB();
-  // }, []);
+  useEffect(() => {
+      initDB();
+  }, []);
+      const isDarkMode = useColorScheme() === 'dark';
 
   return (
     // <AuthProvider>
