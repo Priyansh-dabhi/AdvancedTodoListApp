@@ -22,7 +22,7 @@
 // export { getDBConnection, createTables };
 
 import SQLite from 'react-native-sqlite-storage'
-import { Task } from '../Types/Task';
+import { TaskForDB } from '../Types/TaskForDB';
 
 const db = SQLite.openDatabase({
     name: 'todolist.db', location: 'default'
@@ -33,6 +33,9 @@ const db = SQLite.openDatabase({
     console.log('error'+error);
 });
 
+
+// Crud
+
 // table creation
 
 export const initDB = () => {
@@ -41,19 +44,68 @@ export const initDB = () => {
             `CREATE TABLE IF NOT EXISTS tasks (
             id INTEGER PRIMARY KEY AUTOINCREMENT, 
             task TEXT NOT NULL,
-            timestamp TEXT NOT NULL,
+            timestamp TEXT NOT NULL
             );`)
     })
 }
 
-// Crud
 
-
-export const insertTask = ({task,timestamp,success,error}:Task) => {
+// insert
+export const insertTask = ({task,timestamp,success,error}:TaskForDB) => {
     db.transaction(tx=>{
         tx.executeSql(
             `INSERT INTO tasks (task, timestamp) VALUES (?, ?)`,[task, timestamp],(_,response) => success?.(response),
-            (_,err)=> error?.(err)
+            (_,err)=> {
+                error?.(err)
+                console.log('Error inserting task:', err);
+                return true;
+            }
         )
     })
 }
+
+// delete
+
+export const deleteTask = ({ id, success, error }: TaskForDB) => {
+    db.transaction(tx => {
+        tx.executeSql(
+        `DELETE FROM tasks WHERE id = ?`,
+        [id],
+        (_, response) => success?.(response),
+        (_, err) => error?.(err)
+        );
+    });
+};
+
+// update
+export const updateTask = ({id,task,timestamp,success,error}: TaskForDB) => {
+    db.transaction(tx => {
+        tx.executeSql(
+        `UPDATE tasks SET task = ?, timestamp = ? WHERE id = ?`,
+        [task, timestamp, id],
+        (_, response) => success?.(response),
+        (_, err) => error?.(err)
+        );
+    });
+};
+
+// get all tasks
+export const getAllTasks = (callback: (tasks: any[]) => void) => {
+    db.transaction(tx => {
+        tx.executeSql(
+        `SELECT * FROM tasks ORDER BY id DESC`,
+        [],
+        (_, { rows }) => {
+            const tasksArray = [];
+            for (let i = 0; i < rows.length; i++) {
+            tasksArray.push(rows.item(i));
+            }
+            callback(tasksArray);
+        },
+        (_, err) => {
+            console.error('Error fetching tasks:', err);
+            return true;
+        }
+    );
+    });
+};
