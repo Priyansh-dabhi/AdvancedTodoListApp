@@ -60,15 +60,23 @@ const AddTaskModal = ({ isVisible, onClose, onCreate }: Props) => {
 const handleCreate = () => {
     if (task.trim() !== '') {
         const dateToUse = selectedDate || new Date();
-        const timestamp = dateToUse.toISOString(); // ISO format for DB
+
+        const formattedTimestamp = new Intl.DateTimeFormat('en-GB', {
+            day: '2-digit',
+            month: '2-digit',
+            year: 'numeric',
+            hour: '2-digit',
+            minute: '2-digit',
+            hour12: true,
+        }).format(dateToUse);
 
         const newTask: Task = {
             id: '', // Let SQLite auto-generate
             task: task.trim(), // Same for both DB and UI
-            timestamp: timestamp,
+            timestamp: formattedTimestamp,
             category: [selectedCategory], // Wrap in array
             completed: false,
-            date: timestamp.split('T')[0], // yyyy-mm-dd
+            date: formattedTimestamp.split('T')[0], // yyyy-mm-dd
             success: () => {
                 console.log('Task inserted successfully into DB');
                 onCreate(newTask); // Refresh task list
