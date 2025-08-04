@@ -12,6 +12,9 @@ import AddTaskModal from '../Components/AddTaskModal';
 import { Task } from '../Types/Task';
 import Routes from '../Routes/Routes';
 import { useNavigation } from '@react-navigation/native';
+//DB
+import { getAllTasks } from '../DB/Database';
+
 
 const Home = () => {
     const navigation = useNavigation<any>();
@@ -34,11 +37,27 @@ const Home = () => {
             setGreeting('Good Evening');
         }
     },[])
-    
-    const handleCreateTask = (task:Task)  => {
-        setTasks(prev => [...prev, task]);
-    return task;
-    } ;
+
+    // Fetch tasks from DB
+    const fetchTasksFromDB = () => {
+        getAllTasks((fetchedTasks: Task[]) => {
+        setTasks(fetchedTasks);
+        console.log("Fetched Tasks:", fetchedTasks);
+
+        });
+    };
+
+    useEffect(() => {
+        fetchTasksFromDB();
+    }, []);
+
+const handleCreateTask = (_: Task) => {
+    fetchTasksFromDB();
+};
+    // const handleCreateTask = (task:Task)  => {
+    //     setTasks(prev => [...prev, task]);
+    // return task;
+    // } ;
 
     return (
 
@@ -78,7 +97,7 @@ const Home = () => {
                     </View>   
 
                 <FlatList
-                    data={tasks.filter(task => task.title.toLowerCase().includes(searchQuery.toLowerCase()))}
+                    data={tasks.filter(task =>  task.task?.toLowerCase().includes(searchQuery.toLowerCase()))}
                     keyExtractor={(item, index) => index.toString()}
                     // style={{ width: '100%',borderWidth:1 }}  
                     renderItem={({ item }) => (
@@ -97,7 +116,7 @@ const Home = () => {
                                 />
                             </View>
                             <View style={{flex:1}}>
-                                <Text style={styles.taskItem}>{item.title}</Text>
+                                <Text style={styles.taskItem}>{item.task}</Text>
                                 <Text style={styles.taskItem}>{item.date}</Text> 
                             </View>
                         </View>
