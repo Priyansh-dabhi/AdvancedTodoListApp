@@ -23,6 +23,7 @@
 
 import SQLite from 'react-native-sqlite-storage'
 import { TaskForDB } from '../Types/TaskForDB';
+import { Task } from '../Types/Task';
 
 const db = SQLite.openDatabase({
     name: 'todolist.db', location: 'default'
@@ -51,7 +52,7 @@ export const initDB = () => {
 
 
 // insert
-export const insertTask = ({task,timestamp,success,error}:TaskForDB) => {
+export const insertTask = ({task,timestamp,success,error}:Task) => {
     db.transaction(tx=>{
         tx.executeSql(
             `INSERT INTO tasks (task, timestamp) VALUES (?, ?)`,[task, timestamp],(_,response) => success?.(response),
@@ -66,7 +67,7 @@ export const insertTask = ({task,timestamp,success,error}:TaskForDB) => {
 
 // delete
 
-export const deleteTask = ({ id, success, error }: TaskForDB) => {
+export const deleteTask = ({ id, success, error }: Task) => {
     db.transaction(tx => {
         tx.executeSql(
         `DELETE FROM tasks WHERE id = ?`,
@@ -78,7 +79,7 @@ export const deleteTask = ({ id, success, error }: TaskForDB) => {
 };
 
 // update
-export const updateTask = ({id,task,timestamp,success,error}: TaskForDB) => {
+export const updateTask = ({id,task,timestamp,success,error}: Task) => {
     db.transaction(tx => {
         tx.executeSql(
         `UPDATE tasks SET task = ?, timestamp = ? WHERE id = ?`,
@@ -93,7 +94,7 @@ export const updateTask = ({id,task,timestamp,success,error}: TaskForDB) => {
 export const getAllTasks = (callback: (tasks: any[]) => void) => {
     db.transaction(tx => {
         tx.executeSql(
-        `SELECT * FROM tasks ORDER BY id DESC`,
+        `SELECT * FROM tasks ORDER BY timestamp DESC`,
         [],
         (_, { rows }) => {
             const tasksArray = [];
@@ -101,10 +102,6 @@ export const getAllTasks = (callback: (tasks: any[]) => void) => {
             tasksArray.push(rows.item(i));
             }
             callback(tasksArray);
-        },
-        (_, err) => {
-            console.error('Error fetching tasks:', err);
-            return true;
         }
     );
     });
