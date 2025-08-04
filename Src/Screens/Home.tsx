@@ -1,4 +1,4 @@
-import { StyleSheet, Text, View, Pressable, TouchableOpacity, FlatList, Button, } from 'react-native'
+import { StyleSheet, Text, View, Pressable, TouchableOpacity, FlatList, Button, Alert } from 'react-native'
 import BouncyCheckbox from 'react-native-bouncy-checkbox'
 import React ,{useContext, useEffect, useState} from 'react'
 import { AuthContext } from '../Context/AppwriteContext';
@@ -14,7 +14,7 @@ import Routes from '../Routes/Routes';
 import { useNavigation } from '@react-navigation/native';
 //DB
 import { getAllTasks } from '../DB/Database';
-
+import { deleteTask } from '../DB/Database';
 
 const Home = () => {
     const navigation = useNavigation<any>();
@@ -54,11 +54,18 @@ const Home = () => {
 const handleCreateTask = (_: Task) => {
     fetchTasksFromDB();
 };
-    // const handleCreateTask = (task:Task)  => {
-    //     setTasks(prev => [...prev, task]);
-    // return task;
-    // } ;
-
+const handleCheckboxPress = (taskId: string) => {
+    deleteTask(taskId, 
+        () => {
+        console.log('Deleted successfully');
+        // Refresh the task list (you likely have `loadTasks()` in parent)
+        fetchTasksFromDB(); 
+        },
+        (err) => {
+        Alert.alert('Error', 'Failed to delete task');
+        }
+    );
+};
     return (
 
         <View style={styles.container}>
@@ -112,12 +119,13 @@ const handleCreateTask = (_: Task) => {
                             <View style={{alignItems:'center',justifyContent:'center'}}>
                                 <BouncyCheckbox
                                 fillColor='#FF6B6B'
-
+                                isChecked={item.completed}
+                                onPress={()=>{handleCheckboxPress(item.id)}}
                                 />
                             </View>
                             <View style={{flex:1}}>
                                 <Text style={styles.taskItem}>{item.task}</Text>
-                                <Text style={styles.taskItem}>{item.date}</Text> 
+                                <Text style={styles.taskItem}>{item.timestamp}</Text> 
                             </View>
                         </View>
                     </TouchableOpacity>
