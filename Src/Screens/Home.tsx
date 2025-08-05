@@ -13,7 +13,7 @@ import { Task } from '../Types/Task';
 import Routes from '../Routes/Routes';
 import { useNavigation } from '@react-navigation/native';
 //DB
-import { getAllTasks } from '../DB/Database';
+import { getAllTasks, updateTaskCompletion } from '../DB/Database';
 import { deleteTask } from '../DB/Database';
 
 const Home = () => {
@@ -40,31 +40,52 @@ const Home = () => {
 
     // Fetch tasks from DB
     const fetchTasksFromDB = () => {
-        getAllTasks((fetchedTasks: Task[]) => {
-        setTasks(fetchedTasks);
-        console.log("Fetched Tasks:", fetchedTasks);
-
-        });
-    };
-
+    getAllTasks((fetchedTasks: Task[]) => {
+        // Map over the tasks and set completed to false for all of them
+        const uncheckedTasks = fetchedTasks.map(task => ({
+            ...task,
+            completed: false,
+        }));
+        setTasks(uncheckedTasks);
+        console.log("Fetched and Unchecked Tasks:", uncheckedTasks);
+    });
+};
+fetchTasksFromDB
     useEffect(() => {
         fetchTasksFromDB();
     }, []);
 
-const handleCreateTask = (_: Task) => {
+const handleCreateTask = () => {
     fetchTasksFromDB();
 };
-const handleCheckboxPress = (taskId: string) => {
-    deleteTask(taskId, 
+const handleTaskDeleteOnCheckboxPress = (taskId: number) => {
+    deleteTask(taskId,
         () => {
-        console.log('Deleted successfully');
-        // Refresh the task list (you likely have `loadTasks()` in parent)
-        fetchTasksFromDB(); 
+            console.log('Deleted successfully');
+            // Call the new function to refresh the list and uncheck all items
+            fetchTasksFromDB();
         },
         (err) => {
-        Alert.alert('Error', 'Failed to delete task');
+            Alert.alert('Error', 'Failed to delete task');
         }
     );
+};
+const handleTaskCompletionToggle = (taskId: number, currentStatus: boolean) => {
+    // The completed parameter should be a boolean, not a number.
+    const newStatus = !currentStatus;
+
+    updateTaskCompletion({
+        id: taskId,
+        completed: newStatus, // Pass the boolean directly
+        success: () => {
+            console.log(`Task ${taskId} completion toggled to ${newStatus}`);
+            fetchTasksFromDB(); // Re-fetch all tasks to update the UI
+        },
+        error: (err) => {
+            console.error('Failed to update task completion:', err);
+            Alert.alert('Error', 'Could not update task status.');
+        }
+    });
 };
     return (
 
@@ -105,7 +126,7 @@ const handleCheckboxPress = (taskId: string) => {
 
                 <FlatList
                     data={tasks.filter(task =>  task.task?.toLowerCase().includes(searchQuery.toLowerCase()))}
-                    keyExtractor={(item, index) => index.toString()}
+                    keyExtractor={(item) => item.id.toString()}
                     // style={{ width: '100%',borderWidth:1 }}  
                     renderItem={({ item }) => (
                     <TouchableOpacity 
@@ -120,7 +141,7 @@ const handleCheckboxPress = (taskId: string) => {
                                 <BouncyCheckbox
                                 fillColor='#FF6B6B'
                                 isChecked={item.completed}
-                                onPress={()=>{handleCheckboxPress(item.id)}}
+                                onPress={()=>handleTaskDeleteOnCheckboxPress(item.id)}
                                 />
                             </View>
                             <View style={{flex:1}}>
