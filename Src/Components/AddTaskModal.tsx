@@ -9,7 +9,7 @@ import Modal from 'react-native-modal';
 import Ionicons from 'react-native-vector-icons/Ionicons';
 import DateTimePicker from '@react-native-community/datetimepicker';
 import CategoryPopup from './CategoryPopup';
-import { Task } from '../Types/Task';
+import { NewTask, Task } from '../Types/Task';
 import Calendar from './Calender';
 import Time from './Time';
 import Map from '../Screens/GoogleMaps/Map';
@@ -23,7 +23,7 @@ import { insertTask } from '../DB/Database';
 type Props = {
     isVisible: boolean;
     onClose: () => void;
-    onCreate: (task: Task) => void; // <-- update this
+    onCreate: () => void; // <-- update this
 
 };
 
@@ -70,23 +70,22 @@ const handleCreate = () => {
             hour12: true,
         }).format(dateToUse);
 
-        const newTask: Task = {
-            id: '', // Let SQLite auto-generate
-            task: task.trim(), // Same for both DB and UI
-            timestamp: formattedTimestamp,
-            category: [selectedCategory], // Wrap in array
-            completed: false,
-            date: formattedTimestamp.split('T')[0], // yyyy-mm-dd
-            success: () => {
-                console.log('Task inserted successfully into DB');
-                onCreate(newTask); // Refresh task list
-                resetForm(); // Clear modal
-            },
-            error: (err) => {
-                console.error('Failed to insert task:', err);
-                Alert.alert('Error', 'Could not save task.');
-            },
+        const newTask: NewTask = {
+          task: task.trim(),
+          timestamp: formattedTimestamp,
+          // category: selectedCategory,
+          completed: false,
+          success: () => {
+            console.log('Task inserted successfully into DB');
+            onCreate();
+            resetForm();
+          },
+          error: (err) => {
+            console.error('Failed to insert task:', err);
+            Alert.alert('Error', 'Could not save task.');
+          },
         };
+
 
         insertTask(newTask);
     } else {
