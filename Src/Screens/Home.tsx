@@ -25,6 +25,11 @@ const Home = () => {
         const [modalVisible, setModalVisible] = useState(false);
         const [searchQuery, setSearchQuery] = useState('');
 
+        // clear serch query
+        const clearText = () => {
+            setSearchQuery('');
+        }; 
+
         // Greeting the user
         useEffect(()=> {
         const date = new Date();
@@ -112,11 +117,17 @@ const handleTaskCompletionToggle = (taskId: number, currentStatus: boolean) => {
                         <View style={styles.searchContainer}>
                             <TextInput
                                 placeholder="Search tasks..."
+                                clearButtonMode='always'
                                 placeholderTextColor="#888"
                                 style={styles.searchInput}
                                 value={searchQuery}
                                 onChangeText={setSearchQuery}
                             />
+                            {searchQuery.length > 0 && (
+                                <TouchableOpacity onPress={clearText} style={styles.clearButton}>
+                                        <Icon name="close-circle" size={20} color="#888" />
+                                </TouchableOpacity>
+                            )}
                         </View>
                             <TouchableOpacity style={styles.searchButton}>
                                 <Icon name="search" size={30} color="#FF6B6B" style={{ marginRight: 8 ,marginLeft:8}} />
@@ -243,6 +254,9 @@ const styles = StyleSheet.create({
         flex: 1,
         fontSize: 16,
         color: '#333',
+    },
+    clearButton: {
+        marginLeft: 10,
     },
         searchButton: {
             borderWidth: 1,
