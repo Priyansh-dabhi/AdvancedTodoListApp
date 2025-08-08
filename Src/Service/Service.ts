@@ -1,17 +1,22 @@
 // import { Linking } from 'react-native';
 // import InAppBrowser from 'react-native-inappbrowser-reborn';
-import { Client, Account, ID } from 'appwrite';
+import { Client, Account, ID, Databases } from 'appwrite';
 import Snackbar from 'react-native-snackbar';
 import { OAuthProvider } from 'appwrite';
+import {APPWRITE_ENDPOINT,APPWRITE_PROJECT_ID,APPWRITE_DATABASE_ID,APPWRITE_COLLECTION_ID} from '@env';
+
+// console.log('Endpoint:', `'${APPWRITE_ENDPOINT}'`, 'Length:', APPWRITE_ENDPOINT.length);
+// console.log('Project ID:', `'${APPWRITE_PROJECT_ID}'`, 'Length:', APPWRITE_PROJECT_ID.length);
 
 const client = new Client();
 client
-  .setEndpoint('https://nyc.cloud.appwrite.io/v1') 
-  .setProject('685d13ae0009b272f0d9');
+  .setEndpoint(APPWRITE_ENDPOINT.trim()) 
+  .setProject(APPWRITE_PROJECT_ID.trim());
 
+  // Authentication
   // instance of Account class which provides below methods
 const account = new Account(client);
-
+const databases = new Databases(client);
 type createUserAccount = {
   name:string;
   email:string;
@@ -102,3 +107,8 @@ export const logout = async () =>{
 //     console.log('Google Sign-In failed:', error);
 //   }
 // };
+
+
+
+// --- New database-related functions ---
+
