@@ -7,7 +7,7 @@ export type Task = {
     // category?: [string];
     completed?: boolean;
     // date?: string;      // optional, if you want to track when the task was created
-    
+    isSynced?: boolean; // used to check if the task is synced with the appwrite or not
     success?: (res: any) => void;
     error?: (err: any) => void;
 };
