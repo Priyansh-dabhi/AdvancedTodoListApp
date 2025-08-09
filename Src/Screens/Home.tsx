@@ -55,7 +55,7 @@ const Home = () => {
         console.log("Fetched and Unchecked Tasks:", uncheckedTasks);
     });
 };
-fetchTasksFromDB
+// fetchTasksFromDB
     useEffect(() => {
         fetchTasksFromDB();
     }, []);
