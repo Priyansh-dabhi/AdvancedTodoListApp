@@ -23,7 +23,7 @@ import { insertTask } from '../DB/Database';
 type Props = {
     isVisible: boolean;
     onClose: () => void;
-    onCreate: () => void; // <-- update this
+    onCreate: () => void; 
 
 };
 
@@ -46,7 +46,7 @@ const AddTaskModal = ({ isVisible, onClose, onCreate }: Props) => {
     const [selectedCategory, setSelectedCategory] = useState('No Category');
     const [takePhoto, setTakePhoto] = useState('No Photo');
     const [cameraModalVisible,setCameraModalVisible] =useState(false);
-    const [imgUri, setImgUri] = useState('');
+    const [imgUri, setImgUri] = useState<string | null>(null);
     const [selectedDate, setSelectedDate] = useState<Date | null>(null);
     const [selectedTime, setSelectedTime] = useState<Date | null>(null);
     const [categoryModalVisible, setCategoryModalVisible] = useState(false);
@@ -75,6 +75,7 @@ const handleCreate = () => {
           timestamp: formattedTimestamp,
           // category: selectedCategory,
           completed: false,
+          isSynced: false, // initially not synced
           success: () => {
             console.log('Task inserted successfully into DB');
             onCreate();
@@ -98,7 +99,7 @@ const resetForm = () => {
     setTask('');
     setSelectedCategory('No Category');
     setTakePhoto('No Photo');
-    setImgUri('');
+    setImgUri(null);
     setSelectedDate(null);
     setSelectedTime(null);
     setSelectLocation('Select Location');
