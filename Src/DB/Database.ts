@@ -34,6 +34,7 @@ const db = SQLite.openDatabase({
 
 // Crud
 // table creation
+// isSynced is used to check if the task is synced with the appwrite or not
 
 export const initDB = () => {
     db.transaction(tx => {
@@ -43,6 +44,7 @@ export const initDB = () => {
                 task TEXT NOT NULL,
                 timestamp TEXT NOT NULL,
                 completed INTEGER DEFAULT 0
+                isSynced INTEGER DEFAULT 0
             );`
         );
     });
@@ -53,8 +55,8 @@ export const insertTask = (task: NewTask) => {
   console.log('Received task in insertTask:', task); // <- Debug
     db.transaction(tx => {
         tx.executeSql(
-        `INSERT INTO tasks (task, timestamp, completed) VALUES (?, ?, ?)`,
-        [task.task, task.timestamp|| '', task.completed ? 1 : 0],
+        `INSERT INTO tasks (task, timestamp, completed, isSynced) VALUES (?, ?, ?, ?)`,
+        [task.task, task.timestamp|| '', task.completed ? 1 : 0, task.isSynced ? 1 : 0],
         (_, result) => {
             task.success?.(result);
             console.log('Task inserted successfully:', result);
