@@ -133,3 +133,21 @@ export const getAllTasks = (callback: (tasks: any[]) => void) => {
         );
     });
 };
+
+// get unsynced tasks
+export const getUnsyncedTasks = (callback: (tasks: Task[]) => void) => {
+    db.transaction(tx => {
+        tx.executeSql(
+            `SELECT * FROM tasks WHERE isSynced = ?`,
+            [0],
+            (_, { rows }) => {
+                const unsyncedTasks = [];
+                for (let i = 0; i < rows.length; i++) {
+                    // Each item retrieved from the database is a complete Task
+                    unsyncedTasks.push(rows.item(i));
+                }
+                callback(unsyncedTasks);
+            }
+        );
+    });
+};
