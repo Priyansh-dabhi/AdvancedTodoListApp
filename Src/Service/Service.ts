@@ -185,6 +185,6 @@ export const uploadImage = async (fileUri: string) => {
 //         }
         
 //         // After syncing, refresh the UI
-//         fetchTas();
+//         fetchTask();
 //     }
 // };
