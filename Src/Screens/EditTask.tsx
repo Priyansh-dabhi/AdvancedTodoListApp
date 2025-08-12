@@ -19,7 +19,7 @@ const EditTask = () => {
   const pickAttachment = async () => {
     try {
       const res = await DocumentPicker.pick({
-        type: [DocumentPicker.types.allFiles], // could also use images only
+        type: [DocumentPicker.types.allFiles], 
       });
       setAttachment(res[0]);
     } catch (err) {
