@@ -5,37 +5,45 @@ import {
   TextInput,
   TouchableOpacity,
   Text,
+  ScrollView,
   Image,
-  ScrollView
+  Modal,
+  Pressable,
+  Switch,
+  Platform
 } from 'react-native';
-import DocumentPicker from 'react-native-document-picker';
 import Icon from 'react-native-vector-icons/Ionicons';
+import DateTimePicker from '@react-native-community/datetimepicker';
+import { launchImageLibrary } from 'react-native-image-picker';
 
 const EditTask = () => {
   const [title, setTitle] = useState('My Current Task');
   const [description, setDescription] = useState('Details about the task...');
-  const [attachment, setAttachment] = useState<any>(null);
+  const [dueDate, setDueDate] = useState(new Date());
+  const [showDatePicker, setShowDatePicker] = useState(false);
 
-  const pickAttachment = async () => {
-    try {
-      const res = await DocumentPicker.pick({
-        type: [DocumentPicker.types.allFiles], 
-      });
-      setAttachment(res[0]);
-    } catch (err) {
-      if (!DocumentPicker.isCancel(err)) {
-        console.error('DocumentPicker Error:', err);
-      }
-    }
-  };
+  const [time, setTime] = useState(new Date());
+  const [showTimePicker, setShowTimePicker] = useState(false);
+
+  const [reminder, setReminder] = useState(false);
+
+  const [photo, setPhoto] = useState<any>(null);
+  const [showImageModal, setShowImageModal] = useState(false);
 
   const saveTask = () => {
-    console.log('Updated task:', { title, description, attachment });
+    console.log('Updated task:', { title, description, dueDate, time, reminder, photo });
     // Later: update in SQLite & sync with Appwrite
   };
 
+  const pickPhoto = async () => {
+    const result = await launchImageLibrary({ mediaType: 'photo', quality: 0.8 });
+    if (!result.didCancel && result.assets && result.assets.length > 0) {
+      setPhoto(result.assets[0]);
+    }
+  };
+
   return (
-    <ScrollView style={styles.container}>
+    <ScrollView style={styles.container} keyboardShouldPersistTaps="handled">
       {/* Title */}
       <Text style={styles.label}>Task Title</Text>
       <TextInput
@@ -43,6 +51,7 @@ const EditTask = () => {
         value={title}
         onChangeText={setTitle}
         placeholder="Enter task title"
+        placeholderTextColor="#aaa"
       />
 
       {/* Description */}
@@ -52,31 +61,82 @@ const EditTask = () => {
         value={description}
         onChangeText={setDescription}
         placeholder="Enter task description"
+        placeholderTextColor="#aaa"
         multiline
       />
 
-      {/* Attachment */}
-      <Text style={styles.label}>Attachment</Text>
-      <TouchableOpacity style={styles.attachmentBtn} onPress={pickAttachment}>
-        <Icon name="attach" size={20} color="#fff" />
-        <Text style={styles.attachmentBtnText}>Choose File</Text>
+      {/* Due Date */}
+      <Text style={styles.label}>Due Date</Text>
+      <TouchableOpacity style={styles.dateBtn} onPress={() => setShowDatePicker(true)}>
+        <Icon name="calendar-outline" size={18} color="#333" style={{ marginRight: 6 }} />
+        <Text>{dueDate.toDateString()}</Text>
+      </TouchableOpacity>
+      {showDatePicker && (
+        <DateTimePicker
+          value={dueDate}
+          mode="date"
+          display={Platform.OS === 'ios' ? 'inline' : 'default'}
+          onChange={(e, selected) => {
+            setShowDatePicker(false);
+            if (selected) setDueDate(selected);
+          }}
+        />
+      )}
+
+      {/* Time & Reminder */}
+      <Text style={styles.label}>Time</Text>
+      <TouchableOpacity style={styles.dateBtn} onPress={() => setShowTimePicker(true)}>
+        <Icon name="time-outline" size={18} color="#333" style={{ marginRight: 6 }} />
+        <Text>
+          {time.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
+        </Text>
+      </TouchableOpacity>
+      {showTimePicker && (
+        <DateTimePicker
+          value={time}
+          mode="time"
+          display={Platform.OS === 'ios' ? 'spinner' : 'default'}
+          onChange={(e, selected) => {
+            setShowTimePicker(false);
+            if (selected) setTime(selected);
+          }}
+        />
+      )}
+
+      <View style={styles.reminderRow}>
+        <Text style={styles.label}>Reminder</Text>
+        <Switch value={reminder} onValueChange={setReminder} />
+      </View>
+
+      {/* Photo */}
+      <Text style={styles.label}>Photo</Text>
+      <TouchableOpacity style={styles.photoBtn} onPress={pickPhoto}>
+        <Icon name="image-outline" size={18} color="#fff" style={{ marginRight: 6 }} />
+        <Text style={styles.photoBtnText}>Select Photo</Text>
       </TouchableOpacity>
 
-      {attachment && (
-        <View style={styles.attachmentPreview}>
-          {attachment.type?.startsWith('image/') ? (
-            <Image
-              source={{ uri: attachment.uri }}
-              style={styles.attachmentImage}
-            />
-          ) : (
-            <Text style={styles.attachmentText}>{attachment.name}</Text>
-          )}
-        </View>
+      {photo && (
+        <TouchableOpacity
+          style={styles.thumbnailContainer}
+          onPress={() => setShowImageModal(true)}
+        >
+          <Image source={{ uri: photo.uri }} style={styles.thumbnail} />
+        </TouchableOpacity>
       )}
+
+      {/* Full Screen Image Modal */}
+      <Modal visible={showImageModal} transparent={true}>
+        <View style={styles.modalContainer}>
+          <Pressable style={styles.modalClose} onPress={() => setShowImageModal(false)}>
+            <Icon name="close" size={28} color="#fff" />
+          </Pressable>
+          <Image source={{ uri: photo?.uri }} style={styles.fullImage} resizeMode="contain" />
+        </View>
+      </Modal>
 
       {/* Save Button */}
       <TouchableOpacity style={styles.saveBtn} onPress={saveTask}>
+        <Icon name="save-outline" size={20} color="#fff" style={{ marginRight: 6 }} />
         <Text style={styles.saveBtnText}>Save Changes</Text>
       </TouchableOpacity>
     </ScrollView>
@@ -88,15 +148,15 @@ export default EditTask;
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: '#f8f9fa',
+    backgroundColor: '#eef1f5',
     padding: 16,
   },
   label: {
-    fontSize: 16,
+    fontSize: 15,
     fontWeight: '600',
-    marginTop: 16,
+    marginTop: 14,
     marginBottom: 6,
-    color: '#333',
+    color: '#555',
   },
   input: {
     backgroundColor: '#fff',
@@ -111,45 +171,72 @@ const styles = StyleSheet.create({
     height: 100,
     textAlignVertical: 'top',
   },
-  attachmentBtn: {
+  dateBtn: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    backgroundColor: '#fff',
+    borderRadius: 8,
+    borderWidth: 1,
+    borderColor: '#ddd',
+    padding: 12,
+  },
+  reminderRow: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'center',
+    marginTop: 8,
+  },
+  photoBtn: {
     flexDirection: 'row',
     alignItems: 'center',
     backgroundColor: '#6c63ff',
     paddingVertical: 10,
     paddingHorizontal: 14,
     borderRadius: 8,
-    width: 140,
+    marginTop: 6,
+    width: 150,
   },
-  attachmentBtnText: {
+  photoBtnText: {
     color: '#fff',
     fontSize: 15,
-    marginLeft: 6,
   },
-  attachmentPreview: {
+  thumbnailContainer: {
     marginTop: 10,
-    borderRadius: 8,
-    overflow: 'hidden',
+    alignSelf: 'flex-start',
   },
-  attachmentImage: {
+  thumbnail: {
+    width: 80,
+    height: 80,
+    borderRadius: 6,
+  },
+  modalContainer: {
+    flex: 1,
+    backgroundColor: '#000',
+    justifyContent: 'center',
+    alignItems: 'center',
+  },
+  modalClose: {
+    position: 'absolute',
+    top: 40,
+    right: 20,
+    zIndex: 2,
+  },
+  fullImage: {
     width: '100%',
-    height: 200,
-    borderRadius: 8,
-  },
-  attachmentText: {
-    fontSize: 14,
-    color: '#555',
-    paddingVertical: 6,
+    height: '100%',
   },
   saveBtn: {
-    backgroundColor: '#28a745',
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'center',
+    backgroundColor: '#6c63ff',
     paddingVertical: 14,
     borderRadius: 8,
-    marginTop: 20,
+    marginTop: 24,
   },
   saveBtnText: {
     color: '#fff',
     fontSize: 16,
-    textAlign: 'center',
     fontWeight: '600',
   },
 });
