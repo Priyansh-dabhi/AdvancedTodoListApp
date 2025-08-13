@@ -170,7 +170,7 @@ import EditTask from '../Screens/EditTask'
           component={EditTask} 
           options={{
             headerBackTitle:'Back',
-            headerTitle:'Edit Task',
+            headerTitle:'',
           }}
           />
       </Stack.Navigator>
