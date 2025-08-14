@@ -15,6 +15,7 @@ import {
 import Icon from 'react-native-vector-icons/Ionicons';
 import DateTimePicker from '@react-native-community/datetimepicker';
 import { launchImageLibrary } from 'react-native-image-picker';
+import CameraAndGallery from '../Components/CameraAndGallery';
 
 const EditTask = () => {
   const [title, setTitle] = useState('My Current Task');
@@ -29,18 +30,19 @@ const EditTask = () => {
 
   const [photo, setPhoto] = useState<any>(null);
   const [showImageModal, setShowImageModal] = useState(false);
+  const [cameraModalVisible, setCameraModalVisible] = useState(false);
 
   const saveTask = () => {
     console.log('Updated task:', { title, description, dueDate, time, reminder, photo });
     // Later: update in SQLite & sync with Appwrite
   };
 
-  const pickPhoto = async () => {
-    const result = await launchImageLibrary({ mediaType: 'photo', quality: 0.8 });
-    if (!result.didCancel && result.assets && result.assets.length > 0) {
-      setPhoto(result.assets[0]);
-    }
-  };
+  // const pickPhoto = async () => {
+  //   const result = await launchImageLibrary({ mediaType: 'photo', quality: 0.8 });
+  //   if (!result.didCancel && result.assets && result.assets.length > 0) {
+  //     setPhoto(result.assets[0]);
+  //   }
+  // };
 
   return (
     <ScrollView style={styles.container} keyboardShouldPersistTaps="handled">
@@ -110,11 +112,20 @@ const EditTask = () => {
 
       {/* Photo */}
       <Text style={styles.label}>Photo</Text>
-      <TouchableOpacity style={styles.photoBtn} onPress={pickPhoto}>
+      <TouchableOpacity style={styles.photoBtn} onPress={()=> setCameraModalVisible(true)}>
         <Icon name="image-outline" size={18} color="#fff" style={{ marginRight: 6 }} />
         <Text style={styles.photoBtnText}>Select Photo</Text>
       </TouchableOpacity>
 
+      <CameraAndGallery
+      isVisible={cameraModalVisible}
+      onCreate={()=> {}}
+      onClose={() => setCameraModalVisible(false)}
+      onImageSelected={(uri => {
+        setPhoto({ uri });
+        setCameraModalVisible(false);   
+        })}
+      />
       {photo && (
         <TouchableOpacity
           style={styles.thumbnailContainer}
