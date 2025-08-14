@@ -40,7 +40,8 @@ const AddTaskModal = ({ isVisible, onClose, onCreate }: Props) => {
         setNavigateToMap(false); // reset it
       }
     }, [navigateToMap]);
-
+    
+    // State variables
 
     const [task, setTask] = useState('');
     const [selectedCategory, setSelectedCategory] = useState('No Category');
@@ -200,7 +201,7 @@ const resetForm = () => {
                 <TouchableOpacity style={styles.row} onPress={() => setShowDatePicker(true)}>
                     <Ionicons name="calendar-outline" size={22} color="black" />
                     <Text style={styles.rowText}>
-                        {selectedDate ? selectedDate.toDateString() : 'Select Date'}
+                        {selectedDate ? selectedDate.toDateString() : 'Due Date'}
                     </Text>
                 </TouchableOpacity>
 
