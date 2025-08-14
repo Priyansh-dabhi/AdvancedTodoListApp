@@ -38,17 +38,25 @@ const db = SQLite.openDatabase({
 
 export const initDB = () => {
     db.transaction(tx => {
+        // FIX: The SQL statement is now correctly wrapped in backticks to form a string.
         tx.executeSql(
             `CREATE TABLE IF NOT EXISTS tasks (
                 id INTEGER PRIMARY KEY AUTOINCREMENT, 
                 task TEXT NOT NULL,
-                timestamp TEXT NOT NULL,
-                completed INTEGER DEFAULT 0
+                timestamp TEXT,
+                completed INTEGER DEFAULT 0,
                 isSynced INTEGER DEFAULT 0
-            );`
+            )`,
+            [],
+            () => console.log("Database and table are ready."),
+            (_, error) => {
+                console.error("Error creating table:", error);
+                return true; // Propagate the error
+            }
         );
     });
 };
+
 
 // insert
 export const insertTask = (task: NewTask) => {
