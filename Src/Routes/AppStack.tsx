@@ -1,4 +1,5 @@
-  import { StyleSheet, Text, View, TouchableOpacity } from 'react-native'
+  import { StyleSheet, Text, View, TouchableOpacity, Image, } from 'react-native'
+  import { Pressable } from 'react-native-gesture-handler'
   import React ,{useState,useEffect}from 'react'
   import { getCurrentUser } from '../Service/Service'
   import Home from '../Screens/Home'
@@ -19,7 +20,7 @@ import Temperary from '../Screens/Temperary'
 import EditProfile from '../Screens/EditProfile'
 import Map from '../Screens/GoogleMaps/Map'
 import EditTask from '../Screens/EditTask'
-
+import icons from '@/constants/icons'
 
   //Drawer component
 
@@ -112,6 +113,7 @@ import EditTask from '../Screens/EditTask'
   const Stack = createNativeStackNavigator<AppStackParamList>();
 
   const AppStack = () => {
+    const navigation = useNavigation<any>();
     return (
       <Stack.Navigator  
       
@@ -169,8 +171,20 @@ import EditTask from '../Screens/EditTask'
           name={Routes.EditTask}
           component={EditTask} 
           options={{
-            headerBackTitle:'Back',
+            headerLeft: () => (
+              <TouchableOpacity onPress={() => navigation.goBack()}>
+                <Image
+                  source={icons.back}
+                  style={{ width: 26, height: 26, marginLeft: 8 }}
+                />
+              </TouchableOpacity>
+              ),
             headerTitle:'',
+            headerRight: () => (
+              <Pressable onPress={() => console.log('Menu pressed')}>
+                <Ionicons name="ellipsis-vertical" size={22} color="#000" style={{ marginRight: 8 }} />
+              </Pressable>
+            ),
           }}
           />
       </Stack.Navigator>
