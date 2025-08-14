@@ -76,4 +76,4 @@ yarn-error.log
 
 # hide
 .env
-android/app/build.gradle
+android/app/src/main/AnroidManifest.xml
