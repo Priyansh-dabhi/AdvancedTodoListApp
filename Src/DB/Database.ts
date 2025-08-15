@@ -44,6 +44,8 @@ export const initDB = () => {
                 id INTEGER PRIMARY KEY AUTOINCREMENT, 
                 task TEXT NOT NULL,
                 timestamp TEXT,
+                dueDate TEXT,
+                dueTime TEXT,
                 completed INTEGER DEFAULT 0,
                 isSynced INTEGER DEFAULT 0
             )`,
@@ -63,8 +65,8 @@ export const insertTask = (task: NewTask) => {
   console.log('Received task in insertTask:', task); // <- Debug
     db.transaction(tx => {
         tx.executeSql(
-        `INSERT INTO tasks (task, timestamp, completed, isSynced) VALUES (?, ?, ?, ?)`,
-        [task.task, task.timestamp|| '', task.completed ? 1 : 0, task.isSynced ? 1 : 0],
+        `INSERT INTO tasks (task, timestamp, dueDate, dueTime, completed, isSynced) VALUES (?, ?, ?, ?, ?, ?)`,
+        [task.task, task.timestamp|| '', task.completed ? 1 : 0,task.DueDate|| '',task.DueTime|| '', task.isSynced ? 1 : 0],
         (_, result) => {
             task.success?.(result);
             console.log('Task inserted successfully:', result);
