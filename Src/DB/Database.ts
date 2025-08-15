@@ -143,6 +143,24 @@ export const getAllTasks = (callback: (tasks: any[]) => void) => {
         );
     });
 };
+// get all task by id
+export const getTaskById = (id: number): Promise<Task | null> => {
+    return new Promise((resolve) => {
+        db.transaction(tx => {
+        tx.executeSql(
+            `SELECT * FROM tasks WHERE id = ?`,
+            [id],
+            (_, { rows }) => {
+            if (rows.length > 0) {
+                resolve(rows.item(0));
+            } else {
+                resolve(null);
+            }
+            }
+        );
+        });
+    });
+};
 
 // get unsynced tasks
 export const getUnsyncedTasks = (callback: (tasks: Task[]) => void) => {
@@ -159,5 +177,33 @@ export const getUnsyncedTasks = (callback: (tasks: Task[]) => void) => {
                 callback(unsyncedTasks);
             }
         );
+    });
+};
+
+// get unsynced tasks [this will usefull in future when we will sync with appwrite]
+
+// export const getUnsyncedTasks = () => {
+//     return new Promise((resolve, reject) => {
+//         db.transaction(tx => {
+//             tx.executeSql(
+//                 `SELECT * FROM tasks WHERE isSynced = 0;`,
+//                 [],
+//                 (_, { rows }) => resolve(rows._array),
+//                 (_, error) => reject(error)
+//             );
+//         });
+//     });
+// };
+
+export const updateTaskSyncStatus = (taskId: number) => {
+    return new Promise((resolve, reject) => {
+        db.transaction(tx => {
+            tx.executeSql(
+                `UPDATE tasks SET isSynced = 1 WHERE id = ?;`,
+                [taskId],
+                () => resolve(true),
+                (_, error) => reject(error)
+            );
+        });
     });
 };
