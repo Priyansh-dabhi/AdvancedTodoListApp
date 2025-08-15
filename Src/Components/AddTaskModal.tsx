@@ -75,6 +75,8 @@ const handleCreate = () => {
           task: task.trim(),
           timestamp: formattedTimestamp,
           // category: selectedCategory,
+          DueDate: selectedDate ? selectedDate.toISOString().split('T')[0] : '',
+          DueTime: selectedTime ? selectedTime.toLocaleTimeString([], { hour: '2-digit',minute: '2-digit' }): '', 
           completed: false,
           isSynced: false, // initially not synced
           success: () => {
