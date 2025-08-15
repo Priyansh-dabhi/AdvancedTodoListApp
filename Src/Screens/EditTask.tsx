@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import {
   StyleSheet,
   View,
@@ -10,20 +10,31 @@ import {
   Modal,
   Pressable,
   Switch,
-  Platform
+  Platform,
+  Task
 } from 'react-native';
 import Icon from 'react-native-vector-icons/Ionicons';
 import DateTimePicker from '@react-native-community/datetimepicker';
 import { launchImageLibrary } from 'react-native-image-picker';
 import CameraAndGallery from '../Components/CameraAndGallery';
+import { AppStackParamList } from '../Routes/Routes';
+import { RouteProp } from '@react-navigation/native';
+import { getTaskById } from '../DB/Database';
 
-const EditTask = () => {
+type EditTaskRouteProp = RouteProp<AppStackParamList, 'EditTask'>;
+type Props ={
+  route:EditTaskRouteProp,
+}
+
+const EditTask = ({route}:Props) => {
+  const { taskId } = route.params; // Assuming taskId is passed as a parameter
+
   const [title, setTitle] = useState('My Current Task');
   const [description, setDescription] = useState('Details about the task...');
   const [dueDate, setDueDate] = useState(new Date());
+  const [duetime, setDueTime] = useState(new Date());
   const [showDatePicker, setShowDatePicker] = useState(false);
 
-  const [time, setTime] = useState(new Date());
   const [showTimePicker, setShowTimePicker] = useState(false);
 
   const [reminder, setReminder] = useState(false);
@@ -31,9 +42,20 @@ const EditTask = () => {
   const [photo, setPhoto] = useState<any>(null);
   const [showImageModal, setShowImageModal] = useState(false);
   const [cameraModalVisible, setCameraModalVisible] = useState(false);
+  const [task, setTask] = useState<Task | null>(null);
+
+// useEffect(() => {
+//   const fetchTask = async () => {
+//     const fetchedTask = await getTaskById(taskId);
+//     if (fetchedTask) {
+//       setTask(fetchedTask as Task);
+//     }
+//   };
+//   fetchTask();
+// }, [taskId]);
 
   const saveTask = () => {
-    console.log('Updated task:', { title, description, dueDate, time, reminder, photo });
+    console.log('Updated task:', { title, description, dueDate, duetime, reminder, photo });
     // Later: update in SQLite & sync with Appwrite
   };
 
@@ -90,17 +112,17 @@ const EditTask = () => {
       <TouchableOpacity style={styles.dateBtn} onPress={() => setShowTimePicker(true)}>
         <Icon name="time-outline" size={18} color="#333" style={{ marginRight: 6 }} />
         <Text>
-          {time.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
+          {duetime.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
         </Text>
       </TouchableOpacity>
       {showTimePicker && (
         <DateTimePicker
-          value={time}
+          value={duetime}
           mode="time"
           display={Platform.OS === 'ios' ? 'spinner' : 'default'}
           onChange={(e, selected) => {
             setShowTimePicker(false);
-            if (selected) setTime(selected);
+            if (selected) setDueTime(selected);
           }}
         />
       )}
