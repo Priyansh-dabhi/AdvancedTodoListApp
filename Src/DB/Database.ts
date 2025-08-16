@@ -171,7 +171,8 @@ export const getUnsyncedTasks = (callback: (tasks: Task[]) => void) => {
             (_, { rows }) => {
                 const unsyncedTasks = [];
                 for (let i = 0; i < rows.length; i++) {
-                    // Each item retrieved from the database is a complete Task
+
+                    // Each item retrieved from the database is a complete the Task
                     unsyncedTasks.push(rows.item(i));
                 }
                 callback(unsyncedTasks);
