@@ -5,6 +5,7 @@ export type Task = {
     task: string;  
     timestamp:string,        // or string if you use UUID
     // category?: [string];
+    discription?: string;
     DueDate: string;
     DueTime: string;
     completed?: boolean;
