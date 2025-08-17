@@ -71,6 +71,30 @@ export const initDB = () => {
             return false;
         }
         );
+
+        tx.executeSql(
+        `ALTER TABLE tasks ADD COLUMN dueDate TEXT`,
+        [],
+        () => console.log("Column 'dueDate' added successfully."),
+        (_, error) => {
+            if (!error.message.includes("duplicate column name")) {
+            console.error("Error adding dueDate column:", error);
+            }
+            return false;
+        }
+        );
+
+        tx.executeSql(
+        `ALTER TABLE tasks ADD COLUMN dueTime TEXT`,
+        [],
+        () => console.log("Column 'dueTime' added successfully."),
+        (_, error) => {
+            if (!error.message.includes("duplicate column name")) {
+            console.error("Error adding dueTime column:", error);
+            }
+            return false;
+        }
+        );
     });
 };
 
@@ -167,7 +191,7 @@ export const getTaskById = (id: number): Promise<Task | null> => {
             [id],
             (_, { rows }) => {
             if (rows.length > 0) {
-                resolve(rows.item(0));
+                resolve(rows.item(0) as Task); // ✅ cast to Task
             } else {
                 resolve(null);
             }
@@ -176,6 +200,7 @@ export const getTaskById = (id: number): Promise<Task | null> => {
         });
     });
 };
+
 
 // get unsynced tasks
 export const getUnsyncedTasks = (callback: (tasks: Task[]) => void) => {
