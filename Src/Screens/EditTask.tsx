@@ -27,7 +27,7 @@ type Props ={
 }
 
 const EditTask = ({route}:Props) => {
-  const { taskId } = route.params; // Assuming taskId is passed as a parameter
+  const { taskId , taskItem} = route.params; // Assuming taskId is passed as a parameter
 
   const [title, setTitle] = useState('My Current Task');
   const [description, setDescription] = useState('Details about the task...');
@@ -49,6 +49,12 @@ useEffect(() => {
     const fetchedTask = await getTaskById(taskId);
     if (fetchedTask) {
       setTask(fetchedTask as Task);
+
+      setTitle(fetchedTask.task || '')
+      setDescription(fetchedTask.discription || '');
+      setDueDate(new Date(fetchedTask.DueDate));
+      setDueTime(new Date(fetchedTask.DueTime));
+      // setReminder(fetchedTask.completed || false);
     }
   };
   fetchTask();
