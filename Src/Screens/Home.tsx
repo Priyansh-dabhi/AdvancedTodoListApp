@@ -164,7 +164,7 @@ const Home = () => {
                 delayLongPress={500}
                 hitSlop={{ top: 10, bottom: 10, left: 20, right: 20 }}
                 onPress={() => {
-                navigation.navigate(Routes.EditTask);
+                navigation.navigate(Routes.EditTask, { taskId: item.id, task: item.task });
                 }}
             >
                 <View style={styles.taskCard}>
