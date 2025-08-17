@@ -11,7 +11,7 @@ import {
   Pressable,
   Switch,
   Platform,
-  Task
+
 } from 'react-native';
 import Icon from 'react-native-vector-icons/Ionicons';
 import DateTimePicker from '@react-native-community/datetimepicker';
@@ -20,7 +20,7 @@ import CameraAndGallery from '../Components/CameraAndGallery';
 import { AppStackParamList } from '../Routes/Routes';
 import { RouteProp } from '@react-navigation/native';
 import { getTaskById } from '../DB/Database';
-
+import {Task} from 'Src/Types/Task';
 type EditTaskRouteProp = RouteProp<AppStackParamList, 'EditTask'>;
 type Props ={
   route:EditTaskRouteProp,
@@ -44,15 +44,15 @@ const EditTask = ({route}:Props) => {
   const [cameraModalVisible, setCameraModalVisible] = useState(false);
   const [task, setTask] = useState<Task | null>(null);
 
-// useEffect(() => {
-//   const fetchTask = async () => {
-//     const fetchedTask = await getTaskById(taskId);
-//     if (fetchedTask) {
-//       setTask(fetchedTask as Task);
-//     }
-//   };
-//   fetchTask();
-// }, [taskId]);
+useEffect(() => {
+  const fetchTask = async () => {
+    const fetchedTask = await getTaskById(taskId);
+    if (fetchedTask) {
+      setTask(fetchedTask as Task);
+    }
+  };
+  fetchTask();
+}, [taskId]);
 
   const saveTask = () => {
     console.log('Updated task:', { title, description, dueDate, duetime, reminder, photo });
