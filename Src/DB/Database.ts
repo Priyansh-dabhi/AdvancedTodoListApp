@@ -38,23 +38,38 @@ const db = SQLite.openDatabase({
 
 export const initDB = () => {
     db.transaction(tx => {
-        // FIX: The SQL statement is now correctly wrapped in backticks to form a string.
         tx.executeSql(
-            `CREATE TABLE IF NOT EXISTS tasks (
-                id INTEGER PRIMARY KEY AUTOINCREMENT, 
-                task TEXT NOT NULL,
-                timestamp TEXT,
-                dueDate TEXT,
-                dueTime TEXT,
-                completed INTEGER DEFAULT 0,
-                isSynced INTEGER DEFAULT 0
-            )`,
-            [],
-            () => console.log("Database and table are ready."),
-            (_, error) => {
-                console.error("Error creating table:", error);
-                return true; // Propagate the error
+        `CREATE TABLE IF NOT EXISTS tasks (
+            id INTEGER PRIMARY KEY AUTOINCREMENT, 
+            task TEXT NOT NULL,
+            timestamp TEXT,
+            description TEXT,
+            dueDate TEXT,
+            dueTime TEXT,
+            completed INTEGER DEFAULT 0,
+            isSynced INTEGER DEFAULT 0
+        )`,
+        [],
+        () => console.log("Database and table are ready."),
+        (_, error) => {
+            console.error("Error creating table:", error);
+            return true; // Propagate the error
+        }
+        );
+    });
+
+    // Ensure new columns are added if table already exists
+    db.transaction(tx => {
+        tx.executeSql(
+        `ALTER TABLE tasks ADD COLUMN description TEXT`,
+        [],
+        () => console.log("Column 'description' added successfully."),
+        (_, error) => {
+            if (!error.message.includes("duplicate column name")) {
+            console.error("Error adding description column:", error);
             }
+            return false;
+        }
         );
     });
 };
