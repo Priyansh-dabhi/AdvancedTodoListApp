@@ -4,7 +4,16 @@
 
 // components/AddTaskModal.tsx
 import React, { useEffect, useState } from 'react';
-import { View, Text, TextInput, Button, StyleSheet, TouchableOpacity, Platform, Alert } from 'react-native';
+import {
+  View,
+  Text,
+  TextInput,
+  Button,
+  StyleSheet,
+  TouchableOpacity,
+  Platform,
+  Alert,
+} from 'react-native';
 import Modal from 'react-native-modal';
 import Ionicons from 'react-native-vector-icons/Ionicons';
 import DateTimePicker from '@react-native-community/datetimepicker';
@@ -17,88 +26,94 @@ import Routes from '../Routes/Routes';
 import { useNavigation } from '@react-navigation/native';
 import CameraAndGallery from './CameraAndGallery';
 // DB
-import { insertTask } from '../DB/Database'; 
-
+import { insertTask } from '../DB/Database';
 
 type Props = {
-    isVisible: boolean;
-    onClose: () => void;
-    onCreate: () => void; 
-
+  isVisible: boolean;
+  onClose: () => void;
+  onCreate: () => void;
 };
 
 const AddTaskModal = ({ isVisible, onClose, onCreate }: Props) => {
-    
   // Navigation to map
-    const navigation = useNavigation<any>();
+  const navigation = useNavigation<any>();
 
-    const [navigateToMap, setNavigateToMap] = useState(false);
+  const [navigateToMap, setNavigateToMap] = useState(false);
 
-    useEffect(() => {
-      if (navigateToMap) {
-        navigation.navigate(Routes.Map);
-        setNavigateToMap(false); // reset it
-      }
-    }, [navigateToMap]);
-    
-    // State variables
-
-    const [task, setTask] = useState('');
-    const [selectedCategory, setSelectedCategory] = useState('No Category');
-    const [takePhoto, setTakePhoto] = useState('No Photo');
-    const [cameraModalVisible,setCameraModalVisible] =useState(false);
-    const [imgUri, setImgUri] = useState<string | null>(null);
-    const [selectedDate, setSelectedDate] = useState<Date | null>(null);
-    const [selectedTime, setSelectedTime] = useState<Date | null>(null);
-    const [categoryModalVisible, setCategoryModalVisible] = useState(false);
-    const [timeModalVisible, setTimeModalVisible] = useState(false);
-    const [showDatePicker, setShowDatePicker] = useState(false);
-    const [showTimePicker, setShowTimePicker] = useState(false);
-    const [selectLocation, setSelectLocation] = useState('Select Location');
-
-    const categoryOptions = ['Work', 'Personal', 'Wishlist', 'Birthday', 'No Category'];
-
-const handleCreate = () => {
-    if (task.trim() !== '') {
-        const dateToUse = selectedDate || new Date();
-
-        const formattedTimestamp = new Intl.DateTimeFormat('en-GB', {
-            day: '2-digit',
-            month: '2-digit',
-            year: 'numeric',
-            hour: '2-digit',
-            minute: '2-digit',
-            hour12: true,
-        }).format(dateToUse);
-
-        const newTask: NewTask = {
-          task: task.trim(),
-          timestamp: formattedTimestamp,
-          // category: selectedCategory,
-          DueDate: selectedDate ? selectedDate.toISOString().split('T')[0] : '',
-          DueTime: selectedTime ? selectedTime.toLocaleTimeString([], { hour: '2-digit',minute: '2-digit' }): '', 
-          completed: false,
-          isSynced: false, // initially not synced
-          success: () => {
-            console.log('Task inserted successfully into DB');
-            onCreate();
-            resetForm();
-          },
-          error: (err) => {
-            console.error('Failed to insert task:', err);
-            Alert.alert('Error', 'Could not save task.');
-          },
-        };
-
-
-        insertTask(newTask);
-    } else {
-        Alert.alert('Task title is required');
+  useEffect(() => {
+    if (navigateToMap) {
+      navigation.navigate(Routes.Map);
+      setNavigateToMap(false); // reset it
     }
-};
+  }, [navigateToMap]);
 
+  // State variables
 
-const resetForm = () => {
+  const [task, setTask] = useState('');
+  const [selectedCategory, setSelectedCategory] = useState('No Category');
+  const [takePhoto, setTakePhoto] = useState('No Photo');
+  const [cameraModalVisible, setCameraModalVisible] = useState(false);
+  const [imgUri, setImgUri] = useState<string | null>(null);
+  const [selectedDate, setSelectedDate] = useState<Date | null>(null);
+  const [selectedTime, setSelectedTime] = useState<Date | null>(null);
+  const [categoryModalVisible, setCategoryModalVisible] = useState(false);
+  const [timeModalVisible, setTimeModalVisible] = useState(false);
+  const [showDatePicker, setShowDatePicker] = useState(false);
+  const [showTimePicker, setShowTimePicker] = useState(false);
+  const [selectLocation, setSelectLocation] = useState('Select Location');
+
+  const categoryOptions = [
+    'Work',
+    'Personal',
+    'Wishlist',
+    'Birthday',
+    'No Category',
+  ];
+
+  const handleCreate = () => {
+    if (task.trim() !== '') {
+      const dateToUse = selectedDate || new Date();
+
+      const formattedTimestamp = new Intl.DateTimeFormat('en-GB', {
+        day: '2-digit',
+        month: '2-digit',
+        year: 'numeric',
+        hour: '2-digit',
+        minute: '2-digit',
+        hour12: true,
+      }).format(dateToUse);
+
+      const newTask: NewTask = {
+        task: task.trim(),
+        timestamp: formattedTimestamp,
+        // category: selectedCategory,
+        DueDate: selectedDate ? selectedDate.toISOString().split('T')[0] : '',
+        DueTime: selectedTime
+          ? selectedTime.toLocaleTimeString([], {
+              hour: '2-digit',
+              minute: '2-digit',
+            })
+          : '',
+        completed: false,
+        isSynced: false, // initially not synced
+        success: () => {
+          console.log('Task inserted successfully into DB');
+          onCreate();
+          resetForm();
+        },
+        error: err => {
+          console.error('Failed to insert task:', err);
+          Alert.alert('Error', 'Could not save task.');
+        },
+      };
+
+      insertTask(newTask);
+    } else {
+      Alert.alert('Task title is required');
+    }
+  };
+
+  const resetForm = () => {
     setTask('');
     setSelectedCategory('No Category');
     setTakePhoto('No Photo');
@@ -107,64 +122,64 @@ const resetForm = () => {
     setSelectedTime(null);
     setSelectLocation('Select Location');
     onClose();
-};
+  };
 
-    // Modal close
-    const handleModalClose = () => {
-      onClose();
-      setSelectedCategory('No Category');
-      setTakePhoto('No Photo');
-      setSelectedDate(null);
-      setSelectedTime(null);
-      setSelectLocation('Select Location');
+  // Modal close
+  const handleModalClose = () => {
+    onClose();
+    setSelectedCategory('No Category');
+    setTakePhoto('No Photo');
+    setSelectedDate(null);
+    setSelectedTime(null);
+    setSelectLocation('Select Location');
+  };
+  const handleDateChange = (event: any, date?: Date) => {
+    setShowDatePicker(false);
+    if (date) {
+      const existing = selectedDate || new Date();
+      date.setHours(existing.getHours());
+      date.setMinutes(existing.getMinutes());
+      setSelectedDate(date);
     }
-    const handleDateChange = (event: any, date?: Date) => {
-        setShowDatePicker(false);
-        if (date) {
-            const existing = selectedDate || new Date();
-            date.setHours(existing.getHours());
-            date.setMinutes(existing.getMinutes());
-            setSelectedDate(date);
+  };
+
+  const handleTimeChange = (event: any, time?: Date) => {
+    setShowTimePicker(false);
+    if (time) {
+      const existing = selectedTime || new Date();
+      existing.setHours(time.getHours());
+      existing.setMinutes(time.getMinutes());
+      setSelectedTime(new Date(existing));
+    }
+  };
+
+  return (
+    <Modal
+      isVisible={isVisible}
+      onBackdropPress={handleModalClose}
+      backdropOpacity={0.5}
+      style={styles.modal}
+      onModalHide={() => {
+        if (navigateToMap) {
+          navigation.navigate(Routes.Map);
+          setNavigateToMap(false);
         }
-    };
+      }}
+    >
+      <View style={styles.container}>
+        <Text style={styles.title}>Create New Task</Text>
 
-    const handleTimeChange = (event: any, time?: Date) => {
-        setShowTimePicker(false);
-        if (time) {
-            const existing = selectedTime || new Date();
-            existing.setHours(time.getHours());
-            existing.setMinutes(time.getMinutes());
-            setSelectedTime(new Date(existing));
-        }
-    };
+        <TextInput
+          style={styles.input}
+          placeholder="Enter a task..."
+          value={task}
+          onChangeText={setTask}
+        />
 
-    return (
-        <Modal
-            isVisible={isVisible}
-            onBackdropPress={handleModalClose}
-            backdropOpacity={0.5}
-            style={styles.modal}
-            onModalHide={()=> {
-              if(navigateToMap){
-                navigation.navigate(Routes.Map);
-                setNavigateToMap(false);
-              }
-            }}
-        >
-            <View style={styles.container}>
-                <Text style={styles.title}>Create New Task</Text>
+        <Button title="Create Task" onPress={handleCreate} />
 
-                <TextInput
-                    style={styles.input}
-                    placeholder="Enter a task..."
-                    value={task}
-                    onChangeText={setTask}
-                />
-
-                <Button title="Create Task" onPress={handleCreate} />
-
-                {/* Category Selector */}
-                {/* <TouchableOpacity
+        {/* Category Selector */}
+        {/* <TouchableOpacity
                     onPress={() => setCategoryModalVisible(true)}
                     style={styles.row}
                 >
@@ -181,79 +196,90 @@ const resetForm = () => {
                     }}
                     categories={categoryOptions}
                 /> */}
-                {/* Take Photo */}
-                <TouchableOpacity
-                    onPress={() => setCameraModalVisible(true)}
-                    style={styles.row}
-                >
-                    <Ionicons name="camera-outline" size={22} color="black" />
-                    <Text style={styles.rowText}>{takePhoto}</Text>
-                </TouchableOpacity>
-                <CameraAndGallery 
-                isVisible={cameraModalVisible}
-                onCreate={() => {}}
-                onClose={()=> setCameraModalVisible(false)}
-                onImageSelected={(uri)=> {
-                  setImgUri(uri)
-                  setTakePhoto('Photo Selected');
-                  setCameraModalVisible(false)
-                  ;}}
-                />
-                {/* Date Picker */}
-                <TouchableOpacity style={styles.row} onPress={() => setShowDatePicker(true)}>
-                    <Ionicons name="calendar-outline" size={22} color="black" />
-                    <Text style={styles.rowText}>
-                        {selectedDate ? selectedDate.toDateString() : 'Due Date'}
-                    </Text>
-                </TouchableOpacity>
+        {/* Take Photo */}
+        <TouchableOpacity
+          onPress={() => setCameraModalVisible(true)}
+          style={styles.row}
+        >
+          <Ionicons name="camera-outline" size={22} color="black" />
+          <Text style={styles.rowText}>{takePhoto}</Text>
+        </TouchableOpacity>
+        <CameraAndGallery
+          isVisible={cameraModalVisible}
+          onCreate={() => {}}
+          onClose={() => setCameraModalVisible(false)}
+          onImageSelected={uri => {
+            setImgUri(uri);
+            setTakePhoto('Photo Selected');
+            setCameraModalVisible(false);
+          }}
+        />
+        {/* Date Picker */}
+        <TouchableOpacity
+          style={styles.row}
+          onPress={() => setShowDatePicker(true)}
+        >
+          <Ionicons name="calendar-outline" size={22} color="black" />
+          <Text style={styles.rowText}>
+            {selectedDate ? selectedDate.toDateString() : 'Due Date'}
+          </Text>
+        </TouchableOpacity>
 
-                {/* Time Picker */}
-                <TouchableOpacity style={styles.row} onPress={() => setShowTimePicker(true)}>
-                  <Ionicons name="time-outline" size={22} color="black" />
-                  <Text style={styles.rowText}>
-                    {selectedTime
-                      ? `${(selectedTime.getHours() % 12 || 12)}:${selectedTime
-                          .getMinutes()
-                          .toString()
-                          .padStart(2, '0')} ${selectedTime.getHours() >= 12 ? 'PM' : 'AM'}`
-                      : 'Select Time'}
-                  </Text>
-                  
-                </TouchableOpacity>
+        {/* Time Picker */}
+        <TouchableOpacity
+          style={styles.row}
+          onPress={() => setShowTimePicker(true)}
+        >
+          <Ionicons name="time-outline" size={22} color="black" />
+          <Text style={styles.rowText}>
+            {selectedTime
+              ? `${selectedTime.getHours() % 12 || 12}:${selectedTime
+                  .getMinutes()
+                  .toString()
+                  .padStart(
+                    2,
+                    '0',
+                  )} ${selectedTime.getHours() >= 12 ? 'PM' : 'AM'}`
+              : 'Due Time'}
+          </Text>
+        </TouchableOpacity>
 
-                {/* Location Picker Placeholder */}
-                <TouchableOpacity style={styles.row} onPress={()=> 
-                  {setNavigateToMap(true);
-                    onClose();
-                  }}>
-                    <Ionicons name="location-outline" size={22} color="black" />
-                    {/* onPress= {()=> {navigation.navigate(Routes.EditTask)}} */}
-                    <Text style={styles.rowText}>{selectLocation}</Text>
-                </TouchableOpacity>
+        {/* Location Picker Placeholder */}
+        <TouchableOpacity
+          style={styles.row}
+          onPress={() => {
+            setNavigateToMap(true);
+            onClose();
+          }}
+        >
+          <Ionicons name="location-outline" size={22} color="black" />
+          {/* onPress= {()=> {navigation.navigate(Routes.EditTask)}} */}
+          <Text style={styles.rowText}>{selectLocation}</Text>
+        </TouchableOpacity>
 
-                {/* Inline Android Date Picker */}
-                {showDatePicker && (
-                    <DateTimePicker
-                        value={selectedDate || new Date()}
-                        mode="date"
-                        display={Platform.OS === 'ios' ? 'spinner' : 'default'}
-                        onChange={handleDateChange}
-                    />
-                )}
+        {/* Inline Android Date Picker */}
+        {showDatePicker && (
+          <DateTimePicker
+            value={selectedDate || new Date()}
+            mode="date"
+            display={Platform.OS === 'ios' ? 'spinner' : 'default'}
+            onChange={handleDateChange}
+          />
+        )}
 
-                {/* Time Picker */}
-                {showTimePicker && (
-                    <DateTimePicker
-                        value={selectedDate || new Date()}
-                        mode="time"
-                        is24Hour={false}
-                        display={Platform.OS === 'ios' ? 'spinner' : 'default'}
-                        onChange={handleTimeChange}
-                    />
-                )}
-            </View>
-        </Modal>
-    );
+        {/* Time Picker */}
+        {showTimePicker && (
+          <DateTimePicker
+            value={selectedDate || new Date()}
+            mode="time"
+            is24Hour={false}
+            display={Platform.OS === 'ios' ? 'spinner' : 'default'}
+            onChange={handleTimeChange}
+          />
+        )}
+      </View>
+    </Modal>
+  );
 };
 
 export default AddTaskModal;
