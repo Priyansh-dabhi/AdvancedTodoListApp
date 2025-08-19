@@ -24,11 +24,16 @@ import { useNavigation } from '@react-navigation/native';
 //DB
 import { getAllTasks, updateTaskCompletion } from '../DB/Database';
 import { deleteTask } from '../DB/Database';
-
+// context
+import { useTaskContext } from '../Context/TaskContext';
+import { TaskContext } from '../Context/TaskContext';
 const Home = () => {
     const navigation = useNavigation<any>();
     //Greeting the user
     const [greeting, setGreeting] = useState('');
+
+    // context
+    const {setSelectedTask} = useTaskContext();
 
     const [tasks, setTasks] = useState<Task[]>([]);
     const [modalVisible, setModalVisible] = useState(false);
@@ -164,7 +169,8 @@ const Home = () => {
                 delayLongPress={500}
                 hitSlop={{ top: 10, bottom: 10, left: 20, right: 20 }}
                 onPress={() => {
-                navigation.navigate(Routes.EditTask, { taskId: item.id, task: item.task });
+                    setSelectedTask(item);
+                    navigation.navigate(Routes.EditTask);
                 }}
             >
                 <View style={styles.taskCard}>
