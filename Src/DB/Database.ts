@@ -105,7 +105,14 @@ export const insertTask = (task: NewTask) => {
     db.transaction(tx => {
         tx.executeSql(
         `INSERT INTO tasks (task, timestamp, dueDate, dueTime, completed, isSynced) VALUES (?, ?, ?, ?, ?, ?)`,
-        [task.task, task.timestamp|| '', task.completed ? 1 : 0,task.DueDate|| '',task.DueTime|| '', task.isSynced ? 1 : 0],
+        [
+        task.task, 
+        task.timestamp || '', 
+        task.DueDate || '',     
+        task.DueTime || '',      
+        task.completed ? 1 : 0, 
+        task.isSynced ? 1 : 0
+        ],
         (_, result) => {
             task.success?.(result);
             console.log('Task inserted successfully:', result);
@@ -165,7 +172,7 @@ export const updateTaskCompletion = ({ id, completed, success, error }: UpdateTa
     });
 };
 
-// get all tasks
+// get all tasks [used in home screen]
 
 export const getAllTasks = (callback: (tasks: any[]) => void) => {
     db.transaction(tx => {
@@ -177,6 +184,7 @@ export const getAllTasks = (callback: (tasks: any[]) => void) => {
                 for (let i = 0; i < rows.length; i++) {
                     tasksArray.push(rows.item(i));
                 }
+                // console.log("Fetched tasks:", tasksArray);
                 callback(tasksArray);
             }
         );
