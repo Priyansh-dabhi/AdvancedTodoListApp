@@ -1,4 +1,4 @@
-import React, { useEffect, useState, useContext } from 'react';
+import React, { useEffect, useState } from 'react';
 import {
   StyleSheet,
   View,
@@ -11,81 +11,92 @@ import {
   Pressable,
   Switch,
   Platform,
-
 } from 'react-native';
 import Icon from 'react-native-vector-icons/Ionicons';
 import DateTimePicker from '@react-native-community/datetimepicker';
-import { launchImageLibrary } from 'react-native-image-picker';
 import CameraAndGallery from '../Components/CameraAndGallery';
 import { AppStackParamList } from '../Routes/Routes';
 import { RouteProp } from '@react-navigation/native';
-import { getTaskById } from '../DB/Database';
-import {Task} from 'Src/Types/Task';
-//Context
+// Context
 import { useTaskContext } from '../Context/TaskContext';
 
 type EditTaskRouteProp = RouteProp<AppStackParamList, 'EditTask'>;
-type Props ={
-  route:EditTaskRouteProp,
-}
+type Props = {
+  route: EditTaskRouteProp;
+};
 
 const EditTask = () => {
   // context
   const { selectedTask } = useTaskContext();
-  // const { taskId , taskItem} = route.params; // Assuming taskId is passed as a parameter
 
-  const [title, setTitle] = useState('My Current Task');
-  const [description, setDescription] = useState('Details about the task...');
+  const [title, setTitle] = useState('');
+  const [description, setDescription] = useState('');
   const [dueDate, setDueDate] = useState(new Date());
   const [duetime, setDueTime] = useState(new Date());
   const [showDatePicker, setShowDatePicker] = useState(false);
-
   const [showTimePicker, setShowTimePicker] = useState(false);
-
   const [reminder, setReminder] = useState(false);
-
   const [photo, setPhoto] = useState<any>(null);
   const [showImageModal, setShowImageModal] = useState(false);
   const [cameraModalVisible, setCameraModalVisible] = useState(false);
-  const [task, setTask] = useState<Task | null>(null);
 
-// useEffect(() => {
-//   const fetchTask = async () => {
-//     const fetchedTask = await getTaskById(taskId);
-//     if (fetchedTask) {
-//       setTask(fetchedTask as Task);
+  // --- MODIFICATION START ---
+  // This useEffect now correctly parses the single `dueDateTime` string.
+  useEffect(() => {
+  if (selectedTask) {
+    setTitle(selectedTask.task || '');
+    setDescription(selectedTask.description || '');
 
-//       setTitle(fetchedTask.task || '')
-//       setDescription(fetchedTask.discription || '');
-//       setDueDate(new Date(fetchedTask.DueDate));
-//       setDueTime(new Date(fetchedTask.DueTime));
-//       // setReminder(fetchedTask.completed || false);
-//     }
-//   };
-//   fetchTask();
-// }, [taskId]);
-  useEffect(()=> {
-    if(selectedTask){
-      setTitle(selectedTask.task || '');
-      setDescription(selectedTask.discription || '');
-      setDueDate(new Date(selectedTask.DueDate));
-      setDueTime(new Date(selectedTask.DueTime));
-      // setReminder(selectedTask.completed || false);
+    if (selectedTask.DueDateObject) {
+      const iso = new Date(selectedTask.DueDateObject);
+
+      if (!isNaN(iso.getTime())) {
+        // Split into two states
+        setDueDate(new Date(
+          iso.getFullYear(),
+          iso.getMonth(),
+          iso.getDate()
+        ));
+
+        setDueTime(new Date(
+          0, 0, 0, // reset date part
+          iso.getHours(),
+          iso.getMinutes()
+        ));
+      }
     }
-  },[selectedTask])
+  }
+}, [selectedTask]);
+
+
+  // --- MODIFICATION END ---
 
   const saveTask = () => {
-    console.log('Updated task:', { title, description, dueDate, duetime, reminder, photo });
-    // Later: update in SQLite & sync with Appwrite
+    // This is the reverse process: combine the UI states back into one string for saving.
+    let dueDateTimeISO: string | null = null;
+    if (dueDate) {
+      const combinedDateTime = new Date(dueDate);
+      if (duetime) {
+        combinedDateTime.setHours(duetime.getHours());
+        combinedDateTime.setMinutes(duetime.getMinutes());
+      }
+      dueDateTimeISO = combinedDateTime.toISOString();
+    }
+    
+    const updatedTask = {
+      title,
+      description,
+      dueDateTime: dueDateTimeISO, // The single value to save to the database
+      reminder,
+      photo,
+    };
+    
+    console.log('Updated task ready to be saved:', updatedTask);
+    
+    // Later: call your database update function here, e.g.,
+    // updateTaskInDB(selectedTask.id, updatedTask);
   };
-
-  // const pickPhoto = async () => {
-  //   const result = await launchImageLibrary({ mediaType: 'photo', quality: 0.8 });
-  //   if (!result.didCancel && result.assets && result.assets.length > 0) {
-  //     setPhoto(result.assets[0]);
-  //   }
-  // };
-
+  
   return (
     <ScrollView style={styles.container} keyboardShouldPersistTaps="handled">
       {/* Title */}
@@ -111,8 +122,16 @@ const EditTask = () => {
 
       {/* Due Date */}
       <Text style={styles.label}>Due Date</Text>
-      <TouchableOpacity style={styles.dateBtn} onPress={() => setShowDatePicker(true)}>
-        <Icon name="calendar-outline" size={18} color="#333" style={{ marginRight: 6 }} />
+      <TouchableOpacity
+        style={styles.dateBtn}
+        onPress={() => setShowDatePicker(true)}
+      >
+        <Icon
+          name="calendar-outline"
+          size={18}
+          color="#333"
+          style={{ marginRight: 6 }}
+        />
         <Text>{dueDate.toDateString()}</Text>
       </TouchableOpacity>
       {showDatePicker && (
@@ -129,10 +148,21 @@ const EditTask = () => {
 
       {/* Time & Reminder */}
       <Text style={styles.label}>Time</Text>
-      <TouchableOpacity style={styles.dateBtn} onPress={() => setShowTimePicker(true)}>
-        <Icon name="time-outline" size={18} color="#333" style={{ marginRight: 6 }} />
+      <TouchableOpacity
+        style={styles.dateBtn}
+        onPress={() => setShowTimePicker(true)}
+      >
+        <Icon
+          name="time-outline"
+          size={18}
+          color="#333"
+          style={{ marginRight: 6 }}
+        />
         <Text>
-          {duetime.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
+          {duetime.toLocaleTimeString([], {
+            hour: '2-digit',
+            minute: '2-digit',
+          })}
         </Text>
       </TouchableOpacity>
       {showTimePicker && (
@@ -154,19 +184,27 @@ const EditTask = () => {
 
       {/* Photo */}
       <Text style={styles.label}>Photo</Text>
-      <TouchableOpacity style={styles.photoBtn} onPress={()=> setCameraModalVisible(true)}>
-        <Icon name="image-outline" size={18} color="#fff" style={{ marginRight: 6 }} />
+      <TouchableOpacity
+        style={styles.photoBtn}
+        onPress={() => setCameraModalVisible(true)}
+      >
+        <Icon
+          name="image-outline"
+          size={18}
+          color="#fff"
+          style={{ marginRight: 6 }}
+        />
         <Text style={styles.photoBtnText}>Select Photo</Text>
       </TouchableOpacity>
 
       <CameraAndGallery
-      isVisible={cameraModalVisible}
-      onCreate={()=> {}}
-      onClose={() => setCameraModalVisible(false)}
-      onImageSelected={(uri => {
-        setPhoto({ uri });
-        setCameraModalVisible(false);   
-        })}
+        isVisible={cameraModalVisible}
+        onCreate={() => {}}
+        onClose={() => setCameraModalVisible(false)}
+        onImageSelected={uri => {
+          setPhoto({ uri });
+          setCameraModalVisible(false);
+        }}
       />
       {photo && (
         <TouchableOpacity
@@ -180,16 +218,28 @@ const EditTask = () => {
       {/* Full Screen Image Modal */}
       <Modal visible={showImageModal} transparent={true}>
         <View style={styles.modalContainer}>
-          <Pressable style={styles.modalClose} onPress={() => setShowImageModal(false)}>
+          <Pressable
+            style={styles.modalClose}
+            onPress={() => setShowImageModal(false)}
+          >
             <Icon name="close" size={28} color="#fff" />
           </Pressable>
-          <Image source={{ uri: photo?.uri }} style={styles.fullImage} resizeMode="contain" />
+          <Image
+            source={{ uri: photo?.uri }}
+            style={styles.fullImage}
+            resizeMode="contain"
+          />
         </View>
       </Modal>
 
       {/* Save Button */}
       <TouchableOpacity style={styles.saveBtn} onPress={saveTask}>
-        <Icon name="save-outline" size={20} color="#fff" style={{ marginRight: 6 }} />
+        <Icon
+          name="save-outline"
+          size={20}
+          color="#fff"
+          style={{ marginRight: 6 }}
+        />
         <Text style={styles.saveBtnText}>Save Changes</Text>
       </TouchableOpacity>
     </ScrollView>
