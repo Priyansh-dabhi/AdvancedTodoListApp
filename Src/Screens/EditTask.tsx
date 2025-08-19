@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useState, useContext } from 'react';
 import {
   StyleSheet,
   View,
@@ -21,13 +21,18 @@ import { AppStackParamList } from '../Routes/Routes';
 import { RouteProp } from '@react-navigation/native';
 import { getTaskById } from '../DB/Database';
 import {Task} from 'Src/Types/Task';
+//Context
+import { useTaskContext } from '../Context/TaskContext';
+
 type EditTaskRouteProp = RouteProp<AppStackParamList, 'EditTask'>;
 type Props ={
   route:EditTaskRouteProp,
 }
 
-const EditTask = ({route}:Props) => {
-  const { taskId , taskItem} = route.params; // Assuming taskId is passed as a parameter
+const EditTask = () => {
+  // context
+  const { selectedTask } = useTaskContext();
+  // const { taskId , taskItem} = route.params; // Assuming taskId is passed as a parameter
 
   const [title, setTitle] = useState('My Current Task');
   const [description, setDescription] = useState('Details about the task...');
@@ -44,21 +49,30 @@ const EditTask = ({route}:Props) => {
   const [cameraModalVisible, setCameraModalVisible] = useState(false);
   const [task, setTask] = useState<Task | null>(null);
 
-useEffect(() => {
-  const fetchTask = async () => {
-    const fetchedTask = await getTaskById(taskId);
-    if (fetchedTask) {
-      setTask(fetchedTask as Task);
+// useEffect(() => {
+//   const fetchTask = async () => {
+//     const fetchedTask = await getTaskById(taskId);
+//     if (fetchedTask) {
+//       setTask(fetchedTask as Task);
 
-      setTitle(fetchedTask.task || '')
-      setDescription(fetchedTask.discription || '');
-      setDueDate(new Date(fetchedTask.DueDate));
-      setDueTime(new Date(fetchedTask.DueTime));
-      // setReminder(fetchedTask.completed || false);
+//       setTitle(fetchedTask.task || '')
+//       setDescription(fetchedTask.discription || '');
+//       setDueDate(new Date(fetchedTask.DueDate));
+//       setDueTime(new Date(fetchedTask.DueTime));
+//       // setReminder(fetchedTask.completed || false);
+//     }
+//   };
+//   fetchTask();
+// }, [taskId]);
+  useEffect(()=> {
+    if(selectedTask){
+      setTitle(selectedTask.task || '');
+      setDescription(selectedTask.discription || '');
+      setDueDate(new Date(selectedTask.DueDate));
+      setDueTime(new Date(selectedTask.DueTime));
+      // setReminder(selectedTask.completed || false);
     }
-  };
-  fetchTask();
-}, [taskId]);
+  },[selectedTask])
 
   const saveTask = () => {
     console.log('Updated task:', { title, description, dueDate, duetime, reminder, photo });
