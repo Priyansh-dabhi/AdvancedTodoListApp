@@ -5,9 +5,8 @@ export type Task = {
     task: string;  
     timestamp:string,        // or string if you use UUID
     // category?: [string];
-    discription?: string;
-    DueDate: string;
-    DueTime: string;
+    description?: string;
+    DueDateObject?: string; // ISO date string
     completed?: boolean;
     isSynced?: boolean; // used to check if the task is synced with the appwrite or not
     success?: (res: any) => void;
