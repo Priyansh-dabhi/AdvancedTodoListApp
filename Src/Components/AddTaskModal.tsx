@@ -71,47 +71,62 @@ const AddTaskModal = ({ isVisible, onClose, onCreate }: Props) => {
   ];
 
   const handleCreate = () => {
-    if (task.trim() !== '') {
-      const dateToUse = selectedDate || new Date();
-
-      const formattedTimestamp = new Intl.DateTimeFormat('en-GB', {
-        day: '2-digit',
-        month: '2-digit',
-        year: 'numeric',
-        hour: '2-digit',
-        minute: '2-digit',
-        hour12: true,
-      }).format(dateToUse);
-
-      const newTask: NewTask = {
-        task: task.trim(),
-        timestamp: formattedTimestamp,
-        // category: selectedCategory,
-        DueDate: selectedDate ? selectedDate.toISOString().split('T')[0] : '',
-        DueTime: selectedTime
-          ? selectedTime.toLocaleTimeString([], {
-              hour: '2-digit',
-              minute: '2-digit',
-            })
-          : '',
-        completed: false,
-        isSynced: false, // initially not synced
-        success: () => {
-          console.log('Task inserted successfully into DB');
-          onCreate();
-          resetForm();
-        },
-        error: err => {
-          console.error('Failed to insert task:', err);
-          Alert.alert('Error', 'Could not save task.');
-        },
-      };
-
-      insertTask(newTask);
-    } else {
+    if (task.trim() === '') {
       Alert.alert('Task title is required');
+      return;
     }
+
+    // --- MODIFICATION START ---
+    // This is the new logic to combine date and time.
+
+    let dueDateTimeISO: string = ''; // Initialize as an empty string
+
+    // 1. Check if a date has been selected by the user.
+    if (selectedDate) {
+      // 2. Create the base dateTime object from the selected date.
+      const combinedDateTime = new Date(selectedDate);
+
+      // 3. If a time has also been selected, apply its hours and minutes.
+      if (selectedTime) {
+        combinedDateTime.setHours(selectedTime.getHours());
+        combinedDateTime.setMinutes(selectedTime.getMinutes());
+      }
+
+      // 4. Convert the final, combined Date object into the standard ISO string.
+      dueDateTimeISO = combinedDateTime.toISOString();
+    }
+    // --- MODIFICATION END ---
+
+    const formattedTimestamp = new Intl.DateTimeFormat('en-GB', {
+      day: '2-digit',
+      month: '2-digit',
+      year: 'numeric',
+      hour: '2-digit',
+      minute: '2-digit',
+      hour12: true,
+    }).format(new Date());
+
+    // Create the newTask object with the single `dueDateTime` property
+    const newTask: NewTask = {
+      task: task.trim(),
+      timestamp: formattedTimestamp,
+      DueDateObject: dueDateTimeISO, // The new, single property for the deadline
+      completed: false,
+      isSynced: false, // initially not synced
+      success: () => {
+        console.log('Task inserted successfully into DB');
+        onCreate();
+        resetForm();
+      },
+      error: err => {
+        console.error('Failed to insert task:', err);
+        Alert.alert('Error', 'Could not save task.');
+      },
+    };
+
+    insertTask(newTask);
   };
+
 
   const resetForm = () => {
     setTask('');
@@ -178,24 +193,7 @@ const AddTaskModal = ({ isVisible, onClose, onCreate }: Props) => {
 
         <Button title="Create Task" onPress={handleCreate} />
 
-        {/* Category Selector */}
-        {/* <TouchableOpacity
-                    onPress={() => setCategoryModalVisible(true)}
-                    style={styles.row}
-                >
-                    <Ionicons name="funnel-outline" size={22} color="black" />
-                    <Text style={styles.rowText}>{selectedCategory}</Text>
-                </TouchableOpacity>
 
-                <CategoryPopup
-                    visible={categoryModalVisible}
-                    onClose={() => setCategoryModalVisible(false)}
-                    onSelect={(cat) => {
-                        setSelectedCategory(cat);
-                        setCategoryModalVisible(false);
-                    }}
-                    categories={categoryOptions}
-                /> */}
         {/* Take Photo */}
         <TouchableOpacity
           onPress={() => setCameraModalVisible(true)}
