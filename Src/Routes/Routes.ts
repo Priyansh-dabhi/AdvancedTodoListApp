@@ -11,7 +11,7 @@ export type AppStackParamList = {
     Temperary:undefined
     EditProfile:undefined
     Map:undefined
-    EditTask:{taskId: number; taskItem?: string }
+    EditTask:undefined
 }
 
 const Routes =  {
