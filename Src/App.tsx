@@ -10,6 +10,7 @@ import { GestureHandlerRootView } from 'react-native-gesture-handler';
 // import { createTables, getDBConnection } from './DB/Database';
 import SQLite from 'react-native-sqlite-storage'
 import { initDB } from './DB/Database';
+import { TaskProvider } from './Context/TaskContext';
 
 // const AppInner = () => {
   //   const { isLoggedIn, setIsLoggedIn } = useContext(AuthContext);
@@ -44,9 +45,11 @@ function App() {
     //   <AppInner />
     // </AuthProvider>
     <AuthProvider>
-      <NavigationContainer>
-        <AppStack/>
-      </NavigationContainer>
+      <TaskProvider>
+        <NavigationContainer>
+          <AppStack/>
+        </NavigationContainer>
+      </TaskProvider>
     </AuthProvider>
 
   );
