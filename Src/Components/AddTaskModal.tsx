@@ -127,7 +127,6 @@ const AddTaskModal = ({ isVisible, onClose, onCreate }: Props) => {
     insertTask(newTask);
   };
 
-
   const resetForm = () => {
     setTask('');
     setSelectedCategory('No Category');
@@ -192,7 +191,6 @@ const AddTaskModal = ({ isVisible, onClose, onCreate }: Props) => {
         />
 
         <Button title="Create Task" onPress={handleCreate} />
-
 
         {/* Take Photo */}
         <TouchableOpacity
