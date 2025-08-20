@@ -27,7 +27,6 @@ type Props = {
 };
 
 const EditTask = () => {
-
   const navigation = useNavigation<any>();
   // context
   const { selectedTask } = useTaskContext();
@@ -43,35 +42,34 @@ const EditTask = () => {
   const [showImageModal, setShowImageModal] = useState(false);
   const [cameraModalVisible, setCameraModalVisible] = useState(false);
 
-
   useEffect(() => {
-  if (selectedTask) {
-    setTask(selectedTask.task || '');
-    setDescription(selectedTask.description || '');
+    if (selectedTask) {
+      setTask(selectedTask.task || '');
+      setDescription(selectedTask.description || '');
 
-    if (selectedTask.dueDateTime) {
-      const iso = new Date(selectedTask.dueDateTime);
+      if (selectedTask.dueDateTime) {
+        const iso = new Date(selectedTask.dueDateTime);
 
-      if (!isNaN(iso.getTime())) {
-        // Split into two states
-        setDueDate(new Date(
-          iso.getFullYear(),
-          iso.getMonth(),
-          iso.getDate()
-        ));
+        if (!isNaN(iso.getTime())) {
+          // Split into two states
+          setDueDate(
+            new Date(iso.getFullYear(), iso.getMonth(), iso.getDate()),
+          );
 
-        setDueTime(new Date(
-          0, 0, 0, // reset date part
-          iso.getHours(),
-          iso.getMinutes()
-        ));
+          setDueTime(
+            new Date(
+              0,
+              0,
+              0, // reset date part
+              iso.getHours(),
+              iso.getMinutes(),
+            ),
+          );
+        }
       }
     }
-  }
-  // console.log('Selected task:', selectedTask.dueDateTime);
-}, [selectedTask]);
-
-
+    // console.log('Selected task:', selectedTask.dueDateTime);
+  }, [selectedTask]);
 
   const saveTask = () => {
     // This is the reverse process: combine the UI states back into one string for saving.
@@ -84,19 +82,19 @@ const EditTask = () => {
       }
       dueDateTimeISO = combinedDateTime.toISOString();
     }
-    
+
     const updatedTask = {
       task,
       description,
-      dueDateTime : dueDateTimeISO, // The single value to save to the database
+      dueDateTime: dueDateTimeISO, // The single value to save to the database
       // reminder,
       // photo,
     };
-    
+
     updateTask(selectedTask?.id || 0, updatedTask, () => {
-    console.log('Updated task ready to be saved:', updatedTask);
+      console.log('Updated task ready to be saved:', updatedTask);
     });
-  }  
+  };
   return (
     <ScrollView style={styles.container} keyboardShouldPersistTaps="handled">
       {/* Title */}
@@ -233,7 +231,12 @@ const EditTask = () => {
       </Modal>
 
       {/* Save Button */}
-      <TouchableOpacity style={styles.saveBtn} onPress={()=> {saveTask(), navigation.navigate(Routes.TabHome)}}>
+      <TouchableOpacity
+        style={styles.saveBtn}
+        onPress={() => {
+          (saveTask(), navigation.navigate(Routes.TabHome));
+        }}
+      >
         <Icon
           name="save-outline"
           size={20}
@@ -251,7 +254,7 @@ export default EditTask;
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: '#eef1f5',
+    backgroundColor: '#F8F9FA',
     padding: 16,
   },
   label: {
@@ -262,7 +265,7 @@ const styles = StyleSheet.create({
     color: '#555',
   },
   input: {
-    backgroundColor: '#fff',
+    backgroundColor: '#FFFFFF',
     borderRadius: 8,
     paddingHorizontal: 14,
     paddingVertical: 10,
