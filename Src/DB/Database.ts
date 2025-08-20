@@ -100,7 +100,7 @@ export const insertTask = (task: NewTask) => {
         [
             task.task,
             task.timestamp || '',
-            task.DueDateObject || '', // Use the new single property
+            task.dueDateTime || '', // Use the new single property
             task.completed ? 1 : 0,
             task.isSynced ? 1 : 0,
         ],
@@ -116,6 +116,30 @@ export const insertTask = (task: NewTask) => {
     });
 };
 
+// update
+export const updateTask = (
+    id: number,
+    updatedTask: Partial<Task>,
+    success?: () => void,
+    error?: (err: any) => void
+) => {
+    const { task, description, dueDateTime } = updatedTask;
+    db.transaction(tx => {
+        tx.executeSql(
+            `UPDATE tasks SET task = ?, description = ?, dueDateTime = ?, isSynced = 0 WHERE id = ?`,
+            [task, description, dueDateTime, id],
+            (_, result) => {
+                console.log(`Task with id ${id} updated successfully`);
+                success?.();
+            },
+            (_, err) => {
+                console.error(`Failed to update task with id ${id}:`, err);
+                error?.(err);
+                return true; // Propagate the error
+            }
+        );
+    });
+};
 // delete
 export const deleteTask = (
     id: number,
