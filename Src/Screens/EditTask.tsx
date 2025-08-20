@@ -292,7 +292,7 @@ const styles = StyleSheet.create({
   photoBtn: {
     flexDirection: 'row',
     alignItems: 'center',
-    backgroundColor: '#6c63ff',
+    backgroundColor: '#4A90E2',
     paddingVertical: 10,
     paddingHorizontal: 14,
     borderRadius: 8,
@@ -332,7 +332,7 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     alignItems: 'center',
     justifyContent: 'center',
-    backgroundColor: '#6c63ff',
+    backgroundColor: '#4A90E2',
     paddingVertical: 14,
     borderRadius: 8,
     marginTop: 24,

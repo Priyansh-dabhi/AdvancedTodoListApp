@@ -152,7 +152,7 @@ const Home = () => {
             <Icon
               name="search"
               size={30}
-              color="#FF6B6B"
+              color="#4A90E2"
               style={{ marginRight: 8, marginLeft: 8 }}
             />
           </TouchableOpacity>
@@ -201,7 +201,7 @@ const Home = () => {
             <View style={styles.taskCard}>
               <View style={{ alignItems: 'center', justifyContent: 'center' }}>
                 <BouncyCheckbox
-                  fillColor="#FF6B6B"
+                  fillColor="#4A90E2"
                   isChecked={item.completed}
                   onPress={() => handleTaskDeleteOnCheckboxPress(item.id)}
                 />
@@ -247,7 +247,8 @@ const styles = StyleSheet.create({
     height: '100%',
     // justifyContent: 'center',
     // alignItems: 'center',
-    backgroundColor: '#fff',
+    // backgroundColor: '#fff',
+    backgroundColor: '#F8F9FA',
   },
   headerContainer: {
     borderWidth: 1,
@@ -255,7 +256,8 @@ const styles = StyleSheet.create({
     paddingTop: 45,
     paddingBottom: 20,
     paddingHorizontal: 20,
-    backgroundColor: '#FF6B6B',
+    // backgroundColor: '#FF6B6B',
+    backgroundColor: '#4A90E2',
     // flexDirection: 'row',
     flexDirection: 'column',
     // justifyContent: 'center',
@@ -270,11 +272,11 @@ const styles = StyleSheet.create({
   welcomeText: {
     fontSize: 20,
     fontWeight: '600',
-    color: '#333',
+    color: '#2D3748',
   },
   usernameText: {
     fontSize: 14,
-    color: '#333  ',
+    color: '#718096  ',
     marginTop: 2,
   },
   // Search bar styles
@@ -347,8 +349,8 @@ const styles = StyleSheet.create({
     position: 'absolute',
     right: 20,
     bottom: 30,
-    // backgroundColor: '#1E90FF',
-    backgroundColor: '#FF6B6B',
+    backgroundColor: '#4A90E2',
+    // backgroundColor: '#FF6B6B',
     width: 70,
     height: 70,
     borderRadius: 35, // Half of width/height
@@ -363,7 +365,7 @@ const styles = StyleSheet.create({
     borderRadius: 10,
     padding: 15,
     marginBottom: 15,
-    backgroundColor: '#f9f9f9',
+    backgroundColor: '#FFFFFF',
     // shadowColor: '#000',
     // shadowOffset: { width: 0, height: 2 },
     // shadowOpacity: 0.1,

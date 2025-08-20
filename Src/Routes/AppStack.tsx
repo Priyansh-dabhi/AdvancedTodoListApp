@@ -171,6 +171,7 @@ import icons from '@/constants/icons'
           name={Routes.EditTask}
           component={EditTask} 
           options={{
+            headerStyle:{backgroundColor:'#4A90E2'},
             headerLeft: () => (
               <TouchableOpacity onPress={() => navigation.goBack()}>
                 <Image
