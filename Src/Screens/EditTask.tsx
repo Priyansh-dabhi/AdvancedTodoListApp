@@ -46,8 +46,8 @@ const EditTask = () => {
     setTitle(selectedTask.task || '');
     setDescription(selectedTask.description || '');
 
-    if (selectedTask.DueDateObject) {
-      const iso = new Date(selectedTask.DueDateObject);
+    if (selectedTask.dueDateTime) {
+      const iso = new Date(selectedTask.dueDateTime);
 
       if (!isNaN(iso.getTime())) {
         // Split into two states
@@ -65,6 +65,7 @@ const EditTask = () => {
       }
     }
   }
+  // console.log('Selected task:', selectedTask.dueDateTime);
 }, [selectedTask]);
 
 
