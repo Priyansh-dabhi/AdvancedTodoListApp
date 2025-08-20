@@ -15,10 +15,11 @@ import {
 import Icon from 'react-native-vector-icons/Ionicons';
 import DateTimePicker from '@react-native-community/datetimepicker';
 import CameraAndGallery from '../Components/CameraAndGallery';
-import { AppStackParamList } from '../Routes/Routes';
-import { RouteProp } from '@react-navigation/native';
+import Routes, { AppStackParamList } from '../Routes/Routes';
+import { RouteProp, useNavigation } from '@react-navigation/native';
 // Context
 import { useTaskContext } from '../Context/TaskContext';
+import { updateTask } from '../DB/Database';
 
 type EditTaskRouteProp = RouteProp<AppStackParamList, 'EditTask'>;
 type Props = {
@@ -26,10 +27,12 @@ type Props = {
 };
 
 const EditTask = () => {
+
+  const navigation = useNavigation<any>();
   // context
   const { selectedTask } = useTaskContext();
 
-  const [title, setTitle] = useState('');
+  const [task, setTask] = useState('');
   const [description, setDescription] = useState('');
   const [dueDate, setDueDate] = useState(new Date());
   const [duetime, setDueTime] = useState(new Date());
@@ -43,7 +46,7 @@ const EditTask = () => {
 
   useEffect(() => {
   if (selectedTask) {
-    setTitle(selectedTask.task || '');
+    setTask(selectedTask.task || '');
     setDescription(selectedTask.description || '');
 
     if (selectedTask.dueDateTime) {
@@ -72,7 +75,7 @@ const EditTask = () => {
 
   const saveTask = () => {
     // This is the reverse process: combine the UI states back into one string for saving.
-    let dueDateTimeISO: string | null = null;
+    let dueDateTimeISO: string | undefined = undefined;
     if (dueDate) {
       const combinedDateTime = new Date(dueDate);
       if (duetime) {
@@ -83,27 +86,25 @@ const EditTask = () => {
     }
     
     const updatedTask = {
-      title,
+      task,
       description,
-      dueDateTime: dueDateTimeISO, // The single value to save to the database
-      reminder,
-      photo,
+      dueDateTime : dueDateTimeISO, // The single value to save to the database
+      // reminder,
+      // photo,
     };
     
+    updateTask(selectedTask?.id || 0, updatedTask, () => {
     console.log('Updated task ready to be saved:', updatedTask);
-    
-    // Later: call your database update function here, e.g.,
-    // updateTaskInDB(selectedTask.id, updatedTask);
-  };
-  
+    });
+  }  
   return (
     <ScrollView style={styles.container} keyboardShouldPersistTaps="handled">
       {/* Title */}
       <Text style={styles.label}>Task Title</Text>
       <TextInput
         style={styles.input}
-        value={title}
-        onChangeText={setTitle}
+        value={task}
+        onChangeText={setTask}
         placeholder="Enter task title"
         placeholderTextColor="#aaa"
       />
@@ -232,7 +233,7 @@ const EditTask = () => {
       </Modal>
 
       {/* Save Button */}
-      <TouchableOpacity style={styles.saveBtn} onPress={saveTask}>
+      <TouchableOpacity style={styles.saveBtn} onPress={()=> {saveTask(), navigation.navigate(Routes.TabHome)}}>
         <Icon
           name="save-outline"
           size={20}
