@@ -110,7 +110,7 @@ const AddTaskModal = ({ isVisible, onClose, onCreate }: Props) => {
     const newTask: NewTask = {
       task: task.trim(),
       timestamp: formattedTimestamp,
-      DueDateObject: dueDateTimeISO, // The new, single property for the deadline
+      dueDateTime: dueDateTimeISO, // The new, single property for the deadline
       completed: false,
       isSynced: false, // initially not synced
       success: () => {
