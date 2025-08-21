@@ -214,7 +214,8 @@ const Home = () => {
           </TouchableOpacity>
         )}
         contentContainerStyle={{
-          height: '100%',
+          flexGrow: 1,
+          // height: '100%',
           width: '100%',
           padding: 10,
 
@@ -377,6 +378,7 @@ const styles = StyleSheet.create({
     // paddingVertical: 4,
   },
   flatList: {
+    flex: 1,
     height: '100%',
     width: '100%',
     // backgroundColor: 'yellow',
