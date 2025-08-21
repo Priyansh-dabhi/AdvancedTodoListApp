@@ -110,6 +110,7 @@ const AppStack = () => {
   const navigation = useNavigation<any>();
   return (
     <Stack.Navigator
+      initialRouteName='TabHome'
       screenOptions={{
         headerTitleAlign: 'center',
         headerShown: true,
