@@ -234,7 +234,10 @@ const EditTask = () => {
       <TouchableOpacity
         style={styles.saveBtn}
         onPress={() => {
-          (saveTask(), navigation.navigate(Routes.TabHome));
+          (saveTask(), navigation.reset({
+            index: 0,
+            routes: [{name: Routes.TabHome }],
+          }));
         }}
       >
         <Icon
