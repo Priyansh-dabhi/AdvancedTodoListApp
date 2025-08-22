@@ -128,7 +128,7 @@ const Home = () => {
                     </ScrollView> */}
       <View style={styles.headerContainer}>
         <View style={styles.headerLeft}>
-          <Text style={styles.welcomeText}>{greeting} 👋</Text>
+          <Text style={styles.welcomeText}>{greeting} 📝</Text>
           <Text style={styles.usernameText}>Let's manage your tasks!</Text>
         </View>
 
