@@ -1,6 +1,8 @@
 // import { Linking } from 'react-native';
 // import InAppBrowser from 'react-native-inappbrowser-reborn';
-import { Client, Account, ID, Databases, Storage, Query } from 'appwrite';
+import { Client, Account, ID, Databases, Storage, Query,  } from 'appwrite';
+import { useEffect,useState } from 'react';
+import { Platform } from 'react-native';
 import Snackbar from 'react-native-snackbar';
 import { OAuthProvider } from 'appwrite';
 import {APPWRITE_ENDPOINT,APPWRITE_PROJECT_ID,APPWRITE_DATABASE_ID,APPWRITE_COLLECTION_ID,APPWRITE_BUCKET_ID} from '@env';
@@ -8,15 +10,29 @@ import {APPWRITE_ENDPOINT,APPWRITE_PROJECT_ID,APPWRITE_DATABASE_ID,APPWRITE_COLL
 // console.log('Endpoint:', `'${APPWRITE_ENDPOINT}'`, 'Length:', APPWRITE_ENDPOINT.length);
 // console.log('Project ID:', `'${APPWRITE_PROJECT_ID}'`, 'Length:', APPWRITE_PROJECT_ID.length);
 
-const client = new Client();
+export const client = new Client();
 client
   .setEndpoint(APPWRITE_ENDPOINT.trim()) 
   .setProject(APPWRITE_PROJECT_ID.trim());
 
+  // setting platform for Appwrite client
+// switch (Platform.OS) {
+//   case 'android':
+//     client.setPlat // Use only on Android emulators, not in production
+//     break;
+//   // case 'ios':
+//   //   // iOS-specific settings if needed
+//   //   break;
+//   // case 'web':
+//   //   // Web-specific settings if needed
+//   //   break;
+//   default:
+//     break;
+// }
   // Authentication
   // instance of Account class which provides below methods
-const account = new Account(client);
-const databases = new Databases(client);
+export const account = new Account(client);
+export const databases = new Databases(client);
 type createUserAccount = {
   name:string;
   email:string;
@@ -61,6 +77,7 @@ export const login = async ({email, password}:loginUser) => {
 export const getCurrentUser = async () => {
   try{
     const user = await account.get();
+    // console.log('Current User:', user.$id,user.email);
     return user;
     
   }catch (error){
@@ -123,42 +140,42 @@ const storage = new Storage(client);
 
 // helper function to upload image to Appwrite Storage [we are using MIME type to determine the file type]
 
-export const uploadImage = async (fileUri: string) => {
-  try{
-        const fileId:string = ID.unique();
+// export const uploadImage = async (fileUri: string) => {
+//   try{
+//         const fileId:string = ID.unique();
 
-    // Get the file type from the URI's extension
-        let fileType = 'image/jpeg'; // Default to JPEG
-        if (fileUri.endsWith('.png')) {
-            fileType = 'image/png';
-        } else if (fileUri.endsWith('.gif')) {
-            fileType = 'image/gif';
-        }else if (fileUri.endsWith('.jpg')) {
-            fileType = 'image/jpg';
-        }
+//     // Get the file type from the URI's extension
+//         let fileType = 'image/jpeg'; // Default to JPEG
+//         if (fileUri.endsWith('.png')) {
+//             fileType = 'image/png';
+//         } else if (fileUri.endsWith('.gif')) {
+//             fileType = 'image/gif';
+//         }else if (fileUri.endsWith('.jpg')) {
+//             fileType = 'image/jpg';
+//         }
 
-        // The file object now has the correct MIME type
-        const fileToUpload = {
-          uri: fileUri,
-          // name: `${fileId}.jpg`,
-          name: fileId,
-          type: fileType,
-        }as any;
-        const response =  await storage.createFile(
-            APPWRITE_BUCKET_ID,
-            fileId,
-            fileToUpload
-        );
-        const fileUrl = storage.getFileView(APPWRITE_BUCKET_ID,response.$id);
-  }catch (error) {
-        console.error('Error uploading image:', error);
-        Snackbar.show({
-            text: 'Failed to upload photo.',
-            duration: Snackbar.LENGTH_SHORT,
-        });
-        return null;
-    }
-}
+//         // The file object now has the correct MIME type
+//         const fileToUpload = {
+//           uri: fileUri,
+//           // name: `${fileId}.jpg`,
+//           name: fileId,
+//           type: fileType,
+//         }as any;
+//         const response =  await storage.createFile(
+//             APPWRITE_BUCKET_ID,
+//             fileId,
+//             fileToUpload
+//         );
+//         const fileUrl = storage.getFileView(APPWRITE_BUCKET_ID,response.$id);
+//   }catch (error) {
+//         console.error('Error uploading image:', error);
+//         Snackbar.show({
+//             text: 'Failed to upload photo.',
+//             duration: Snackbar.LENGTH_SHORT,
+//         });
+//         return null;
+//     }
+// }
 
 // A new function in your service file
 
