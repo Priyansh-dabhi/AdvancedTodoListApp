@@ -129,14 +129,62 @@ export const logout = async () =>{
 
 // --- New database-related functions ---
 
-export const DATABASE_ID = "<APPWRITE_DATABASE_ID>";
-export const COLLECTION_ID = "<APPWRITE_COLLECTION_ID>";
+export const DATABASE_ID = APPWRITE_DATABASE_ID;
+export const COLLECTION_ID = APPWRITE_COLLECTION_ID;
 
 console.log('DB_ID:', `'${APPWRITE_DATABASE_ID}'`, 'Length:', APPWRITE_DATABASE_ID.length);
 console.log('COLLECTION ID:', `'${APPWRITE_COLLECTION_ID}'`, 'Length:', APPWRITE_COLLECTION_ID.length);
 console.log('Bucket ID:', `'${APPWRITE_BUCKET_ID}'`, 'Length:', APPWRITE_BUCKET_ID.length);
 
 const storage = new Storage(client);
+
+
+
+// Add Task
+export const addTask = async (taskData: {
+  task: string;
+  description: string;
+  dueDateTime: string;
+  completed: boolean;
+  timestamp: string;
+  userId: string;
+}) => {
+  try {
+    const res = await databases.createDocument(
+      DATABASE_ID,
+      COLLECTION_ID,
+      ID.unique(),
+      taskData
+    );
+    return res; // return the created document
+  } catch (error) {
+    console.error("Appwrite addTask error:", error);
+    throw error; // let UI handle the error
+  }
+};
+
+// Update Task
+export async function updateTask(docId: string, taskData: Partial<typeof addTask>) {
+  return await databases.updateDocument(
+    DATABASE_ID,
+    COLLECTION_ID,
+    docId,
+    taskData
+  );
+}
+
+// Delete Task
+export async function deleteTask(docId: string) {
+  return await databases.deleteDocument(DATABASE_ID, COLLECTION_ID, docId);
+}
+
+// Get All Tasks for User
+export async function getTasks(userId: string) {
+  return await databases.listDocuments(DATABASE_ID, COLLECTION_ID, [
+    Query.equal("userId", userId)
+  ]);
+}
+
 
 // helper function to upload image to Appwrite Storage [we are using MIME type to determine the file type]
 
