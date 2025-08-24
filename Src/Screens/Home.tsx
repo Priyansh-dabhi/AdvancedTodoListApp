@@ -13,9 +13,10 @@ import {
 import BouncyCheckbox from 'react-native-bouncy-checkbox';
 import React, { useContext, useEffect, useState } from 'react';
 import { AuthContext } from '../Context/AppwriteContext';
-import { getCurrentUser, logout } from '../Service/Service';
+import { getCurrentUser, getTasks, logout } from '../Service/Service';
 import { ScrollView, TextInput } from 'react-native-gesture-handler';
 import DateTimePicker from '@react-native-community/datetimepicker';
+import images from '@/constants/images';
 // Icons & task library:
 import Icon from 'react-native-vector-icons/Ionicons';
 import AddTaskModal from '../Components/AddTaskModal';
@@ -29,8 +30,12 @@ import { deleteTask } from '../DB/Database';
 // context
 import { useTaskContext } from '../Context/TaskContext';
 import { TaskContext } from '../Context/TaskContext';
-import images from '@/constants/images';
+import { useAuth } from '../Context/AppwriteContext';
+
 const Home = () => {
+  //context
+  const {user} = useAuth();
+
   const navigation = useNavigation<any>();
   //Greeting the user
   const [greeting, setGreeting] = useState('');
@@ -59,6 +64,28 @@ const Home = () => {
       setGreeting('Good Evening');
     }
   }, []);
+  // Appwrite 
+
+  useEffect(() => {
+  if (user) {
+    getTasks(user.$id).then((res) => {
+      const mappedTasks: Task[] = res.documents.map((doc) => ({
+        id: Number(doc.$id), // Appwrite document id
+        task: doc.task,
+        timestamp: doc.timestamp,
+        description: doc.description,
+        dueDateTime: doc.dueDateTime,
+        completed: doc.completed === 1 || doc.completed === true, // normalize to boolean
+        isSynced: doc.isSynced ?? 0,
+      }));
+      setTasks(mappedTasks);
+    });
+
+    console.log('User in Home:', user);
+  } else {
+    console.log('No user logged in');
+  }
+}, [user]);
 
   // Fetch tasks from DB
   const fetchTasksFromDB = () => {
