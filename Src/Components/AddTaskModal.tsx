@@ -28,6 +28,10 @@ import CameraAndGallery from './CameraAndGallery';
 // DB
 import { insertTask } from '../DB/Database';
 
+// Context for user
+import { useAuth } from '../Context/AppwriteContext';
+import { addTask } from '../Service/Service';
+
 type Props = {
   isVisible: boolean;
   onClose: () => void;
@@ -35,6 +39,10 @@ type Props = {
 };
 
 const AddTaskModal = ({ isVisible, onClose, onCreate }: Props) => {
+  
+  // auth context custom hook call
+  const {user} = useAuth();
+  
   // Navigation to map
   const navigation = useNavigation<any>();
 
@@ -70,7 +78,10 @@ const AddTaskModal = ({ isVisible, onClose, onCreate }: Props) => {
     'No Category',
   ];
 
-  const handleCreate = () => {
+  const handleCreate = async() => {
+
+    if(!user) return Alert.alert('User not logged in');
+
     if (task.trim() === '') {
       Alert.alert('Task title is required');
       return;
@@ -90,6 +101,8 @@ const AddTaskModal = ({ isVisible, onClose, onCreate }: Props) => {
       if (selectedTime) {
         combinedDateTime.setHours(selectedTime.getHours());
         combinedDateTime.setMinutes(selectedTime.getMinutes());
+        combinedDateTime.setSeconds(0);      // reset seconds
+        combinedDateTime.setMilliseconds(0); // reset ms
       }
 
       // 4. Convert the final, combined Date object into the standard ISO string.
@@ -105,6 +118,26 @@ const AddTaskModal = ({ isVisible, onClose, onCreate }: Props) => {
       minute: '2-digit',
       hour12: true,
     }).format(new Date());
+
+    // Appwrite DB insertion
+    try {
+      const res = await addTask({
+        task,
+        description: '',
+        dueDateTime: dueDateTimeISO,
+        completed: false,
+        timestamp: formattedTimestamp,
+        userId: user.$id,
+      });
+
+      console.log('Task inserted successfully into Appwrite DB:', res);
+      onCreate();
+      resetForm();
+    } catch (err) {
+      console.error('Failed to insert task in Appwrite:', err);
+      Alert.alert('Error', 'Could not save task in Appwrite.');
+    }
+
 
     // Create the newTask object with the single `dueDateTime` property
     const newTask: NewTask = {
@@ -172,6 +205,10 @@ const AddTaskModal = ({ isVisible, onClose, onCreate }: Props) => {
       isVisible={isVisible}
       onBackdropPress={handleModalClose}
       backdropOpacity={0.5}
+      animationIn={'fadeInUp'}
+      animationOut={'slideOutDown'}
+      useNativeDriverForBackdrop={true} // Use native driver for better performance
+      // hideModalContentWhileAnimating={true} // Hide content while animating
       style={styles.modal}
       onModalHide={() => {
         if (navigateToMap) {
