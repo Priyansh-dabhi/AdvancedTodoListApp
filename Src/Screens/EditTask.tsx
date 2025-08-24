@@ -66,6 +66,9 @@ const EditTask = () => {
             ),
           );
         }
+      }else{
+        setDueDate(new Date());
+        setDueTime(new Date());
       }
     }
     // console.log('Selected task:', selectedTask.dueDateTime);
