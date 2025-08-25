@@ -21,10 +21,36 @@ import gettingUserName, {
   gettingUserEmail,
 } from '../Components/GettingUserDetail';
 
+
 // type ProfileProp = NativeStackScreenProps<AppStackParamList,'Profile'>;
 
 const Profile = () => {
-  const navigation = useNavigation<any>();
+  const [username, setUsername] = useState('');
+    const { setIsLoggedIn } = useContext(AuthContext);
+    const navigation = useNavigation<any>();
+    
+      // handling logout
+        const handleLogout = async () => {
+            try {
+            await logout();
+            setIsLoggedIn(false);
+            Snackbar.show({
+                text: 'Logged out successfully!',
+                duration: Snackbar.LENGTH_SHORT,
+            });
+            navigation.reset({
+                index: 0,
+                routes: [{name: Routes.Login}],
+            })
+            } catch (err) {
+            console.log('Logout Error:', err);
+            Snackbar.show({
+                text: 'Logout failed',
+                duration: Snackbar.LENGTH_SHORT,
+            });
+            }
+        };
+
   const user = {
     name: gettingUserName(),
     email: gettingUserEmail(),
@@ -92,7 +118,7 @@ const Profile = () => {
         </View>
 
         {/* Logout */}
-        <TouchableOpacity style={styles.logoutButton}>
+        <TouchableOpacity style={styles.logoutButton} onPress={handleLogout}>
           <Ionicons name="log-out-outline" size={20} color="#fff" />
           <Text style={styles.logoutText}>Logout</Text>
         </TouchableOpacity>
