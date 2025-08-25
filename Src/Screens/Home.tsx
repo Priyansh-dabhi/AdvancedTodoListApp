@@ -34,7 +34,7 @@ import { useAuth } from '../Context/AppwriteContext';
 
 const Home = () => {
   //context
-  const {user} = useAuth();
+  const {user, isLoggedIn} = useAuth();
 
   const navigation = useNavigation<any>();
   //Greeting the user
@@ -67,7 +67,9 @@ const Home = () => {
   // Appwrite 
 
   useEffect(() => {
-  if (user) {
+  if (!user) {
+    console.log("User is still loading or not found");
+  } else {
     getTasks(user.$id).then((res) => {
       const mappedTasks: Task[] = res.documents.map((doc) => ({
         id: Number(doc.$id), // Appwrite document id
@@ -80,11 +82,13 @@ const Home = () => {
       }));
       setTasks(mappedTasks);
     });
-
+    console.log('isLoggedIn:', isLoggedIn); 
     console.log('User in Home:', user);
-  } else {
-    console.log('No user logged in');
-  }
+  } 
+  // else {
+  //   console.log('isLoggedIn:', isLoggedIn); 
+  //   console.log('No user logged in');
+  // }
 }, [user]);
 
   // Fetch tasks from DB
