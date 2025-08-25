@@ -110,7 +110,7 @@ const AppStack = () => {
   const navigation = useNavigation<any>();
   return (
     <Stack.Navigator
-      initialRouteName='TabHome'
+      initialRouteName= {Routes.Login}
       screenOptions={{
         headerTitleAlign: 'center',
         headerShown: true,
@@ -135,8 +135,28 @@ const AppStack = () => {
         }}
       />
 
-      <Stack.Screen name={Routes.Login} component={Login} />
-      <Stack.Screen name={Routes.Signup} component={Signup} />
+      <Stack.Screen 
+        name={Routes.Login}
+        component={Login} 
+        options={{
+          headerStyle: {
+            backgroundColor: '#4A90E2',
+          },
+          
+          headerShown: true,
+        }}
+        />
+      <Stack.Screen 
+        name={Routes.Signup}
+        component={Signup} 
+        options={{
+          headerStyle: {
+            backgroundColor: '#4A90E2',
+          },
+          
+          headerShown: true,
+        }}
+        />
       <Stack.Screen
         name={Routes.EditProfile}
         component={EditProfile}
