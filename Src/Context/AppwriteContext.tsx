@@ -21,6 +21,8 @@ export const AuthContext = createContext<AuthContextType>({
 export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
   const [isLoggedIn, setIsLoggedIn] = useState(false);
   const [user, setUser] = useState<Models.User | null>(null);
+  const [loading, setLoading] = useState(true);
+
   // Check user session on app start
   useEffect(() => {
     getCurrentUser().then((user) => {
@@ -31,12 +33,13 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
         setUser(null);
         setIsLoggedIn(false);
       }
+      setLoading(false);
     });
   }, []);
 
   return(
-    <AuthContext.Provider value={{isLoggedIn,setIsLoggedIn,user,setUser}}>
-        {children}
+    <AuthContext.Provider value={{isLoggedIn: !!user,setIsLoggedIn,user,setUser}}>
+        {loading? null : children}
     </AuthContext.Provider>
   );
 
