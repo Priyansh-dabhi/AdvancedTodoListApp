@@ -2,7 +2,7 @@ import { StyleSheet, Text, View, KeyboardAvoidingView, TextInput, Pressable, Pla
 import React, { useContext, useState } from 'react'
 import { AuthStackParamList } from '../Routes/AuthStack';
 import { NativeStackScreenProps } from '@react-navigation/native-stack';
-import { createAccount } from '../Service/Service'
+import { createAccount, login } from '../Service/Service'
 import Snackbar from 'react-native-snackbar';
 import { AuthContext } from '../Context/AppwriteContext';
 import Routes, { AppStackParamList } from '../Routes/Routes';
@@ -25,6 +25,7 @@ const usenavigation = useNavigation<any>();
 
 //Signup Logic Function
 
+// Signup Logic Function
 const handleSignup = async () => {
     setError('');
 
@@ -39,21 +40,38 @@ const handleSignup = async () => {
     }
 
     try {
+        // Step 1: Create user account
         const res = await createAccount({ name, email, password });
-        if (res) {
+
+        if (!res) {
+        setError('Signup failed. Try again');
+        return;
+        }
+
+        // Step 2: Immediately create session for auto-login
+        const session = await login({ email, password });
+
+        if (session) {
         setIsLoggedIn(true);
+        
         Snackbar.show({
             text: 'Signup successful!',
             duration: Snackbar.LENGTH_SHORT,
         });
+
+        usenavigation.reset({
+            index: 0,
+            routes: [{ name: Routes.TabHome }],
+        });
         } else {
-        setError('Signup failed. Try again');
+        setError('Could not start session after signup');
         }
     } catch (err) {
         console.log('Signup Error:', err);
         setError('Something went wrong');
     }
 };
+
 
 
 
