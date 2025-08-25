@@ -77,7 +77,7 @@ export const login = async ({email, password}:loginUser) => {
 export const getCurrentUser = async () => {
   try{
     const user = await account.get();
-    // console.log('Current User:', user.$id,user.email);
+    console.log('Current User:', user.$id,user.email);
     return user;
     
   }catch (error){
