@@ -31,7 +31,7 @@ const Temperary = () => {
             }
         };
     return (
-        <View>
+        <View style={{flex:1,justifyContent:'center',alignItems:'center'}}>
 
                     <Pressable style={styles.logoutBtn} onPress={()=> {navigation.navigate(Routes.Login)}}>
                         <Text style={styles.logoutText}>SignIn</Text>
