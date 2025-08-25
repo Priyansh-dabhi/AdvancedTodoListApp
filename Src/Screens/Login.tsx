@@ -42,11 +42,15 @@ const Login = () => {
         const session = await login({ email, password });
         if (session) {
           setIsLoggedIn(true);
+          console.log(setIsLoggedIn);
           Snackbar.show({
             text: 'Login successful!',
             duration: Snackbar.LENGTH_SHORT,
           });
-          usenavigation.navigate(Routes.DRAWER_HOME);
+          usenavigation.reset({
+            index: 0,
+            routes: [{name: Routes.TabHome}],
+          })
         } else {
           setError('Login Failed!');
         }
