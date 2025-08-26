@@ -129,7 +129,8 @@ const AddTaskModal = ({ isVisible, onClose, onCreate }: Props) => {
         timestamp: formattedTimestamp,
         userId: user.$id,
       });
-
+      
+      console.log('UserId:', user.$id);
       console.log('Task inserted successfully into Appwrite DB:', res);
       onCreate();
       resetForm();
