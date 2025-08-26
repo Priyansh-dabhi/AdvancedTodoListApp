@@ -21,6 +21,9 @@ import EditProfile from '../Screens/EditProfile';
 import Map from '../Screens/GoogleMaps/Map';
 import EditTask from '../Screens/EditTask';
 import icons from '@/constants/icons';
+// context
+import { useAuth } from '../Context/AppwriteContext';
+
 
 //Drawer component
 
@@ -107,10 +110,11 @@ const My_Tab = () => {
 const Stack = createNativeStackNavigator<AppStackParamList>();
 
 const AppStack = () => {
+  const {isLoggedIn} = useAuth();
   const navigation = useNavigation<any>();
   return (
     <Stack.Navigator
-      initialRouteName= {Routes.Login}
+      initialRouteName= {isLoggedIn ? Routes.TabHome : Routes.Login}
       screenOptions={{
         headerTitleAlign: 'center',
         headerShown: true,
