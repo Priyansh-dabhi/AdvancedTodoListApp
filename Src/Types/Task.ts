@@ -1,7 +1,7 @@
     // TaskInput:
 export type NewTask = Omit<Task, 'id'>
 export type Task = {
-    id: number;  
+    id: string;  
     task: string;  
     timestamp:string,        // or string if you use UUID
     // category?: [string];
