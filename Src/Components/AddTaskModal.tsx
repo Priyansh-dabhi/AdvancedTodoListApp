@@ -141,6 +141,7 @@ const handleCreate = async () => {
       dueDateTime: appwriteDocument.dueDateTime,
       completed: appwriteDocument.completed,
       isSynced: true, // It is synced because we just saved it.
+      userId: user.$id
     };
 
     // STEP C: Save the complete task object to the local SQLite database.
