@@ -181,11 +181,21 @@ export async function deleteTask(docId: string) {
 }
 
 // Get All Tasks for User
-export async function getTasks(userId: string) {
-  return await databases.listDocuments(DATABASE_ID, COLLECTION_ID, [
-    Query.equal("userId", userId)
-  ]);
-}
+export const getTasks = async (userId: string) => {
+  try {
+    const response = await databases.listDocuments(
+      DATABASE_ID,
+      COLLECTION_ID,
+      [
+        Query.equal('userId', userId) 
+      ]
+    );
+    return response;
+  } catch (error) {
+    console.error("Failed to fetch tasks:", error);
+    throw error;
+  }
+};
 
 
 // helper function to upload image to Appwrite Storage [we are using MIME type to determine the file type]
