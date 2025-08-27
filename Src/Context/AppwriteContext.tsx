@@ -1,6 +1,6 @@
-
-import React, { createContext, useContext, useState, useEffect } from "react";
-import { getCurrentUser } from "../Service/Service";
+import React, { createContext, useContext, useState, useEffect, useMemo } from "react";
+import { getCurrentUser, account } from "../Service/Service"; // Make sure to import account
+import { clearAllTasks } from "../db/database"; // Adjust path
 import { Models } from "appwrite";
 import { View, ActivityIndicator, StyleSheet } from 'react-native';
 
@@ -13,6 +13,7 @@ interface AuthContextType {
   setIsLoggedIn: (status: boolean) => void;
   user: UserType;
   setUser: (user: UserType) => void;
+  logout: () => Promise<void>;
 }
 
 // Create the context with default values
@@ -21,15 +22,15 @@ export const AuthContext = createContext<AuthContextType>({
   setIsLoggedIn: () => {},
   user: null,
   setUser: () => {},
+  logout: async () => {},
 });
 
 // Create the provider component
 export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
   const [isLoggedIn, setIsLoggedIn] = useState(false);
   const [user, setUser] = useState<UserType>(null);
-  const [isLoading, setIsLoading] = useState(true); // Renamed from 'loading' for clarity
+  const [isLoading, setIsLoading] = useState(true);
 
-  // Check user session on app start
   useEffect(() => {
     const checkUserSession = async () => {
       try {
@@ -46,16 +47,36 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
         setUser(null);
         setIsLoggedIn(false);
       } finally {
-        // This will run after the try/catch block is complete
         setIsLoading(false);
       }
     };
-
     checkUserSession();
   }, []);
 
-  // While the initial user check is running, show a loading screen.
-  // This prevents the rest of the app from rendering prematurely.
+  const handleLogout = async () => {
+    try {
+      await account.deleteSession('current');
+      await clearAllTasks();
+      setUser(null);
+      setIsLoggedIn(false);
+    } catch (error) {
+      console.error('Error during logout:', error);
+      setUser(null);
+      setIsLoggedIn(false);
+    }
+  };
+
+  // --- THIS IS THE FIX ---
+  // useMemo prevents a new object from being created on every render.
+  // This stabilizes the context value and stops the infinite loop.
+  const authContextValue = useMemo(() => ({
+    isLoggedIn,
+    setIsLoggedIn,
+    user,
+    setUser,
+    logout: handleLogout,
+  }), [isLoggedIn, user]); // The value only changes if isLoggedIn or user changes
+
   if (isLoading) {
     return (
       <View style={styles.loadingContainer}>
@@ -64,9 +85,8 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
     );
   }
 
-  // Once the check is complete, provide the auth values to the app.
   return (
-    <AuthContext.Provider value={{ isLoggedIn, setIsLoggedIn, user, setUser }}>
+    <AuthContext.Provider value={authContextValue}>
       {children}
     </AuthContext.Provider>
   );
@@ -80,5 +100,4 @@ const styles = StyleSheet.create({
     }
 })
 
-// Custom hook for easy access to the context
 export const useAuth = () => useContext(AuthContext);
