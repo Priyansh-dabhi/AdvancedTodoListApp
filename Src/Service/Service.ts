@@ -129,8 +129,8 @@ export const logout = async () =>{
 
 // --- New database-related functions ---
 
-export const DATABASE_ID = APPWRITE_DATABASE_ID;
-export const COLLECTION_ID = APPWRITE_COLLECTION_ID;
+export const DATABASE_ID = APPWRITE_DATABASE_ID.trim();
+export const COLLECTION_ID = APPWRITE_COLLECTION_ID.trim();
 
 console.log('DB_ID:', `'${APPWRITE_DATABASE_ID}'`, 'Length:', APPWRITE_DATABASE_ID.length);
 console.log('COLLECTION ID:', `'${APPWRITE_COLLECTION_ID}'`, 'Length:', APPWRITE_COLLECTION_ID.length);
@@ -150,6 +150,8 @@ export const addTask = async (taskData: {
   userId: string;
 }) => {
   try {
+    // console.log("DB ID:", DATABASE_ID);
+    // console.log("Collection ID:", COLLECTION_ID);
     const res = await databases.createDocument(
       DATABASE_ID,
       COLLECTION_ID,
