@@ -48,7 +48,8 @@ export const initDB = () => {
             description TEXT,
             dueDateTime TEXT, 
             completed INTEGER DEFAULT 0,
-            isSynced INTEGER DEFAULT 0
+            isSynced INTEGER DEFAULT 0,
+            userId TEXT
             )`,
             [],
             () => console.log('Database and table are ready.'),
@@ -58,10 +59,21 @@ export const initDB = () => {
             }
             );
     });
-
+    
   // This second transaction handles migrations for users who already have the app.
   // It ensures the new columns exist if the table was created with an older schema.
     db.transaction(tx => {
+        tx.executeSql(
+            `ALTER TABLE tasks ADD COLUMN userId TEXT`,
+            [],
+            () => console.log("Column 'userId' added successfully."),
+            (_, error) => {
+                if (!error.message.includes('duplicate column name')) {
+                console.error('Error adding userId column:', error);
+                }
+                return false;
+            }
+        );
     // Add 'description' column if it doesn't exist
         tx.executeSql(
         `ALTER TABLE tasks ADD COLUMN description TEXT`,
@@ -119,8 +131,8 @@ export const insertTask = (task: NewTask) => {
 export const insertOrUpdateTask = (task: Task) => {
     db.transaction(tx => {
         tx.executeSql(
-        `INSERT OR REPLACE INTO tasks (id, task, timestamp, description, dueDateTime, completed, isSynced)
-        VALUES (?, ?, ?, ?, ?, ?, ?)`,
+            `INSERT OR REPLACE INTO tasks (id, task, timestamp, description, dueDateTime, completed, isSynced, userId)
+            VALUES (?, ?, ?, ?, ?, ?, ?, ?)`,
         [
             task.id,
             task.task,
@@ -129,11 +141,57 @@ export const insertOrUpdateTask = (task: Task) => {
             task.dueDateTime,
             task.completed ? 1 : 0,
             task.isSynced ? 1 : 0,
+            task.userId,
         ]
+    );
+});
+};
+
+export const getAllTasksByUser = (
+    userId: string,
+    callback: (tasks: any[]) => void
+    ) => {
+    db.transaction(tx => {
+        tx.executeSql(
+        `SELECT * FROM tasks WHERE userId = ? ORDER BY id DESC`,
+        [userId],
+        (_, { rows }) => {
+            const tasksArray: any[] = [];
+            for (let i = 0; i < rows.length; i++) {
+            tasksArray.push(rows.item(i));
+            }
+            callback(tasksArray);
+        },
+        (_, error) => {
+            console.error('Error fetching tasks by userId:', error);
+            return false;
+        }
         );
     });
 };
 
+// new delete
+// Add this function to your database.ts file
+
+export const clearAllTasks = (): Promise<void> => {
+    return new Promise((resolve, reject) => {
+        db.transaction(tx => {
+        tx.executeSql(
+            `DELETE FROM tasks`, // This command deletes all rows from the table
+            [],
+            () => {
+            console.log('Local tasks table has been cleared.');
+            resolve();
+            },
+            (_, error) => {
+            console.error('Failed to clear tasks table:', error);
+            reject(error);
+            return false; // Stop the transaction
+            }
+        );
+        });
+    });
+};
 // update
 export const updateTask = (
     id: number,
@@ -212,17 +270,6 @@ export const updateTaskCompletion = ({
 };
 
 // get all tasks [used in home screen]
-export const getAllTasks = (callback: (tasks: any[]) => void) => {
-    db.transaction(tx => {
-        tx.executeSql(`SELECT * FROM tasks ORDER BY id DESC`, [], (_, { rows }) => {
-        const tasksArray = [];
-        for (let i = 0; i < rows.length; i++) {
-            tasksArray.push(rows.item(i));
-        }
-        callback(tasksArray);
-        });
-    });
-};
 
 // get all task by id
 export const getTaskById = (id: number): Promise<Task | null> => {
