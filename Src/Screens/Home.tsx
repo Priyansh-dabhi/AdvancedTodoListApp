@@ -9,9 +9,10 @@ import {
   Alert,
   Image,
   SafeAreaView,
+  RefreshControl,
 } from 'react-native';
 import BouncyCheckbox from 'react-native-bouncy-checkbox';
-import React, { useContext, useEffect, useState } from 'react';
+import React, { useCallback, useContext, useEffect, useState } from 'react';
 import { AuthContext } from '../Context/AppwriteContext';
 import { getCurrentUser, getTasks, logout } from '../Service/Service';
 import { ScrollView, TextInput } from 'react-native-gesture-handler';
@@ -23,9 +24,9 @@ import AddTaskModal from '../Components/AddTaskModal';
 //Task Types
 import { Task } from '../Types/Task';
 import Routes from '../Routes/Routes';
-import { useNavigation } from '@react-navigation/native';
+import { useFocusEffect, useNavigation } from '@react-navigation/native';
 //DB
-import { getAllTasks, updateTaskCompletion, insertOrUpdateTask } from '../DB/Database';
+import { getAllTasksByUser, updateTaskCompletion, insertOrUpdateTask } from '../DB/Database';
 import { deleteTask } from '../DB/Database';
 // context
 import { useTaskContext } from '../Context/TaskContext';
@@ -46,7 +47,9 @@ const Home = () => {
   const [tasks, setTasks] = useState<Task[]>([]);
   const [modalVisible, setModalVisible] = useState(false);
   const [searchQuery, setSearchQuery] = useState('');
-
+  
+  // pull to refresh
+  const [isRefreshing, setIsRefreshing] = useState(false);
   // clear serch query
   const clearText = () => {
     setSearchQuery('');
@@ -64,58 +67,86 @@ const Home = () => {
       setGreeting('Good Evening');
     }
   }, []);
+
+
   // Appwrite 
 
-  useEffect(() => {
-    const syncFromAppwrite = async () => {
-      if (!user) {
-        console.log("User is still loading or not found");
-      } else {
-        const res = await getTasks(user.$id);
-        console.log('Appwrite tasks fetched:', res);
-        const mappedTasks = res.documents.map((doc)=> ({
-          id: doc.$id,
-          task: doc.task,
-          timestamp: doc.timestamp,
-          description: doc.description,
-          dueDateTime: doc.dueDateTime,
-          completed: doc.completed === 1 || doc.completed === true,
-          isSynced:true,
-        }));
-        // Save each into SQLite
-        mappedTasks.forEach(task => {
-          insertOrUpdateTask(task); // implement upsert in SQLite
-        });
-        fetchTasksFromDB(); // Refresh UI
-      } 
+  // This is the main data synchronization effect.
+  // It depends on the 'user' object from the AuthContext.
+
+  const syncFromAppwrite = async () => {
+    // 1. Guard Clause: If the user object isn't available yet,
+    //    do nothing and exit the function. The effect will
+    //    automatically re-run when the user object arrives.
+    if (!user) {
+      console.log("Auth context is not ready yet. Waiting for user...");
+      return;
     }
-  // else {
-  //   console.log('isLoggedIn:', isLoggedIn); 
-  //   console.log('No user logged in');
-  // }
-  syncFromAppwrite();
-}, [user]);
 
-  // Fetch tasks from DB
-const fetchTasksFromDB = () => {
-  getAllTasks((fetchedTasks: any[]) => {
-    const normalizedTasks: Task[] = fetchedTasks.map(task => ({
-      ...task,
-      completed: task.completed === 1,   
-      isSynced: task.isSynced === 1,     
+    // 2. Fetch Data: By this point, we are guaranteed to have a user.
+    console.log(`User ${user.$id} is available. Fetching tasks from Appwrite.`);
+    const res = await getTasks(user.$id);
+
+    const mappedTasks = res.documents.map((doc) => ({
+      id: doc.$id,
+      task: doc.task,
+      timestamp: doc.timestamp,
+      description: doc.description,
+      dueDateTime: doc.dueDateTime,
+      completed: doc.completed === 1 || doc.completed === true,
+      isSynced: true,
+      userId: user.$id
     }));
-    setTasks(normalizedTasks);
-    console.log('Fetched Tasks from SQLite:', normalizedTasks);
-  });
-};
-  // fetchTasksFromDB
-  useEffect(() => {
-    fetchTasksFromDB();
-  }, []);
 
+    // 3. Save to Local DB (Safely): Use Promise.all to ensure all
+    //    database write operations are complete before proceeding.
+    //    This prevents the race condition where you try to read
+    //    from the DB before it has been updated.
+    const savePromises = mappedTasks.map(task => insertOrUpdateTask(task));
+    await Promise.all(savePromises);
+    
+    console.log('All Appwrite tasks saved to local DB. Refreshing UI...');
+
+    // 4. Refresh UI: Now that the local database is guaranteed to be
+    //    up-to-date, fetch from it to render the tasks.
+    fetchTasksFromDB();
+  };
+  
+  
+  // Fetch tasks from DB
+  const fetchTasksFromDB = () => {
+    if (!user) return;
+    getAllTasksByUser(user.$id, (fetchedTasks: any[]) => {
+      const normalizedTasks: Task[] = fetchedTasks.map(task => ({
+        ...task,
+        completed: task.completed === 1,
+        isSynced: task.isSynced === 1,
+      }));
+      setTasks(normalizedTasks);
+      console.log(`Fetched Tasks for user ${user.$id}:`, normalizedTasks);
+    });
+  };
+  
   const handleCreateTask = () => {
     fetchTasksFromDB();
   };
+  
+useFocusEffect(
+    useCallback(() => {
+      syncFromAppwrite();
+    }, [user])
+  );
+// // fetchTasksFromDB
+// useEffect(() => {
+//   fetchTasksFromDB();
+// }, []);
+
+
+const onRefresh = useCallback(async () => {
+  setIsRefreshing(true); // Start the spinner
+  await syncFromAppwrite(); // Re-fetch the data
+  setIsRefreshing(false); // Stop the spinner
+}, [user]); // Recreate the function if the user changes
 
   // Delete task on checkbox press
   const handleTaskDeleteOnCheckboxPress = (taskId: number) => {
@@ -198,6 +229,13 @@ const fetchTasksFromDB = () => {
       </View>
 
       <FlatList
+        refreshControl={
+          <RefreshControl
+            refreshing={isRefreshing}
+            onRefresh={onRefresh}
+            colors={["#4A90E2"]} // Optional: customize spinner color
+          />
+        }
         data={tasks.filter(task =>
           task.task?.toLowerCase().includes(searchQuery.toLowerCase()),
         )}
@@ -260,6 +298,7 @@ const fetchTasksFromDB = () => {
           marginBottom: 20,
         }}
         style={styles.flatList}
+        
       />
       {/* Floating "+" button */}
       <TouchableOpacity
