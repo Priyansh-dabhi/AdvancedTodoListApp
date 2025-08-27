@@ -26,7 +26,7 @@ import Routes from '../Routes/Routes';
 import { useNavigation } from '@react-navigation/native';
 import CameraAndGallery from './CameraAndGallery';
 // DB
-import { insertTask } from '../DB/Database';
+import { insertOrUpdateTask, insertTask } from '../DB/Database';
 
 // Context for user
 import { useAuth } from '../Context/AppwriteContext';
@@ -78,88 +78,86 @@ const AddTaskModal = ({ isVisible, onClose, onCreate }: Props) => {
     'No Category',
   ];
 
-  const handleCreate = async() => {
+const handleCreate = async () => {
+  // 1. --- VALIDATION ---
+  // Ensure a user is logged in before proceeding.
+  if (!user) {
+    return Alert.alert('Error', 'You must be logged in to create a task.');
+  }
 
-    if(!user) return Alert.alert('User not logged in');
+  // Ensure the task title is not empty.
+  if (task.trim() === '') {
+    Alert.alert('Validation', 'Task title cannot be empty.');
+    return;
+  }
 
-    if (task.trim() === '') {
-      Alert.alert('Task title is required');
-      return;
+  // 2. --- PREPARE DATA ---
+  // Combine the selected date and time into a single ISO 8601 string.
+  let dueDateTimeISO: string = '';
+  if (selectedDate) {
+    const combinedDateTime = new Date(selectedDate);
+    if (selectedTime) {
+      combinedDateTime.setHours(selectedTime.getHours());
+      combinedDateTime.setMinutes(selectedTime.getMinutes());
     }
+    dueDateTimeISO = combinedDateTime.toISOString();
+  }
 
-    // --- MODIFICATION START ---
-    // This is the new logic to combine date and time.
+  // Format the creation timestamp for display purposes.
+  const formattedTimestamp = new Intl.DateTimeFormat('en-GB', {
+    day: '2-digit',
+    month: '2-digit',
+    year: 'numeric',
+    hour: '2-digit',
+    minute: '2-digit',
+    hour12: true,
+  }).format(new Date());
 
-    let dueDateTimeISO: string = ''; // Initialize as an empty string
-
-    // 1. Check if a date has been selected by the user.
-    if (selectedDate) {
-      // 2. Create the base dateTime object from the selected date.
-      const combinedDateTime = new Date(selectedDate);
-
-      // 3. If a time has also been selected, apply its hours and minutes.
-      if (selectedTime) {
-        combinedDateTime.setHours(selectedTime.getHours());
-        combinedDateTime.setMinutes(selectedTime.getMinutes());
-        combinedDateTime.setSeconds(0);      // reset seconds
-        combinedDateTime.setMilliseconds(0); // reset ms
-      }
-
-      // 4. Convert the final, combined Date object into the standard ISO string.
-      dueDateTimeISO = combinedDateTime.toISOString();
-    }
-    // --- MODIFICATION END ---
-
-    const formattedTimestamp = new Intl.DateTimeFormat('en-GB', {
-      day: '2-digit',
-      month: '2-digit',
-      year: 'numeric',
-      hour: '2-digit',
-      minute: '2-digit',
-      hour12: true,
-    }).format(new Date());
-
-    // Appwrite DB insertion
-    try {
-      const res = await addTask({
-        task,
-        description: '',
-        dueDateTime: dueDateTimeISO,
-        completed: false,
-        timestamp: formattedTimestamp,
-        userId: user.$id,
-      });
-      
-      console.log('UserId:', user.$id);
-      console.log('Task inserted successfully into Appwrite DB:', res);
-      onCreate();
-      resetForm();
-    } catch (err) {
-      console.error('Failed to insert task in Appwrite:', err);
-      Alert.alert('Error', 'Could not save task in Appwrite.');
-    }
-
-
-    // Create the newTask object with the single `dueDateTime` property
-    const newTask: NewTask = {
+  // 3. --- "APPWRITE-FIRST" WORKFLOW ---
+  try {
+    // STEP A: Save the task to Appwrite first to get the official document ID ($id).
+    console.log('Attempting to save task to Appwrite...');
+    const appwriteDocument = await addTask({
       task: task.trim(),
-      timestamp: formattedTimestamp,
-      dueDateTime: dueDateTimeISO, // The new, single property for the deadline
+      description: '', // You can add a description field later
+      dueDateTime: dueDateTimeISO,
       completed: false,
-      isSynced: false, // initially not synced
-      success: () => {
-        console.log('Task inserted successfully into DB');
-        onCreate();
-        resetForm();
-      },
-      error: err => {
-        console.error('Failed to insert task:', err);
-        Alert.alert('Error', 'Could not save task.');
-      },
+      timestamp: formattedTimestamp,
+      userId: user.$id,
+    });
+
+    if (!appwriteDocument?.$id) {
+        throw new Error("Failed to create task in Appwrite or received an invalid response.");
+    }
+
+    console.log('Task created in Appwrite with $id:', appwriteDocument.$id);
+
+    // STEP B: Create a task object for the local SQLite database using the ID from Appwrite.
+    const taskForSQLite: Task = {
+      id: appwriteDocument.$id, // <-- This is the critical fix.
+      task: appwriteDocument.task,
+      timestamp: appwriteDocument.timestamp,
+      description: appwriteDocument.description,
+      dueDateTime: appwriteDocument.dueDateTime,
+      completed: appwriteDocument.completed,
+      isSynced: true, // It is synced because we just saved it.
     };
 
-    insertTask(newTask);
-  };
+    // STEP C: Save the complete task object to the local SQLite database.
+    // Using an "upsert" function is safest here.
+    insertOrUpdateTask(taskForSQLite);
+    console.log('Task saved locally with ID:', taskForSQLite.id);
+
+    // STEP D: If both saves are successful, trigger UI updates and close the modal.
+    onCreate(); // This calls fetchTasksFromDB() in Home.tsx
+    resetForm(); // This clears the form and closes the modal
+
+  } catch (err) {
+    // If anything fails (network error, etc.), inform the user.
+    console.error('Error during task creation process:', err);
+    Alert.alert('Error', 'Could not save the task. Please check your connection and try again.');
+  }
+};
 
   const resetForm = () => {
     setTask('');
