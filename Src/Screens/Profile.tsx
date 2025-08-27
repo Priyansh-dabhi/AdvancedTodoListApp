@@ -20,6 +20,7 @@ import Ionicons from 'react-native-vector-icons/Ionicons';
 import gettingUserName, {
   gettingUserEmail,
 } from '../Components/GettingUserDetail';
+import { clearAllTasks } from '../DB/Database';
 
 
 // type ProfileProp = NativeStackScreenProps<AppStackParamList,'Profile'>;
@@ -38,6 +39,9 @@ const Profile = () => {
                 text: 'Logged out successfully!',
                 duration: Snackbar.LENGTH_SHORT,
             });
+            // delete task from local db when user logout
+            clearAllTasks();
+
             navigation.reset({
                 index: 0,
                 routes: [{name: Routes.Login}],
