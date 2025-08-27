@@ -42,7 +42,7 @@ export const initDB = () => {
     db.transaction(tx => {
         tx.executeSql(
             `CREATE TABLE IF NOT EXISTS tasks (
-            id INTEGER PRIMARY KEY AUTOINCREMENT, 
+            id TEXT PRIMARY KEY, 
             task TEXT NOT NULL,
             timestamp TEXT,
             description TEXT,
@@ -112,6 +112,24 @@ export const insertTask = (task: NewTask) => {
             task.error?.(error);
             return true;
         }
+        );
+    });
+};
+// Insert or update task
+export const insertOrUpdateTask = (task: Task) => {
+    db.transaction(tx => {
+        tx.executeSql(
+        `INSERT OR REPLACE INTO tasks (id, task, timestamp, description, dueDateTime, completed, isSynced)
+        VALUES (?, ?, ?, ?, ?, ?, ?)`,
+        [
+            task.id,
+            task.task,
+            task.timestamp,
+            task.description,
+            task.dueDateTime,
+            task.completed ? 1 : 0,
+            task.isSynced ? 1 : 0,
+        ]
         );
     });
 };
