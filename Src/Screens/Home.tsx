@@ -25,7 +25,7 @@ import { Task } from '../Types/Task';
 import Routes from '../Routes/Routes';
 import { useNavigation } from '@react-navigation/native';
 //DB
-import { getAllTasks, updateTaskCompletion } from '../DB/Database';
+import { getAllTasks, updateTaskCompletion, insertOrUpdateTask } from '../DB/Database';
 import { deleteTask } from '../DB/Database';
 // context
 import { useTaskContext } from '../Context/TaskContext';
@@ -67,42 +67,47 @@ const Home = () => {
   // Appwrite 
 
   useEffect(() => {
-  if (!user) {
-    console.log("User is still loading or not found");
-  } else {
-    getTasks(user.$id).then((res) => {
-      const mappedTasks: Task[] = res.documents.map((doc) => ({
-        id: Number(doc.$id), // Appwrite document id
-        task: doc.task,
-        timestamp: doc.timestamp,
-        description: doc.description,
-        dueDateTime: doc.dueDateTime,
-        completed: doc.completed === 1 || doc.completed === true, // normalize to boolean
-        isSynced: doc.isSynced ?? 0,
-      }));
-      setTasks(mappedTasks);
-    });
-    console.log('isLoggedIn:', isLoggedIn); 
-    console.log('User in Home:', user);
-  } 
+    const syncFromAppwrite = async () => {
+      if (!user) {
+        console.log("User is still loading or not found");
+      } else {
+        const res = await getTasks(user.$id);
+        console.log('Appwrite tasks fetched:', res);
+        const mappedTasks = res.documents.map((doc)=> ({
+          id: doc.$id,
+          task: doc.task,
+          timestamp: doc.timestamp,
+          description: doc.description,
+          dueDateTime: doc.dueDateTime,
+          completed: doc.completed === 1 || doc.completed === true,
+          isSynced:true,
+        }));
+        // Save each into SQLite
+        mappedTasks.forEach(task => {
+          insertOrUpdateTask(task); // implement upsert in SQLite
+        });
+        fetchTasksFromDB(); // Refresh UI
+      } 
+    }
   // else {
   //   console.log('isLoggedIn:', isLoggedIn); 
   //   console.log('No user logged in');
   // }
+  syncFromAppwrite();
 }, [user]);
 
   // Fetch tasks from DB
-  const fetchTasksFromDB = () => {
-    getAllTasks((fetchedTasks: Task[]) => {
-      // Map over the tasks and set completed to false for all of them
-      const uncheckedTasks = fetchedTasks.map(task => ({
-        ...task,
-        completed: false,
-      }));
-      setTasks(uncheckedTasks);
-      console.log('Fetched and Unchecked Tasks:', uncheckedTasks);
-    });
-  };
+const fetchTasksFromDB = () => {
+  getAllTasks((fetchedTasks: any[]) => {
+    const normalizedTasks: Task[] = fetchedTasks.map(task => ({
+      ...task,
+      completed: task.completed === 1,   
+      isSynced: task.isSynced === 1,     
+    }));
+    setTasks(normalizedTasks);
+    console.log('Fetched Tasks from SQLite:', normalizedTasks);
+  });
+};
   // fetchTasksFromDB
   useEffect(() => {
     fetchTasksFromDB();
@@ -111,6 +116,8 @@ const Home = () => {
   const handleCreateTask = () => {
     fetchTasksFromDB();
   };
+
+  // Delete task on checkbox press
   const handleTaskDeleteOnCheckboxPress = (taskId: number) => {
     deleteTask(
       taskId,
@@ -124,26 +131,26 @@ const Home = () => {
       },
     );
   };
-  const handleTaskCompletionToggle = (
-    taskId: number,
-    currentStatus: boolean,
-  ) => {
-    // The completed parameter should be a boolean, not a number.
-    const newStatus = !currentStatus;
+  // const handleTaskCompletionToggle = (
+  //   taskId: number,
+  //   currentStatus: boolean,
+  // ) => {
+  //   // The completed parameter should be a boolean, not a number.
+  //   const newStatus = !currentStatus;
 
-    updateTaskCompletion({
-      id: taskId,
-      completed: newStatus, // Pass the boolean directly
-      success: () => {
-        console.log(`Task ${taskId} completion toggled to ${newStatus}`);
-        fetchTasksFromDB(); // Re-fetch all tasks to update the UI
-      },
-      error: err => {
-        console.error('Failed to update task completion:', err);
-        Alert.alert('Error', 'Could not update task status.');
-      },
-    });
-  };
+  //   updateTaskCompletion({
+  //     id: taskId,
+  //     completed: newStatus, // Pass the boolean directly
+  //     success: () => {
+  //       console.log(`Task ${taskId} completion toggled to ${newStatus}`);
+  //       fetchTasksFromDB(); // Re-fetch all tasks to update the UI
+  //     },
+  //     error: err => {
+  //       console.error('Failed to update task completion:', err);
+  //       Alert.alert('Error', 'Could not update task status.');
+  //     },
+  //   });
+  // };
   return (
     <SafeAreaView style={styles.container}>
       {/* <Text style={styles.title}>Welcome <Text style={{color:'#f02e65'}}>{username}</Text> to Home Screen 🎉 </Text>
@@ -234,7 +241,7 @@ const Home = () => {
                 <BouncyCheckbox
                   fillColor="#4A90E2"
                   isChecked={item.completed}
-                  onPress={() => handleTaskDeleteOnCheckboxPress(item.id)}
+                  onPress={() => handleTaskDeleteOnCheckboxPress(item.id as any)}
                 />
               </View>
               <View style={{ flex: 1 }}>
