@@ -9,6 +9,7 @@ export type Task = {
     dueDateTime?: string; // ISO date string
     completed?: boolean;
     isSynced?: boolean; // used to check if the task is synced with the appwrite or not
+    userId: string; 
     success?: (res: any) => void;
     error?: (err: any) => void;
 };
