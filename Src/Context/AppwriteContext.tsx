@@ -31,6 +31,11 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
   const [user, setUser] = useState<UserType>(null);
   const [isLoading, setIsLoading] = useState(true);
 
+  // --- ADD THIS WRAPPED FUNCTION ---
+  const handleSetIsLoggedIn = (status: boolean) => {
+    console.log(`[AuthContext] ==> setIsLoggedIn called with: ${status}`);
+    setIsLoggedIn(status);
+  };
   useEffect(() => {
     const checkUserSession = async () => {
       try {
@@ -71,7 +76,7 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
   // This stabilizes the context value and stops the infinite loop.
   const authContextValue = useMemo(() => ({
     isLoggedIn,
-    setIsLoggedIn,
+    setIsLoggedIn: handleSetIsLoggedIn,
     user,
     setUser,
     logout: handleLogout,
