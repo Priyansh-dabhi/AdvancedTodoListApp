@@ -114,7 +114,7 @@ const AppStack = () => {
   const navigation = useNavigation<any>();
   return (
     <Stack.Navigator
-      initialRouteName= {isLoggedIn ? Routes.TabHome : Routes.Login}
+      initialRouteName= {Routes.TabHome}
       screenOptions={{
         headerTitleAlign: 'center',
         headerShown: true,
@@ -139,7 +139,7 @@ const AppStack = () => {
         }}
       />
 
-      <Stack.Screen 
+      {/* <Stack.Screen 
         name={Routes.Login}
         component={Login} 
         options={{
@@ -160,22 +160,22 @@ const AppStack = () => {
           
           headerShown: true,
         }}
-        />
+        /> */}
       <Stack.Screen
         name={Routes.EditProfile}
         component={EditProfile}
         options={{
-          headerBackTitle: 'Back',
-
-          headerTitle: 'Edit Profile',
+          // headerBackTitle: 'Back',
+          headerShown:false
+          // headerTitle: 'Edit Profile',
         }}
       />
       <Stack.Screen
         name={Routes.Map}
         component={Map}
         options={{
-          headerBackTitle: 'Back',
-          headerTitle: 'Google Map',
+          // headerBackTitle: 'Back',
+          // headerTitle: 'Google Map',
         }}
       />
       <Stack.Screen
