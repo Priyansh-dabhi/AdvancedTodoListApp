@@ -14,7 +14,7 @@ import {
 import BouncyCheckbox from 'react-native-bouncy-checkbox';
 import React, { useCallback, useContext, useEffect, useState } from 'react';
 import { AuthContext } from '../Context/AppwriteContext';
-import { getCurrentUser, getTasks, logout } from '../Service/Service';
+import { getCurrentUser, getTasks, logout, deleteTaskFromAppwrite } from '../Service/Service';
 import { ScrollView, TextInput } from 'react-native';
 import DateTimePicker from '@react-native-community/datetimepicker';
 import images from '@/constants/images';
@@ -27,7 +27,8 @@ import Routes from '../Routes/Routes';
 import { useFocusEffect, useNavigation } from '@react-navigation/native';
 //DB
 import { getAllTasksByUser, updateTaskCompletion, insertOrUpdateTask } from '../DB/Database';
-import { deleteTask } from '../DB/Database';
+// import { deleteTask } from '../DB/Database';
+import { markTaskAsDeleted, permanentlyDeleteTask } from '../DB/Database';
 // context
 import { useTaskContext } from '../Context/TaskContext';
 import { TaskContext } from '../Context/TaskContext';
@@ -42,7 +43,7 @@ const Home = () => {
   const [greeting, setGreeting] = useState('');
 
   // context
-  const { setSelectedTask } = useTaskContext();
+  const { selectedTask,setSelectedTask } = useTaskContext();
 
   const [tasks, setTasks] = useState<Task[]>([]);
   const [modalVisible, setModalVisible] = useState(false);
@@ -125,6 +126,7 @@ const Home = () => {
       setTasks(normalizedTasks);
       console.log(`Fetched Tasks for user ${user.$id}:`, normalizedTasks);
     });
+    
   };
   
   const handleCreateTask = () => {
@@ -156,19 +158,31 @@ const onRefresh = useCallback(async () => {
 }, [user]); // Recreate the function if the user changes
 
   // Delete task on checkbox press
-  const handleTaskDeleteOnCheckboxPress = (taskId: number) => {
-    deleteTask(
-      taskId,
-      () => {
-        console.log('Deleted successfully');
-        // Call the new function to refresh the list and uncheck all items
-        fetchTasksFromDB();
-      },
-      err => {
-        Alert.alert('Error', 'Failed to delete task');
-      },
-    );
-  };
+const handleTaskDeleteOnCheckboxPress = async (taskToDelete: Task) => {
+
+  const appwriteDocumentId = taskToDelete.id;
+
+    if (!appwriteDocumentId) {
+        console.error("Delete failed: The task object is missing its ID.", taskToDelete);
+        Alert.alert("Error", "Could not delete the task because its ID is missing.");
+        return;
+    }
+
+    setTasks(prevTasks => prevTasks.filter(task => task.id !== appwriteDocumentId));
+
+    try {
+        await markTaskAsDeleted(appwriteDocumentId);
+
+        await deleteTaskFromAppwrite  (appwriteDocumentId);
+
+        await permanentlyDeleteTask(appwriteDocumentId);
+        
+        console.log(`Task ${appwriteDocumentId} was successfully deleted and synced.`);
+
+    } catch (error) {
+        console.log(`Failed to sync deletion for task ${appwriteDocumentId}. It remains marked for deletion locally.`);
+    }
+};
   // const handleTaskCompletionToggle = (
   //   taskId: number,
   //   currentStatus: boolean,
@@ -286,7 +300,7 @@ const onRefresh = useCallback(async () => {
                 <BouncyCheckbox
                   fillColor="#4A90E2"
                   isChecked={item.completed}
-                  onPress={() => handleTaskDeleteOnCheckboxPress(item.id as any)}
+                  onPress={() => handleTaskDeleteOnCheckboxPress(item)}
                 />
               </View>
               <View style={{ flex: 1 }}>
