@@ -6,6 +6,7 @@ import Signup from '../Screens/Signup'
 import Login from '../Screens/Login'
 
 import { createNativeStackNavigator } from '@react-navigation/native-stack'
+import Routes from './Routes'
 export type AuthStackParamList = {
     Signup:undefined
     Login:undefined
@@ -23,14 +24,28 @@ const AuthStack = () => {
         
     }}
     >
-      <Stack.Screen
-      name='Signup'
-      component={Signup}
-      />
-      <Stack.Screen
-      name='Login'
-      component={Login}
-      />
+            <Stack.Screen 
+              name={Routes.Login}
+              component={Login} 
+              options={{
+                headerStyle: {
+                  backgroundColor: '#4A90E2',
+                },
+                
+                headerShown: true,
+              }}
+              />
+            <Stack.Screen 
+              name={Routes.Signup}
+              component={Signup} 
+              options={{
+                headerStyle: {
+                  backgroundColor: '#4A90E2',
+                },
+                
+                headerShown: true,
+              }}
+              />
     </Stack.Navigator>
   )
 }
