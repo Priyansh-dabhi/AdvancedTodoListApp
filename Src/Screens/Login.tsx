@@ -21,6 +21,8 @@ import { useNavigation } from '@react-navigation/native';
 
 //Navigation
 // type loginScreenProps = NativeStackScreenProps<AppStackParamList,'Login'>;
+// Async Storage
+import AsyncStorage from '@react-native-async-storage/async-storage'
 
 const Login = () => {
   const { setIsLoggedIn, setUser } = useAuth();
@@ -43,7 +45,8 @@ const Login = () => {
         if (session) {
           const currentUser = await getCurrentUser();
         if (currentUser) {
-          setUser(currentUser); // <-- SET THE USER OBJECT
+          setUser(currentUser); 
+          await AsyncStorage.setItem('user_session', JSON.stringify(currentUser));
         }
           setIsLoggedIn(true);
           console.log(setIsLoggedIn);
