@@ -2,9 +2,9 @@ import { StyleSheet, Text, View, KeyboardAvoidingView, TextInput, Pressable, Pla
 import React, { useContext, useState } from 'react'
 import { AuthStackParamList } from '../Routes/AuthStack';
 import { NativeStackScreenProps } from '@react-navigation/native-stack';
-import { createAccount, login } from '../Service/Service'
+import { createAccount, getCurrentUser, login } from '../Service/Service'
 import Snackbar from 'react-native-snackbar';
-import { AuthContext } from '../Context/AppwriteContext';
+import { AuthContext, useAuth } from '../Context/AppwriteContext';
 import Routes, { AppStackParamList } from '../Routes/Routes';
 import { useNavigation } from '@react-navigation/native';
 
@@ -14,7 +14,7 @@ import { useNavigation } from '@react-navigation/native';
 
 const Signup = () => {
 //context
-    const {setIsLoggedIn} = useContext(AuthContext)
+    const {setIsLoggedIn, setUser} = useAuth();
 // states
 const [name, setName] = useState('');
 const [email, setEmail] = useState('');
@@ -52,16 +52,15 @@ const handleSignup = async () => {
         const session = await login({ email, password });
 
         if (session) {
+            const currentUser = await getCurrentUser();
+            if (currentUser) {
+            setUser(currentUser); // <-- SET THE USER OBJECT
+        }
         setIsLoggedIn(true);
         
         Snackbar.show({
             text: 'Signup successful!',
             duration: Snackbar.LENGTH_SHORT,
-        });
-
-        usenavigation.reset({
-            index: 0,
-            routes: [{ name: Routes.TabHome }],
         });
         } else {
         setError('Could not start session after signup');
