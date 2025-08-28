@@ -10,8 +10,8 @@ import {
 import React, { useState, useContext } from 'react';
 import { NativeStackScreenProps } from '@react-navigation/native-stack';
 import { AuthStackParamList } from '../Routes/AuthStack';
-import { login } from '../Service/Service';
-import { AuthContext } from '../Context/AppwriteContext';
+import { getCurrentUser, login } from '../Service/Service';
+import { AuthContext, useAuth } from '../Context/AppwriteContext';
 import Snackbar from 'react-native-snackbar';
 //google signin
 // import { googleSignIn } from '../Service/Service';
@@ -23,7 +23,7 @@ import { useNavigation } from '@react-navigation/native';
 // type loginScreenProps = NativeStackScreenProps<AppStackParamList,'Login'>;
 
 const Login = () => {
-  const { setIsLoggedIn } = useContext(AuthContext);
+  const { setIsLoggedIn, setUser } = useAuth();
 
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
@@ -41,16 +41,16 @@ const Login = () => {
       try {
         const session = await login({ email, password });
         if (session) {
+          const currentUser = await getCurrentUser();
+        if (currentUser) {
+          setUser(currentUser); // <-- SET THE USER OBJECT
+        }
           setIsLoggedIn(true);
           console.log(setIsLoggedIn);
           Snackbar.show({
             text: 'Login successful!',
             duration: Snackbar.LENGTH_SHORT,
           });
-          usenavigation.reset({
-            index: 0,
-            routes: [{name: Routes.TabHome}],
-          })
         } else {
           setError('Login Failed!');
         }
