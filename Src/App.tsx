@@ -6,6 +6,7 @@ import AuthStack from './Routes/AuthStack';
 import AppStack from './Routes/AppStack';
 import { getCurrentUser } from './Service/Service'; // 
 import { GestureHandlerRootView } from 'react-native-gesture-handler';
+import Router from './Routes/Router';
 // database
 // import { createTables, getDBConnection } from './DB/Database';
 import SQLite from 'react-native-sqlite-storage'
@@ -47,7 +48,7 @@ function App() {
     <AuthProvider>
       <TaskProvider>
         <NavigationContainer>
-          <AppStack/>
+          <Router/>
         </NavigationContainer>
       </TaskProvider>
     </AuthProvider>
