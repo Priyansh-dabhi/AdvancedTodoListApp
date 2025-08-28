@@ -15,7 +15,7 @@ import BouncyCheckbox from 'react-native-bouncy-checkbox';
 import React, { useCallback, useContext, useEffect, useState } from 'react';
 import { AuthContext } from '../Context/AppwriteContext';
 import { getCurrentUser, getTasks, logout } from '../Service/Service';
-import { ScrollView, TextInput } from 'react-native-gesture-handler';
+import { ScrollView, TextInput } from 'react-native';
 import DateTimePicker from '@react-native-community/datetimepicker';
 import images from '@/constants/images';
 // Icons & task library:
@@ -131,11 +131,18 @@ const Home = () => {
     fetchTasksFromDB();
   };
   
-useFocusEffect(
-    useCallback(() => {
-      syncFromAppwrite();
-    }, [user])
-  );
+useEffect(() => {
+  if (user) {
+    // A user is logged in, so fetch their data.
+    console.log(`User ${user.$id} detected. Syncing tasks.`);
+    syncFromAppwrite();
+  } else {
+    // The user is null (logged out), so clear the tasks from the UI.
+    // This is the crucial step that fixes the stale data issue.
+    setTasks([]);
+    console.log('User logged out or not present, clearing tasks state.');
+  }
+}, [user]);
 // // fetchTasksFromDB
 // useEffect(() => {
 //   fetchTasksFromDB();
