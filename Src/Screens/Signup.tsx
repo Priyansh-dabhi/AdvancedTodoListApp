@@ -9,6 +9,9 @@ import Routes, { AppStackParamList } from '../Routes/Routes';
 import { useNavigation } from '@react-navigation/native';
 
 
+//Async Storage
+import AsyncStorage from '@react-native-async-storage/async-storage'
+
 // type signupScreenProps = NativeStackScreenProps<AppStackParamList, 'Signup'>;
 
 
@@ -54,8 +57,9 @@ const handleSignup = async () => {
         if (session) {
             const currentUser = await getCurrentUser();
             if (currentUser) {
-            setUser(currentUser); // <-- SET THE USER OBJECT
-        }
+                setUser(currentUser); 
+                await AsyncStorage.setItem('user_session', JSON.stringify(currentUser));
+            }
         setIsLoggedIn(true);
         
         Snackbar.show({
