@@ -176,7 +176,7 @@ export async function updateTask(docId: string, taskData: Partial<typeof addTask
 }
 
 // Delete Task
-export async function deleteTask(docId: string) {
+export async function deleteTaskFromAppwrite(docId: string) {
   return await databases.deleteDocument(DATABASE_ID, COLLECTION_ID, docId);
 }
 
