@@ -4,6 +4,9 @@ import { clearAllTasks } from "../db/database"; // Adjust path
 import { Models } from "appwrite";
 import { View, ActivityIndicator, StyleSheet } from 'react-native';
 
+//Async Storage
+import AsyncStorage from '@react-native-async-storage/async-storage'
+
 // Define the shape of the user object
 type UserType = Models.User<Models.Preferences> | null;
 
@@ -38,19 +41,37 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
   };
   useEffect(() => {
     const checkUserSession = async () => {
+      setIsLoading(true);
       try {
+        // 1. Immediately try to load user from local storage
+        const savedUserSession = await AsyncStorage.getItem('user_session');
+
+        if (savedUserSession) {
+          // 2. If a local user exists, put the app in a logged-in state immediately
+          const localUser = JSON.parse(savedUserSession);
+          setUser(localUser);
+          setIsLoggedIn(true);
+          console.log("Loaded user from local session.");
+        } else {
+          // No local session, so user is definitely logged out
+          setIsLoggedIn(false);
+          setUser(null);
+        }
+
+        // 3. Then, try to verify with the server in the background (if online)
+        // This keeps the session fresh if there IS an internet connection.
         const currentUser = await getCurrentUser();
         if (currentUser) {
-          setUser(currentUser);
-          setIsLoggedIn(true);
-        } else {
-          setUser(null);
-          setIsLoggedIn(false);
+            // Update user details and session just in case they changed
+            setUser(currentUser);
+            await AsyncStorage.setItem('user_session', JSON.stringify(currentUser));
+            setIsLoggedIn(true);
         }
+
       } catch (error) {
-        console.error("AuthContext Error: Failed to get current user.", error);
-        setUser(null);
-        setIsLoggedIn(false);
+        // This catch block will be hit if the device is offline and getCurrentUser() fails.
+        // We DON'T set isLoggedIn to false here, because we trust our local session.
+        console.error("Could not verify session with server (likely offline):", error);
       } finally {
         setIsLoading(false);
       }
