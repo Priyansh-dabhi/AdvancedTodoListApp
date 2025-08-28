@@ -21,13 +21,14 @@ import gettingUserName, {
   gettingUserEmail,
 } from '../Components/GettingUserDetail';
 import { clearAllTasks } from '../DB/Database';
+import AsyncStorage from '@react-native-async-storage/async-storage';
 
 
 // type ProfileProp = NativeStackScreenProps<AppStackParamList,'Profile'>;
 
 const Profile = () => {
   const [username, setUsername] = useState('');
-    const { setIsLoggedIn } = useContext(AuthContext);
+    const { setIsLoggedIn , setUser} = useContext(AuthContext);
     const navigation = useNavigation<any>();
     
       // handling logout
@@ -40,8 +41,9 @@ const Profile = () => {
                 duration: Snackbar.LENGTH_SHORT,
             });
             // delete task from local db when user logout
+            await AsyncStorage.removeItem('user_session');
             clearAllTasks();
-
+            setUser(null);
             } catch (err) {
             console.log('Logout Error:', err);
             Snackbar.show({
