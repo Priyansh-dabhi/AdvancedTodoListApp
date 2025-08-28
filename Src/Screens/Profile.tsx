@@ -42,10 +42,6 @@ const Profile = () => {
             // delete task from local db when user logout
             clearAllTasks();
 
-            navigation.reset({
-                index: 0,
-                routes: [{name: Routes.Login}],
-            })
             } catch (err) {
             console.log('Logout Error:', err);
             Snackbar.show({
