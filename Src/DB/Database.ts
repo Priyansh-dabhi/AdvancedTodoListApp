@@ -49,7 +49,8 @@ export const initDB = () => {
             dueDateTime TEXT, 
             completed INTEGER DEFAULT 0,
             isSynced INTEGER DEFAULT 0,
-            userId TEXT
+            userId TEXT,
+            isDeleted INTEGER DEFAULT 0
             )`,
             [],
             () => console.log('Database and table are ready.'),
@@ -63,6 +64,19 @@ export const initDB = () => {
   // This second transaction handles migrations for users who already have the app.
   // It ensures the new columns exist if the table was created with an older schema.
     db.transaction(tx => {
+
+        // Migration for users who already have the app
+        tx.executeSql(
+            `ALTER TABLE tasks ADD COLUMN isDeleted INTEGER DEFAULT 0`,
+            [],
+            () => console.log("Column 'isDeleted' added successfully."),
+            (_, error) => {
+                if (!error.message.includes('duplicate column name')) {
+                    console.error('Error adding isDeleted column:', error);
+                }
+                return false;
+            }
+        );
         tx.executeSql(
             `ALTER TABLE tasks ADD COLUMN userId TEXT`,
             [],
@@ -153,7 +167,7 @@ export const getAllTasksByUser = (
     ) => {
     db.transaction(tx => {
         tx.executeSql(
-        `SELECT * FROM tasks WHERE userId = ? ORDER BY id DESC`,
+        `SELECT * FROM tasks WHERE userId = ? AND isDeleted = 0 ORDER BY timestamp DESC`,
         [userId],
         (_, { rows }) => {
             const tasksArray: any[] = [];
@@ -217,25 +231,52 @@ export const updateTask = (
     });
 };
 // delete
-export const deleteTask = (
-    id: number,
-    success?: () => void,
-    error?: (err: any) => void
-    ) => {
-    db.transaction(tx => {
-        tx.executeSql(
-        'DELETE FROM tasks WHERE id = ?',
-        [id],
-        (_, result) => {
-            console.log(`Deleted task with id: ${id}`);
-            success?.();
-        },
-        (_, err) => {
-            console.error(`Failed to delete task with id ${id}:`, err);
-            error?.(err);
-            return false;
-        }
-        );
+// export const deleteTask = (
+//     id: number,
+//     success?: () => void,
+//     error?: (err: any) => void
+//     ) => {
+//     db.transaction(tx => {
+//         tx.executeSql(
+//         'DELETE FROM tasks WHERE id = ?',
+//         [id],
+//         (_, result) => {
+//             console.log(`Deleted task with id: ${id}`);
+//             success?.();
+//         },
+//         (_, err) => {
+//             console.error(`Failed to delete task with id ${id}:`, err);
+//             error?.(err);
+//             return false;
+//         }
+//         );
+//     });
+// };
+// Marks a task for deletion
+export const markTaskAsDeleted = (id: string): Promise<void> => {
+    return new Promise((resolve, reject) => {
+        db.transaction(tx => {
+            tx.executeSql(
+                `UPDATE tasks SET isDeleted = 1 WHERE id = ?`,
+                [id],
+                () => resolve(),
+                (_, error) => reject(error)
+            );
+        });
+    });
+};
+
+// Permanently removes a task from the database
+export const permanentlyDeleteTask = (id: string): Promise<void> => {
+    return new Promise((resolve, reject) => {
+        db.transaction(tx => {
+            tx.executeSql(
+                'DELETE FROM tasks WHERE id = ?',
+                [id],
+                () => resolve(),
+                (_, error) => reject(error)
+            );
+        });
     });
 };
 
