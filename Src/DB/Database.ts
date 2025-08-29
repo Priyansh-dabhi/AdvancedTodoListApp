@@ -253,6 +253,7 @@ export const updateTask = (
 //     });
 // };
 // Marks a task for deletion
+// here we are using isDeleted as flag!!
 export const markTaskAsDeleted = (id: string): Promise<void> => {
     return new Promise((resolve, reject) => {
         db.transaction(tx => {
@@ -280,7 +281,37 @@ export const permanentlyDeleteTask = (id: string): Promise<void> => {
     });
 };
 
+// new update
+// This function saves all changes and marks the task as unsynced.
+export const updateTaskInDB = (task: Task): Promise<void> => {
+    return new Promise((resolve, reject) => {
+        db.transaction(tx => {
+            tx.executeSql(
+                `UPDATE tasks SET task = ?, description = ?, dueDateTime = ?, isSynced = 0 WHERE id = ?`,
+                [task.task, task.description, task.dueDateTime, task.id],
+                () => resolve(),
+                (_, error) => reject(error)
+            );
+        });
+    });
+};
+
+// This function updates only the sync status.
+export const updateTaskSyncStatus = (id: string, isSynced: boolean): Promise<void> => {
+    return new Promise((resolve, reject) => {
+        db.transaction(tx => {
+            tx.executeSql(
+                `UPDATE tasks SET isSynced = ? WHERE id = ?`,
+                [isSynced ? 1 : 0, id],
+                () => resolve(),
+                (_, error) => reject(error)
+            );
+        });
+    });
+};
+
 // update
+
 export type UpdateTaskCompletionParams = {
     id: number;
     completed: boolean;
@@ -344,15 +375,15 @@ export const getUnsyncedTasks = (callback: (tasks: Task[]) => void) => {
     });
 };
 
-export const updateTaskSyncStatus = (taskId: number) => {
-    return new Promise((resolve, reject) => {
-        db.transaction(tx => {
-        tx.executeSql(
-            `UPDATE tasks SET isSynced = 1 WHERE id = ?;`,
-            [taskId],
-            () => resolve(true),
-            (_, error) => reject(error)
-        );
-        });
-    });
-};
+// export const updateTaskSyncStatus = (taskId: number) => {
+//     return new Promise((resolve, reject) => {
+//         db.transaction(tx => {
+//         tx.executeSql(
+//             `UPDATE tasks SET isSynced = 1 WHERE id = ?;`,
+//             [taskId],
+//             () => resolve(true),
+//             (_, error) => reject(error)
+//         );
+//         });
+//     });
+// };
