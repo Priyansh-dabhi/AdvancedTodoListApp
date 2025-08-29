@@ -166,7 +166,7 @@ export const addTask = async (taskData: {
 };
 
 // Update Task
-export async function updateTask(docId: string, taskData: Partial<typeof addTask>) {
+export async function updateTaskFromAppwrite(docId: string, taskData: Partial<typeof addTask>) {
   return await databases.updateDocument(
     DATABASE_ID,
     COLLECTION_ID,
