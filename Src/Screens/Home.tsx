@@ -183,6 +183,18 @@ const handleTaskDeleteOnCheckboxPress = async (taskToDelete: Task) => {
         console.log(`Failed to sync deletion for task ${appwriteDocumentId}. It remains marked for deletion locally.`);
     }
 };
+// after updating it will re fetches the tasks from db!
+useFocusEffect(
+        useCallback(() => {
+            console.log("Home screen is in focus, fetching tasks from DB...");
+            fetchTasksFromDB(); // This re-fetches tasks from SQLite and updates the state.
+
+            // Optional: You can return a cleanup function if needed, but it's not required here.
+            return () => {
+                console.log("Home screen is no longer in focus.");
+            };
+        }, []) // The empty dependency array ensures this effect doesn't re-run unnecessarily.
+    );
   // const handleTaskCompletionToggle = (
   //   taskId: number,
   //   currentStatus: boolean,
