@@ -1,62 +1,61 @@
+import React, { useContext, useState } from 'react';
 import {
   StyleSheet,
   Text,
   View,
-  Pressable,
   TouchableOpacity,
+  ScrollView,
+  Image,
 } from 'react-native';
-import React, { useContext, useEffect, useState } from 'react';
-import { getCurrentUser, logout } from '../Service/Service';
-import Snackbar from 'react-native-snackbar';
-import { AuthContext } from '../Context/AppwriteContext';
-import { NativeStackScreenProps } from '@react-navigation/native-stack';
-import { AppStackParamList } from '../Routes/Routes';
-import Login from './Login';
-import Routes from '../Routes/Routes';
-import { useNavigation } from '@react-navigation/native';
-import { ScrollView } from 'react-native-gesture-handler';
-import { Image } from 'react-native';
 import Ionicons from 'react-native-vector-icons/Ionicons';
-import gettingUserName, {
-  gettingUserEmail,
-} from '../Components/GettingUserDetail';
-import { clearAllTasks } from '../DB/Database';
+import Snackbar from 'react-native-snackbar';
 import AsyncStorage from '@react-native-async-storage/async-storage';
+import { useNavigation } from '@react-navigation/native';
 
-
-// type ProfileProp = NativeStackScreenProps<AppStackParamList,'Profile'>;
+import { AuthContext } from '../Context/AppwriteContext';
+import { logout } from '../Service/Service';
+import { clearAllTasks } from '../DB/Database';
+import gettingUserName, { gettingUserEmail } from '../Components/GettingUserDetail';
+import EditProfileModal from '../Components/EditProfileModal';
+import icons from '../../constants/images';
 
 const Profile = () => {
   const [username, setUsername] = useState('');
-    const { setIsLoggedIn , setUser} = useContext(AuthContext);
-    const navigation = useNavigation<any>();
-    
-      // handling logout
-        const handleLogout = async () => {
-            try {
-            await logout();
-            setIsLoggedIn(false);
-            Snackbar.show({
-                text: 'Logged out successfully!',
-                duration: Snackbar.LENGTH_SHORT,
-            });
-            // delete task from local db when user logout
-            await AsyncStorage.removeItem('user_session');
-            clearAllTasks();
-            setUser(null);
-            } catch (err) {
-            console.log('Logout Error:', err);
-            Snackbar.show({
-                text: 'Logout failed',
-                duration: Snackbar.LENGTH_SHORT,
-            });
-            }
-        };
+  const { setIsLoggedIn, setUser } = useContext(AuthContext);
+  const [avatarUri, setAvatarUri] = useState('');
+  const [modalVisible, setModalVisible] = useState(false);
+  const [name , setName] = useState("");
+  const navigation = useNavigation<any>();
+
+
+  // handle logout
+  const handleLogout = async () => {
+    try {
+      await logout();
+      setIsLoggedIn(false);
+
+      Snackbar.show({
+        text: 'Logged out successfully!',
+        duration: Snackbar.LENGTH_SHORT,
+      });
+
+      // Clear session and local tasks
+      await AsyncStorage.removeItem('user_session');
+      clearAllTasks();
+      setUser(null);
+    } catch (err) {
+      console.log('Logout Error:', err);
+      Snackbar.show({
+        text: 'Logout failed',
+        duration: Snackbar.LENGTH_SHORT,
+      });
+    }
+  };
 
   const user = {
     name: gettingUserName(),
     email: gettingUserEmail(),
-    profilePic: 'https://via.placeholder.com/100', // Replace with real image or avatar
+    profilePic: 'https://via.placeholder.com/100', // Replace with real profile pic
   };
 
   const stats = {
@@ -67,43 +66,35 @@ const Profile = () => {
 
   return (
     <View style={styles.container}>
-      <View style={styles.profileHeader}>
-        <View
-          style={{
-            flexDirection: 'row',
-            alignItems: 'center',
-            justifyContent: 'space-between',
-            width: '100%',
-          }}
-        >
-          <Text style={{ marginBottom: 12 }}></Text>
-          <Pressable onPress={() => navigation.navigate(Routes.EditProfile)}>
-            <Ionicons
-              name="create-outline"
-              size={26}
-              color="#555"
-              style={{
-                position: 'absolute',
-                top: 10,
-                right: 10,
-                paddingLeft: 8,
-                paddingBottom: 8,
-              }}
-            />
-          </Pressable>
-        </View>
-      </View>
+      {/* Header */}
+      {/* <View style={styles.profileHeader}>
+            <Text style={styles.headerTitle}>Profile</Text>
+          </View>
+       */}
+
       <ScrollView contentContainerStyle={{ paddingBottom: 40 }}>
         {/* Profile Info */}
         <View style={styles.profileContainer}>
-          <Image
-            source={require('../../assets/icons/target.png')}
+          <TouchableOpacity onPress={() => setModalVisible(true)}>
+            <Image
+            // source={require('../../assets/icons/target.png')}
+            source={avatarUri ? { uri: avatarUri } : icons.userIcon2}
             style={styles.avatar}
           />
+          </TouchableOpacity>
           <Text style={styles.name}>{user.name}</Text>
           <Text style={styles.email}>{user.email}</Text>
         </View>
-
+        <EditProfileModal
+        isVisible={modalVisible}
+        onClose={() => setModalVisible(false)}
+        onCreate={() => {}}
+        onImageSelected={uri => {
+          console.log('Selected URI:', uri);
+          setAvatarUri(uri);
+          setModalVisible(false);
+        }}
+        />
         {/* Task Stats */}
         <View style={styles.statsRow}>
           <StatCard label="Completed" value={stats.completed} />
@@ -111,7 +102,7 @@ const Profile = () => {
           <StatCard label="Total" value={stats.total} />
         </View>
 
-        {/* Settings List */}
+        {/* Settings */}
         <View style={styles.settingsContainer}>
           <SettingsItem icon="moon" label="Dark Mode" />
           <SettingsItem icon="notifications" label="Notifications" />
@@ -129,6 +120,7 @@ const Profile = () => {
   );
 };
 
+// Stat card component
 const StatCard = ({ label, value }: { label: string; value: number }) => (
   <View style={styles.statCard}>
     <Text style={styles.statValue}>{value}</Text>
@@ -136,9 +128,10 @@ const StatCard = ({ label, value }: { label: string; value: number }) => (
   </View>
 );
 
-const SettingsItem = ({ icon, label }: { icon: any; label: string }) => (
+// Settings item component
+const SettingsItem = ({ icon, label }: { icon: string; label: string }) => (
   <TouchableOpacity style={styles.settingsItem}>
-    <Ionicons name={icon} size={20} color="#555" />
+    <Ionicons name={icon} size={20} color="#4A90E2" />
     <Text style={styles.settingsLabel}>{label}</Text>
     <Ionicons
       name="chevron-forward"
@@ -157,18 +150,21 @@ const styles = StyleSheet.create({
     backgroundColor: '#f6f7fb',
   },
   profileHeader: {
-    backgroundColor: '#FF6B6B',
-    paddingTop: 20,
+    backgroundColor: '#4A90E2',
     paddingVertical: 20,
-    paddingHorizontal: 15,
     alignItems: 'center',
-    height: 94,
+    justifyContent: 'center',
+    height: 100,
+  },
+  headerTitle: {
+    color: '#fff',
+    fontSize: 20,
+    fontWeight: '700',
   },
   profileContainer: {
     alignItems: 'center',
     paddingVertical: 30,
     backgroundColor: '#fff',
-    // marginTop: ,
     marginBottom: 10,
   },
   avatar: {
@@ -198,8 +194,8 @@ const styles = StyleSheet.create({
   },
   statValue: {
     fontSize: 18,
-    fontWeight: '600',
-    color: '#3D5AFE',
+    fontWeight: '700',
+    color: '#4A90E2',
   },
   statLabel: {
     fontSize: 14,
@@ -224,7 +220,7 @@ const styles = StyleSheet.create({
     color: '#333',
   },
   logoutButton: {
-    backgroundColor: '#FF3B30',
+    backgroundColor: '#4A90E2',
     marginHorizontal: 20,
     borderRadius: 8,
     paddingVertical: 14,
@@ -236,5 +232,6 @@ const styles = StyleSheet.create({
     color: '#fff',
     marginLeft: 8,
     fontSize: 16,
+    fontWeight: '600',
   },
 });
