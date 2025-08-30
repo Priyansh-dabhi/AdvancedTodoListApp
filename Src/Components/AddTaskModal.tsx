@@ -30,7 +30,13 @@ import { insertOrUpdateTask, insertTask } from '../DB/Database';
 
 // Context for user
 import { useAuth } from '../Context/AppwriteContext';
-import { addTask } from '../Service/Service';
+import { addTask, uploadFile } from '../Service/Service';
+// RNFS
+import RNFS from 'react-native-fs';
+
+
+
+
 
 type Props = {
   isVisible: boolean;
@@ -69,6 +75,8 @@ const AddTaskModal = ({ isVisible, onClose, onCreate }: Props) => {
   const [showDatePicker, setShowDatePicker] = useState(false);
   const [showTimePicker, setShowTimePicker] = useState(false);
   const [selectLocation, setSelectLocation] = useState('Select Location');
+  const [localPhotoPath, setLocalPhotoPath] = useState<string | null>(null);
+
 
   const categoryOptions = [
     'Work',
@@ -79,18 +87,20 @@ const AddTaskModal = ({ isVisible, onClose, onCreate }: Props) => {
   ];
 
 const handleCreate = async () => {
+  
+  
   // 1. --- VALIDATION ---
   // Ensure a user is logged in before proceeding.
   if (!user) {
     return Alert.alert('Error', 'You must be logged in to create a task.');
   }
-
+  
   // Ensure the task title is not empty.
   if (task.trim() === '') {
     Alert.alert('Validation', 'Task title cannot be empty.');
     return;
   }
-
+  
   // 2. --- PREPARE DATA ---
   // Combine the selected date and time into a single ISO 8601 string.
   let dueDateTimeISO: string = '';
@@ -102,7 +112,7 @@ const handleCreate = async () => {
     }
     dueDateTimeISO = combinedDateTime.toISOString();
   }
-
+  
   // Format the creation timestamp for display purposes.
   const formattedTimestamp = new Intl.DateTimeFormat('en-GB', {
     day: '2-digit',
@@ -112,10 +122,16 @@ const handleCreate = async () => {
     minute: '2-digit',
     hour12: true,
   }).format(new Date());
-
+  
+  let appwritePhotoId: string | null = null;
   // 3. --- "APPWRITE-FIRST" WORKFLOW ---
   try {
-    // STEP A: Save the task to Appwrite first to get the official document ID ($id).
+    // If the user selected a photo, upload it to Appwrite Storage first.
+            if (localPhotoPath) {
+                console.log('Uploading photo to Appwrite...');
+                appwritePhotoId = await uploadFile(localPhotoPath);
+                console.log('Photo uploaded. File ID:', appwritePhotoId);
+            }
     console.log('Attempting to save task to Appwrite...');
     const appwriteDocument = await addTask({
       task: task.trim(),
@@ -124,6 +140,7 @@ const handleCreate = async () => {
       completed: false,
       timestamp: formattedTimestamp,
       userId: user.$id,
+      photoId: "appwritePhotoId"
     });
 
     if (!appwriteDocument?.$id) {
@@ -141,7 +158,9 @@ const handleCreate = async () => {
       dueDateTime: appwriteDocument.dueDateTime,
       completed: appwriteDocument.completed,
       isSynced: true, // It is synced because we just saved it.
-      userId: user.$id
+      userId: user.$id,
+      photoId:"tempPhotoId",
+      photoPath:'tempPhotoPath'
     };
 
     // STEP C: Save the complete task object to the local SQLite database.
@@ -168,6 +187,7 @@ const handleCreate = async () => {
     setSelectedDate(null);
     setSelectedTime(null);
     setSelectLocation('Select Location');
+    setLocalPhotoPath(null);
     onClose();
   };
 
@@ -200,6 +220,24 @@ const handleCreate = async () => {
     }
   };
 
+  // This is called by your CameraAndGallery component
+    const onImageSelected = async (imageUri: string) => {
+        setCameraModalVisible(false);
+        try {
+            // Copy the image to a permanent location in your app's directory
+            const fileName = `${Date.now()}-${imageUri.split('/').pop()}`;
+            const newPath = `${RNFS.DocumentDirectoryPath}/${fileName}`;
+            await RNFS.copyFile(imageUri, newPath);
+
+            // Save the NEW local path to the state
+            setTakePhoto('Photo Selected')
+            setLocalPhotoPath(newPath);
+            console.log('Image copied locally to:', newPath);
+        } catch (error) {
+            console.error("Error copying file:", error);
+            Alert.alert("Error", "Could not save the selected photo.");
+        }
+    };
   return (
     <Modal
       isVisible={isVisible}
@@ -241,11 +279,7 @@ const handleCreate = async () => {
           isVisible={cameraModalVisible}
           onCreate={() => {}}
           onClose={() => setCameraModalVisible(false)}
-          onImageSelected={uri => {
-            setImgUri(uri);
-            setTakePhoto('Photo Selected');
-            setCameraModalVisible(false);
-          }}
+          onImageSelected={onImageSelected}
         />
         {/* Date Picker */}
         <TouchableOpacity
