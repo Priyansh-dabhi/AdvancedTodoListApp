@@ -33,6 +33,7 @@ import { markTaskAsDeleted, permanentlyDeleteTask } from '../DB/Database';
 import { useTaskContext } from '../Context/TaskContext';
 import { TaskContext } from '../Context/TaskContext';
 import { useAuth } from '../Context/AppwriteContext';
+import { Models } from 'appwrite';
 
 const Home = () => {
   //context
@@ -76,73 +77,58 @@ const Home = () => {
   // It depends on the 'user' object from the AuthContext.
 
   const syncFromAppwrite = async () => {
-    // 1. Guard Clause: If the user object isn't available yet,
-    //    do nothing and exit the function. The effect will
-    //    automatically re-run when the user object arrives.
-    if (!user) {
-      console.log("Auth context is not ready yet. Waiting for user...");
-      return;
-    }
+  if (!user) {
+    console.log("Auth context is not ready yet. Waiting for user...");
+    return;
+  }
 
-    // 2. Fetch Data: By this point, we are guaranteed to have a user.
-    console.log(`User ${user.$id} is available. Fetching tasks from Appwrite.`);
-    const res = await getTasks(user.$id);
+  console.log(`User ${user.$id} is available. Fetching tasks from Appwrite.`);
 
-    const mappedTasks = res.documents.map((doc) => ({
-      id: doc.$id,
-      task: doc.task,
-      timestamp: doc.timestamp,
-      description: doc.description,
-      dueDateTime: doc.dueDateTime,
-      completed: doc.completed === 1 || doc.completed === true,
-      isSynced: true,
-      userId: user.$id
+  // with TablesDB, the property is `rows`, not `documents`
+  const res = await getTasks(user.$id);
+
+  const mappedTasks: Task[] = res.rows.map((doc: any) => ({
+  id: doc.$id,
+  task: doc.task,
+  timestamp: doc.timestamp,
+  description: doc.description,
+  dueDateTime: doc.dueDateTime ?? null,
+  completed: doc.completed === 1 || doc.completed === true,
+  isSynced: true,
+  userId: user.$id,
+}));
+
+  // Save all tasks locally
+  await Promise.all(mappedTasks.map((task) => insertOrUpdateTask(task)));
+
+  console.log("All Appwrite tasks saved to local DB. Refreshing UI...");
+  fetchTasksFromDB();
+};
+
+const fetchTasksFromDB = () => {
+  if (!user) return;
+  getAllTasksByUser(user.$id, (fetchedTasks: any[]) => {
+    const normalizedTasks: Task[] = fetchedTasks.map((task) => ({
+      ...task,
+      completed: task.completed === 1,
+      isSynced: task.isSynced === 1,
     }));
+    setTasks(normalizedTasks);
+    console.log(`Fetched Tasks for user ${user.$id}:`, normalizedTasks);
+  });
+};
 
-    // 3. Save to Local DB (Safely): Use Promise.all to ensure all
-    //    database write operations are complete before proceeding.
-    //    This prevents the race condition where you try to read
-    //    from the DB before it has been updated.
-    const savePromises = mappedTasks.map(task => insertOrUpdateTask(task));
-    await Promise.all(savePromises);
-    
-    console.log('All Appwrite tasks saved to local DB. Refreshing UI...');
+const handleCreateTask = () => {
+  fetchTasksFromDB();
+};
 
-    // 4. Refresh UI: Now that the local database is guaranteed to be
-    //    up-to-date, fetch from it to render the tasks.
-    fetchTasksFromDB();
-  };
-  
-  
-  // Fetch tasks from DB
-  const fetchTasksFromDB = () => {
-    if (!user) return;
-    getAllTasksByUser(user.$id, (fetchedTasks: any[]) => {
-      const normalizedTasks: Task[] = fetchedTasks.map(task => ({
-        ...task,
-        completed: task.completed === 1,
-        isSynced: task.isSynced === 1,
-      }));
-      setTasks(normalizedTasks);
-      console.log(`Fetched Tasks for user ${user.$id}:`, normalizedTasks);
-    });
-    
-  };
-  
-  const handleCreateTask = () => {
-    fetchTasksFromDB();
-  };
-  
 useEffect(() => {
   if (user) {
-    // A user is logged in, so fetch their data.
     console.log(`User ${user.$id} detected. Syncing tasks.`);
     syncFromAppwrite();
   } else {
-    // The user is null (logged out), so clear the tasks from the UI.
-    // This is the crucial step that fixes the stale data issue.
     setTasks([]);
-    console.log('User logged out or not present, clearing tasks state.');
+    console.log("User logged out or not present, clearing tasks state.");
   }
 }, [user]);
 // // fetchTasksFromDB

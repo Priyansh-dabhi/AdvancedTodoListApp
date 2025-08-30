@@ -1,25 +1,3 @@
-// import SQLite from 'react-native-sqlite-storage';
-
-// SQLite.enablePromise(true);
-
-// const getDBConnection = async () => {
-//     return SQLite.openDatabase({ name: 'tasks.db', location: 'default' });
-// };
-
-// const createTables = async (db: SQLite.SQLiteDatabase) => {
-//     const query = `
-//         CREATE TABLE IF NOT EXISTS tasks (
-//         id INTEGER PRIMARY KEY AUTOINCREMENT,
-//         title TEXT NOT NULL,
-//         description TEXT,
-//         date TEXT,
-//         completed INTEGER DEFAULT 0
-//         );
-//     `;
-//     await db.executeSql(query);
-// };
-
-// export { getDBConnection, createTables };
 import SQLite from 'react-native-sqlite-storage';
 import { NewTask, Task } from '../Types/Task'; // Assuming both types are in this file
 
@@ -50,7 +28,9 @@ export const initDB = () => {
             completed INTEGER DEFAULT 0,
             isSynced INTEGER DEFAULT 0,
             userId TEXT,
-            isDeleted INTEGER DEFAULT 0
+            isDeleted INTEGER DEFAULT 0,
+            photoId TEXT NULL,
+            photoPath TEXT NULL
             )`,
             [],
             () => console.log('Database and table are ready.'),
@@ -64,6 +44,18 @@ export const initDB = () => {
   // This second transaction handles migrations for users who already have the app.
   // It ensures the new columns exist if the table was created with an older schema.
     db.transaction(tx => {
+        tx.executeSql(
+            `ALTER TABLE tasks ADD COLUMN photoId TEXT NULL`,
+            [],
+            () => console.log("Column 'photoId' added successfully."),
+            // ...
+        );
+        tx.executeSql(
+            `ALTER TABLE tasks ADD COLUMN photoPath TEXT NULL`,
+            [],
+            () => console.log("Column 'photoPath' added successfully."),
+            // ...
+        );
 
         // Migration for users who already have the app
         tx.executeSql(
@@ -145,8 +137,8 @@ export const insertTask = (task: NewTask) => {
 export const insertOrUpdateTask = (task: Task) => {
     db.transaction(tx => {
         tx.executeSql(
-            `INSERT OR REPLACE INTO tasks (id, task, timestamp, description, dueDateTime, completed, isSynced, userId)
-            VALUES (?, ?, ?, ?, ?, ?, ?, ?)`,
+            `INSERT OR REPLACE INTO tasks (id, task, timestamp, description, dueDateTime, completed, isSynced, userId, isDeleted, photoId, photoPath)
+            VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`,
         [
             task.id,
             task.task,
@@ -156,6 +148,9 @@ export const insertOrUpdateTask = (task: Task) => {
             task.completed ? 1 : 0,
             task.isSynced ? 1 : 0,
             task.userId,
+            task.isDeleted ? 1 : 0,
+            task.photoId,
+            task.photoPath,
         ]
     );
 });
