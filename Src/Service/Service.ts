@@ -1,201 +1,204 @@
-// import { Linking } from 'react-native';
-// import InAppBrowser from 'react-native-inappbrowser-reborn';
-import { Client, Account, ID, Databases, Storage, Query,  } from 'appwrite';
-import { useEffect,useState } from 'react';
+import { 
+  Client, 
+  Account, 
+  ID, 
+  TablesDB, 
+  Storage, 
+  Query, 
+  OAuthProvider 
+} from 'appwrite';
 import { Platform } from 'react-native';
 import Snackbar from 'react-native-snackbar';
-import { OAuthProvider } from 'appwrite';
-import {APPWRITE_ENDPOINT,APPWRITE_PROJECT_ID,APPWRITE_DATABASE_ID,APPWRITE_COLLECTION_ID,APPWRITE_BUCKET_ID} from '@env';
+import { 
+  APPWRITE_ENDPOINT,
+  APPWRITE_PROJECT_ID,
+  APPWRITE_DATABASE_ID,
+  APPWRITE_COLLECTION_ID,
+  APPWRITE_BUCKET_ID
+} from '@env';
+import RNFS from 'react-native-fs';
 
-// console.log('Endpoint:', `'${APPWRITE_ENDPOINT}'`, 'Length:', APPWRITE_ENDPOINT.length);
-// console.log('Project ID:', `'${APPWRITE_PROJECT_ID}'`, 'Length:', APPWRITE_PROJECT_ID.length);
-
-export const client = new Client();
-client
-  .setEndpoint(APPWRITE_ENDPOINT.trim()) 
+// ---------------------
+// CLIENT SETUP
+// ---------------------
+export const client = new Client()
+  .setEndpoint(APPWRITE_ENDPOINT.trim())
   .setProject(APPWRITE_PROJECT_ID.trim());
 
-  // setting platform for Appwrite client
-// switch (Platform.OS) {
-//   case 'android':
-//     client.setPlat // Use only on Android emulators, not in production
-//     break;
-//   // case 'ios':
-//   //   // iOS-specific settings if needed
-//   //   break;
-//   // case 'web':
-//   //   // Web-specific settings if needed
-//   //   break;
-//   default:
-//     break;
-// }
-  // Authentication
-  // instance of Account class which provides below methods
+// ---------------------
+// APPWRITE SERVICES
+// ---------------------
 export const account = new Account(client);
-export const databases = new Databases(client);
-type createUserAccount = {
-  name:string;
-  email:string;
-  password:string;
-}
-type loginUser = {
-  email:string;
-  password:string;
-}
-
-// SignUp
-export const createAccount = async ({email, password, name}:createUserAccount) => {
-  try{
-    const response = await account.create(ID.unique(), email, password, name);
-    return response;
-  }catch (error){
-    Snackbar.show({
-      text:String(error),
-      duration:Snackbar.LENGTH_SHORT,
-    })
-    return null;
-  }
-}
-
-// Login
-
-export const login = async ({email, password}:loginUser) => {
-  try{
-    const session =  await account.createEmailPasswordSession(email, password);
-    return session;
-  }catch (error) {
-    Snackbar.show({
-      text: String(error),
-      duration: Snackbar.LENGTH_SHORT,
-    })
-    return null;
-  }
-}
-  
-// Get current login user
-
-export const getCurrentUser = async () => {
-  try{
-    const user = await account.get();
-    console.log('Current User:', user.$id,user.email);
-    return user;
-    
-  }catch (error){
-    Snackbar.show({
-      text: String(error),
-      duration: Snackbar.LENGTH_SHORT,
-    })
-    return null;
-  }
-}
-  
-// Logout
-
-export const logout = async () =>{
-  try{
-    await account.deleteSession('current');
-    return true;
-  }catch (error){
-    Snackbar.show({
-      text: String(error),
-      duration: Snackbar.LENGTH_SHORT,
-    })
-    return null;
-  }
-}
-
-//  Google Sign-In
-
-// export const googleSignIn = async () => {
-//   try {
-//     const success = 'appwrite://auth/callback';
-//     const failure = 'appwrite://auth/failure';
-
-//     // This automatically opens the browser and starts OAuth flow
-//     await account.createOAuth2Session(
-//       OAuthProvider.Google, // or just 'google' if enum throws error
-//       success,
-//       failure
-//     );
-
-//     // No need for InAppBrowser or Linking here
-//     // Appwrite will handle the redirect
-//   } catch (error) {
-//     console.log('Google Sign-In failed:', error);
-//   }
-// };
-
-
-
-// --- New database-related functions ---
+export const tables = new TablesDB(client);
+export const storage = new Storage(client);
 
 export const DATABASE_ID = APPWRITE_DATABASE_ID.trim();
 export const COLLECTION_ID = APPWRITE_COLLECTION_ID.trim();
 
-console.log('DB_ID:', `'${APPWRITE_DATABASE_ID}'`, 'Length:', APPWRITE_DATABASE_ID.length);
-console.log('COLLECTION ID:', `'${APPWRITE_COLLECTION_ID}'`, 'Length:', APPWRITE_COLLECTION_ID.length);
-console.log('Bucket ID:', `'${APPWRITE_BUCKET_ID}'`, 'Length:', APPWRITE_BUCKET_ID.length);
+// ---------------------
+// TYPES
+// ---------------------
+type CreateUserAccount = {
+  name: string;
+  email: string;
+  password: string;
+};
+type LoginUser = {
+  email: string;
+  password: string;
+};
 
-const storage = new Storage(client);
+// ---------------------
+// AUTH FUNCTIONS
+// ---------------------
 
+// SignUp
+export const createAccount = async ({ email, password, name }: CreateUserAccount) => {
+  try {
+    const response = await account.create({
+      userId: ID.unique(),
+      email,
+      password,
+      name,
+    });
+    return response;
+  } catch (error) {
+    Snackbar.show({ text: String(error), duration: Snackbar.LENGTH_SHORT });
+    return null;
+  }
+};
 
+// Login
+export const login = async ({ email, password }: LoginUser) => {
+  try {
+    const session = await account.createEmailPasswordSession({ email, password });
+    return session;
+  } catch (error) {
+    Snackbar.show({ text: String(error), duration: Snackbar.LENGTH_SHORT });
+    return null;
+  }
+};
+
+// Get current user
+export const getCurrentUser = async () => {
+  try {
+    const user = await account.get();
+    console.log('Current User:', user.$id, user.email);
+    return user;
+  } catch (error) {
+    Snackbar.show({ text: String(error), duration: Snackbar.LENGTH_SHORT });
+    return null;
+  }
+};
+
+// Logout
+export const logout = async () => {
+  try {
+    await account.deleteSession({ sessionId: 'current' });
+    return true;
+  } catch (error) {
+    Snackbar.show({ text: String(error), duration: Snackbar.LENGTH_SHORT });
+    return null;
+  }
+};
+
+// ---------------------
+// TASK FUNCTIONS (Tables API)
+// ---------------------
 
 // Add Task
 export const addTask = async (taskData: {
   task: string;
   description: string;
-  dueDateTime: string;
+  dueDateTime: string | null;
   completed: boolean;
   timestamp: string;
   userId: string;
+  photoId: string | null;
 }) => {
   try {
-    // console.log("DB ID:", DATABASE_ID);
-    // console.log("Collection ID:", COLLECTION_ID);
-    const res = await databases.createDocument(
-      DATABASE_ID,
-      COLLECTION_ID,
-      ID.unique(),
-      taskData
-    );
-    return res; // return the created document
+    const res = await tables.createRow({
+      databaseId: DATABASE_ID,
+      tableId: COLLECTION_ID,
+      rowId: ID.unique(),
+      data: taskData,
+    });
+    return res;
   } catch (error) {
     console.error("Appwrite addTask error:", error);
-    throw error; // let UI handle the error
+    throw error;
   }
 };
 
 // Update Task
-export async function updateTaskFromAppwrite(docId: string, taskData: Partial<typeof addTask>) {
-  return await databases.updateDocument(
-    DATABASE_ID,
-    COLLECTION_ID,
-    docId,
-    taskData
-  );
+export async function updateTaskFromAppwrite(docId: string, taskData: any) {
+  return await tables.updateRow({
+    databaseId: DATABASE_ID,
+    tableId: COLLECTION_ID,
+    rowId: docId,
+    data: taskData,
+  });
 }
 
 // Delete Task
 export async function deleteTaskFromAppwrite(docId: string) {
-  return await databases.deleteDocument(DATABASE_ID, COLLECTION_ID, docId);
+  return await tables.deleteRow({
+    databaseId: DATABASE_ID,
+    tableId: COLLECTION_ID,
+    rowId: docId,
+  });
 }
 
 // Get All Tasks for User
 export const getTasks = async (userId: string) => {
   try {
-    const response = await databases.listDocuments(
-      DATABASE_ID,
-      COLLECTION_ID,
-      [
-        Query.equal('userId', userId) 
-      ]
-    );
+    const response = await tables.listRows({
+      databaseId: DATABASE_ID,
+      tableId: COLLECTION_ID,
+      queries: [Query.equal('userId', userId)],
+    });
     return response;
   } catch (error) {
     console.error("Failed to fetch tasks:", error);
     throw error;
   }
 };
+
+// ---------------------
+// STORAGE (Files)
+// ---------------------
+export async function uploadFile(localFilePath: string) {
+  try {
+    const stats = await RNFS.stat(localFilePath);
+    const fileSize = stats.size;
+    const fileName = localFilePath.split('/').pop() || 'unnamed_file.jpg';
+
+    let fileType = 'image/jpeg';
+    if (fileName.endsWith('.png')) {
+      fileType = 'image/png';
+    }
+
+    const file = {
+      uri: `file://${localFilePath}`,
+      name: fileName,
+      type: fileType,
+      size: fileSize,
+    } as any;
+
+    console.log('Final file object being sent to Appwrite:', JSON.stringify(file, null, 2));
+
+    const response = await storage.createFile({
+      bucketId: APPWRITE_BUCKET_ID,
+      fileId: ID.unique(),
+      file,
+    });
+
+    return response.$id;
+  } catch (error) {
+    console.error("Error uploading file:", error);
+    throw error;
+  }
+}
 
 
 // helper function to upload image to Appwrite Storage [we are using MIME type to determine the file type]
