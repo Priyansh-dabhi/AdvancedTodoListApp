@@ -75,14 +75,31 @@ const My_Tab = () => {
         }}
       />
       <Tab.Screen
-        name={Routes.Profile}
-        component={Profile}
-        options={{
-          tabBarIcon: ({ color, size }) => (
-            <Ionicons name="person" color={color} size={size} />
-          ),
-        }}
-      />
+  name={Routes.Profile}
+  component={Profile}
+  options={({ navigation }) => ({
+    tabBarIcon: ({ color, size }) => (
+      <Ionicons name="person" color={color} size={size} />
+    ),
+    headerShown: true,
+    headerTitle: '',
+    headerStyle: {
+      backgroundColor: '#4A90E2',
+    },
+    headerRight: () => (
+      <Pressable
+        onPress={() => navigation.navigate(Routes.EditProfile)}
+        style={{ marginRight: 16 }}
+      >
+        <Ionicons
+          name="create-outline"
+          size={24}
+          color="white"
+        />
+      </Pressable>
+    ),
+  })}
+/>
       <Tab.Screen
         name={Routes.Temperary}
         component={Temperary}
@@ -165,8 +182,9 @@ const AppStack = () => {
         name={Routes.EditProfile}
         component={EditProfile}
         options={{
+          headerStyle: { backgroundColor: '#4A90E2' },
           // headerBackTitle: 'Back',
-          headerShown:false
+          headerShown:true
           // headerTitle: 'Edit Profile',
         }}
       />
