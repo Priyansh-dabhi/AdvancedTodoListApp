@@ -19,14 +19,14 @@ import gettingUserName, { gettingUserEmail } from '../Components/GettingUserDeta
 import EditProfileModal from '../Components/EditProfileModal';
 import icons from '../../constants/images';
 
+const PRIMARY_COLOR = '#6C63FF';
+
 const Profile = () => {
   const [username, setUsername] = useState('');
   const { setIsLoggedIn, setUser } = useContext(AuthContext);
   const [avatarUri, setAvatarUri] = useState('');
   const [modalVisible, setModalVisible] = useState(false);
-  const [name , setName] = useState("");
   const navigation = useNavigation<any>();
-
 
   // handle logout
   const handleLogout = async () => {
@@ -66,35 +66,30 @@ const Profile = () => {
 
   return (
     <View style={styles.container}>
-      {/* Header */}
-      {/* <View style={styles.profileHeader}>
-            <Text style={styles.headerTitle}>Profile</Text>
-          </View>
-       */}
-
       <ScrollView contentContainerStyle={{ paddingBottom: 40 }}>
         {/* Profile Info */}
         <View style={styles.profileContainer}>
           <TouchableOpacity onPress={() => setModalVisible(true)}>
             <Image
-            // source={require('../../assets/icons/target.png')}
-            source={avatarUri ? { uri: avatarUri } : icons.userIcon2}
-            style={styles.avatar}
-          />
+              source={avatarUri ? { uri: avatarUri } : icons.userIcon2}
+              style={styles.avatar}
+            />
           </TouchableOpacity>
           <Text style={styles.name}>{user.name}</Text>
           <Text style={styles.email}>{user.email}</Text>
         </View>
+
         <EditProfileModal
-        isVisible={modalVisible}
-        onClose={() => setModalVisible(false)}
-        onCreate={() => {}}
-        onImageSelected={uri => {
-          console.log('Selected URI:', uri);
-          setAvatarUri(uri);
-          setModalVisible(false);
-        }}
+          isVisible={modalVisible}
+          onClose={() => setModalVisible(false)}
+          onCreate={() => {}}
+          onImageSelected={(uri) => {
+            console.log('Selected URI:', uri);
+            setAvatarUri(uri);
+            setModalVisible(false);
+          }}
         />
+
         {/* Task Stats */}
         <View style={styles.statsRow}>
           <StatCard label="Completed" value={stats.completed} />
@@ -131,7 +126,7 @@ const StatCard = ({ label, value }: { label: string; value: number }) => (
 // Settings item component
 const SettingsItem = ({ icon, label }: { icon: string; label: string }) => (
   <TouchableOpacity style={styles.settingsItem}>
-    <Ionicons name={icon} size={20} color="#4A90E2" />
+    <Ionicons name={icon} size={20} color={PRIMARY_COLOR} />
     <Text style={styles.settingsLabel}>{label}</Text>
     <Ionicons
       name="chevron-forward"
@@ -149,18 +144,6 @@ const styles = StyleSheet.create({
     flex: 1,
     backgroundColor: '#f6f7fb',
   },
-  profileHeader: {
-    backgroundColor: '#4A90E2',
-    paddingVertical: 20,
-    alignItems: 'center',
-    justifyContent: 'center',
-    height: 100,
-  },
-  headerTitle: {
-    color: '#fff',
-    fontSize: 20,
-    fontWeight: '700',
-  },
   profileContainer: {
     alignItems: 'center',
     paddingVertical: 30,
@@ -168,15 +151,18 @@ const styles = StyleSheet.create({
     marginBottom: 10,
   },
   avatar: {
-    width: 90,
-    height: 90,
-    borderRadius: 45,
+    width: 100,
+    height: 100,
+    borderRadius: 50,
     marginBottom: 12,
+    // borderWidth: 1,
+    // borderColor: PRIMARY_COLOR,
   },
   name: {
     fontSize: 20,
-    fontWeight: '600',
-    color: '#333',
+    fontWeight: '700',
+    color: PRIMARY_COLOR,
+    marginBottom: 4,
   },
   email: {
     fontSize: 14,
@@ -193,9 +179,9 @@ const styles = StyleSheet.create({
     alignItems: 'center',
   },
   statValue: {
-    fontSize: 18,
+    fontSize: 20,
     fontWeight: '700',
-    color: '#4A90E2',
+    color: PRIMARY_COLOR,
   },
   statLabel: {
     fontSize: 14,
@@ -220,13 +206,17 @@ const styles = StyleSheet.create({
     color: '#333',
   },
   logoutButton: {
-    backgroundColor: '#4A90E2',
+    backgroundColor: PRIMARY_COLOR,
     marginHorizontal: 20,
-    borderRadius: 8,
+    borderRadius: 10,
     paddingVertical: 14,
     flexDirection: 'row',
     justifyContent: 'center',
     alignItems: 'center',
+    elevation: 3,
+    shadowColor: '#000',
+    shadowOpacity: 0.2,
+    shadowRadius: 4,
   },
   logoutText: {
     color: '#fff',
