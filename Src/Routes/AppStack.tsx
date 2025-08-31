@@ -84,7 +84,7 @@ const My_Tab = () => {
     headerShown: true,
     headerTitle: '',
     headerStyle: {
-      backgroundColor: '#4A90E2',
+      backgroundColor: '#6C63FF',
     },
     headerRight: () => (
       <Pressable
@@ -200,7 +200,7 @@ const AppStack = () => {
         name={Routes.EditTask}
         component={EditTask}
         options={{
-          headerStyle: { backgroundColor: '#4A90E2' },
+          headerStyle: { backgroundColor: '#6C63FF' },
           headerLeft: () => (
             <TouchableOpacity onPress={() => navigation.goBack()}>
               <Image
