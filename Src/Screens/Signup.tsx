@@ -1,139 +1,140 @@
 import { StyleSheet, Text, View, KeyboardAvoidingView, TextInput, Pressable, Platform } from 'react-native'
-import React, { useContext, useState } from 'react'
-import { AuthStackParamList } from '../Routes/AuthStack';
-import { NativeStackScreenProps } from '@react-navigation/native-stack';
+import React, { useState } from 'react'
 import { createAccount, getCurrentUser, login } from '../Service/Service'
-import Snackbar from 'react-native-snackbar';
-import { AuthContext, useAuth } from '../Context/AppwriteContext';
-import Routes, { AppStackParamList } from '../Routes/Routes';
-import { useNavigation } from '@react-navigation/native';
-
-
-//Async Storage
+import Snackbar from 'react-native-snackbar'
+import { useAuth } from '../Context/AppwriteContext'
+import Routes from '../Routes/Routes'
+import { useNavigation } from '@react-navigation/native'
 import AsyncStorage from '@react-native-async-storage/async-storage'
 
-// type signupScreenProps = NativeStackScreenProps<AppStackParamList, 'Signup'>;
-
-
 const Signup = () => {
-//context
-    const {setIsLoggedIn, setUser} = useAuth();
-// states
-const [name, setName] = useState('');
-const [email, setEmail] = useState('');
-const [password, setPassword] = useState('');
-const [repeatPassword, setRepeatPassword] = useState('');
-const [error, setError] = useState('');
-const usenavigation = useNavigation<any>();
+  const { setIsLoggedIn, setUser } = useAuth()
+  const usenavigation = useNavigation<any>()
 
-//Signup Logic Function
+  // states
+  const [firstName, setFirstName] = useState('')
+  const [lastName, setLastName] = useState('')
+  const [email, setEmail] = useState('')
+  const [password, setPassword] = useState('')
+  const [repeatPassword, setRepeatPassword] = useState('')
+  const [error, setError] = useState('')
 
-// Signup Logic Function
-const handleSignup = async () => {
-    setError('');
+  // Signup Logic Function
+  const handleSignup = async () => {
+    setError('')
 
-    if (!name || !email || !password || !repeatPassword) {
-        setError('All fields are required');
-        return;
+    if (!firstName || !lastName || !email || !password || !repeatPassword) {
+      setError('All fields are required')
+      return
     }
 
     if (password !== repeatPassword) {
-        setError('Passwords do not match');
-        return;
+      setError('Passwords do not match')
+      return
     }
 
     try {
-        // Step 1: Create user account
-        const res = await createAccount({ name, email, password });
+      // Step 1: Create user account
+      const res = await createAccount({ firstName, lastName, email, password })
 
-        if (!res) {
-        setError('Signup failed. Try again');
-        return;
+      if (!res) {
+        setError('Signup failed. Try again')
+        return
+      }
+
+      // Step 2: Auto-login
+      const session = await login({ email, password })
+
+      if (session) {
+        const currentUser = await getCurrentUser()
+        if (currentUser) {
+          setUser(currentUser)
+          await AsyncStorage.setItem('user_session', JSON.stringify(currentUser))
         }
+        setIsLoggedIn(true)
 
-        // Step 2: Immediately create session for auto-login
-        const session = await login({ email, password });
-
-        if (session) {
-            const currentUser = await getCurrentUser();
-            if (currentUser) {
-                setUser(currentUser); 
-                await AsyncStorage.setItem('user_session', JSON.stringify(currentUser));
-            }
-        setIsLoggedIn(true);
-        
         Snackbar.show({
-            text: 'Signup successful!',
-            duration: Snackbar.LENGTH_SHORT,
-        });
-        } else {
-        setError('Could not start session after signup');
-        }
+          text: 'Signup successful!',
+          duration: Snackbar.LENGTH_SHORT,
+        })
+      } else {
+        setError('Could not start session after signup')
+      }
     } catch (err) {
-        console.log('Signup Error:', err);
-        setError('Something went wrong');
+      console.log('Signup Error:', err)
+      setError('Something went wrong')
     }
-};
+  }
 
-
-
-
-    return (
-        <KeyboardAvoidingView
-        behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
-        style={styles.container}>
-        <View style={styles.formContainer}>
+  return (
+    <KeyboardAvoidingView
+      behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
+      style={styles.container}
+    >
+      <View style={styles.formContainer}>
         <Text style={styles.appName}>Appwrite Auth</Text>
 
-        {/* Name */}
+        {/* First Name */}
         <TextInput
-            value={name}
-            onChangeText={text => {
-            setError('');
-            setName(text);
-            }}
-            placeholderTextColor={'#AEAEAE'}
-            placeholder="Name"
-            style={styles.input}
+          value={firstName}
+          onChangeText={text => {
+            setError('')
+            setFirstName(text)
+          }}
+          placeholderTextColor={'#AEAEAE'}
+          placeholder="First Name"
+          style={styles.input}
+        />
+
+        {/* Last Name */}
+        <TextInput
+          value={lastName}
+          onChangeText={text => {
+            setError('')
+            setLastName(text)
+          }}
+          placeholderTextColor={'#AEAEAE'}
+          placeholder="Last Name"
+          style={styles.input}
         />
 
         {/* Email */}
         <TextInput
-            value={email}
-            keyboardType="email-address"
-            onChangeText={text => {
-            setError('');
-            setEmail(text);
-            }}
-            placeholderTextColor={'#AEAEAE'}
-            placeholder="Email"
-            style={styles.input}
+          value={email}
+          keyboardType="email-address"
+          onChangeText={text => {
+            setError('')
+            setEmail(text)
+          }}
+          placeholderTextColor={'#AEAEAE'}
+          placeholder="Email"
+          style={styles.input}
         />
 
         {/* Password */}
         <TextInput
-            value={password}
-            onChangeText={text => {
-            setError('');
-            setPassword(text);
-            }}
-            placeholderTextColor={'#AEAEAE'}
-            placeholder="Password"
-            secureTextEntry
-            style={styles.input}
+          value={password}
+          onChangeText={text => {
+            setError('')
+            setPassword(text)
+          }}
+          placeholderTextColor={'#AEAEAE'}
+          placeholder="Password"
+          secureTextEntry
+          style={styles.input}
         />
 
         {/* Repeat password */}
         <TextInput
-            secureTextEntry
-            value={repeatPassword}
-            onChangeText={text => {
-            setError('');
-            setRepeatPassword(text);
-            }}
-            placeholderTextColor={'#AEAEAE'}
-            placeholder="Repeat Password"
-            style={styles.input}
+          secureTextEntry
+          value={repeatPassword}
+          onChangeText={text => {
+            setError('')
+            setRepeatPassword(text)
+          }}
+          placeholderTextColor={'#AEAEAE'}
+          placeholder="Repeat Password"
+          style={styles.input}
         />
 
         {/* Validation error */}
@@ -141,106 +142,102 @@ const handleSignup = async () => {
 
         {/* Signup button */}
         <Pressable
-            onPress={handleSignup}
-            style={[styles.btn, {marginTop: error ? 10 : 20}]}>
-            <Text style={styles.btnText}>Sign Up</Text>
+          onPress={handleSignup}
+          style={[styles.btn, { marginTop: error ? 10 : 20 }]}
+        >
+          <Text style={styles.btnText}>Sign Up</Text>
         </Pressable>
 
         {/* Login navigation */}
         <Pressable
-            onPress={() => usenavigation.navigate(Routes.Login)}
-            style={styles.loginContainer}>
-            <Text style={styles.haveAccountLabel}>
+          onPress={() => usenavigation.navigate(Routes.Login)}
+          style={styles.loginContainer}
+        >
+          <Text style={styles.haveAccountLabel}>
             Already have an account?{'  '}
             <Text style={styles.loginLabel}>Login</Text>
-            </Text>
+          </Text>
         </Pressable>
-        </View>
+      </View>
     </KeyboardAvoidingView>
   )
 }
 
 const styles = StyleSheet.create({
-    container: {
-        flex: 1,
-        backgroundColor: '#FFFFFF',
+  container: {
+    flex: 1,
+    backgroundColor: '#FFFFFF',
+  },
+  formContainer: {
+    justifyContent: 'center',
+    alignContent: 'center',
+    height: '100%',
+  },
+  appName: {
+    color: '#f02e65',
+    fontSize: 40,
+    fontWeight: 'bold',
+    alignSelf: 'center',
+    marginBottom: 20,
+  },
+  input: {
+    backgroundColor: '#fef8fa',
+    padding: 10,
+    height: 40,
+    alignSelf: 'center',
+    borderRadius: 5,
+    width: '80%',
+    color: '#000000',
+    marginTop: 10,
+    shadowColor: '#000',
+    shadowOffset: {
+      width: 0,
+      height: 2,
     },
-    formContainer: {
-        justifyContent: 'center',
-        alignContent: 'center',
-        height: '100%',
+    shadowOpacity: 0.23,
+    shadowRadius: 2.62,
+    elevation: 1,
+  },
+  errorText: {
+    color: 'red',
+    alignSelf: 'center',
+    marginTop: 10,
+  },
+  btn: {
+    backgroundColor: '#ffffff',
+    padding: 10,
+    height: 48,
+    alignSelf: 'center',
+    borderRadius: 5,
+    width: '80%',
+    marginTop: 10,
+    shadowColor: '#000',
+    shadowOffset: {
+      width: 0,
+      height: 2,
     },
-    appName: {
-        color: '#f02e65',
-        fontSize: 40,
-        fontWeight: 'bold',
-        alignSelf: 'center',
-        marginBottom: 20,
-    },
-    input: {
-        backgroundColor: '#fef8fa',
-        padding: 10,
-        height: 40,
-        alignSelf: 'center',
-        borderRadius: 5,
-
-        width: '80%',
-        color: '#000000',
-
-        marginTop: 10,
-        shadowColor: '#000',
-        shadowOffset: {
-        width: 0,
-        height: 2,
-        },
-        shadowOpacity: 0.23,
-        shadowRadius: 2.62,
-
-        elevation: 1,
-    },
-    errorText: {
-        color: 'red',
-        alignSelf: 'center',
-        marginTop: 10,
-    },
-    btn: {
-        backgroundColor: '#ffffff',
-        padding: 10,
-        height: 48,
-
-        alignSelf: 'center',
-        borderRadius: 5,
-        width: '80%',
-        marginTop: 10,
-
-        shadowColor: '#000',
-        shadowOffset: {
-        width: 0,
-        height: 2,
-        },
-        shadowOpacity: 0.23,
-        shadowRadius: 2.62,
-
-        elevation: 3,
-    },
-    btnText: {
-        color: '#484848',
-        alignSelf: 'center',
-        fontWeight: 'bold',
-        fontSize: 18,
-    },
-    loginContainer: {
-        marginTop: 60,
-    },
-    haveAccountLabel: {
-        color: '#484848',
-        alignSelf: 'center',
-        fontWeight: 'bold',
-        fontSize: 15,
-    },
-    loginLabel: {
-        color: '#1d9bf0',
-    },
+    shadowOpacity: 0.23,
+    shadowRadius: 2.62,
+    elevation: 3,
+  },
+  btnText: {
+    color: '#484848',
+    alignSelf: 'center',
+    fontWeight: 'bold',
+    fontSize: 18,
+  },
+  loginContainer: {
+    marginTop: 60,
+  },
+  haveAccountLabel: {
+    color: '#484848',
+    alignSelf: 'center',
+    fontWeight: 'bold',
+    fontSize: 15,
+  },
+  loginLabel: {
+    color: '#1d9bf0',
+  },
 })
 
 export default Signup
