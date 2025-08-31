@@ -5,7 +5,8 @@ import {
   TablesDB, 
   Storage, 
   Query, 
-  OAuthProvider 
+  OAuthProvider,
+
 } from 'appwrite';
 import { Platform } from 'react-native';
 import Snackbar from 'react-native-snackbar';
@@ -53,21 +54,31 @@ type LoginUser = {
 // ---------------------
 
 // SignUp
-export const createAccount = async ({ email, password, name }: CreateUserAccount) => {
+interface NewCreateUserAccount {
+  email: string;
+  password: string;
+  firstName: string;
+  lastName: string;
+}
+
+export const createAccount = async ({ email, password, firstName, lastName }: NewCreateUserAccount) => {
   try {
-    const response = await account.create({
-      userId: ID.unique(),
+    // Combine first and last name into Appwrite's `name` field
+    const fullName = `${firstName} ${lastName}`;
+
+    const response = await account.create(
+      ID.unique(),
       email,
       password,
-      name,
-    });
+      fullName
+    );
+
     return response;
   } catch (error) {
     Snackbar.show({ text: String(error), duration: Snackbar.LENGTH_SHORT });
     return null;
   }
 };
-
 // Login
 export const login = async ({ email, password }: LoginUser) => {
   try {
@@ -115,6 +126,7 @@ export const addTask = async (taskData: {
   timestamp: string;
   userId: string;
   photoId: string | null;
+  photoPath: string | null;
 }) => {
   try {
     const res = await tables.createRow({
@@ -178,12 +190,13 @@ export async function uploadFile(localFilePath: string) {
       fileType = 'image/png';
     }
 
-    const file = {
+    const file: File = {
       uri: `file://${localFilePath}`,
       name: fileName,
       type: fileType,
       size: fileSize,
-    } as any;
+      
+    }as any;
 
     console.log('Final file object being sent to Appwrite:', JSON.stringify(file, null, 2));
 
