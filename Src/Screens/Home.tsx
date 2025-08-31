@@ -96,6 +96,7 @@ const Home = () => {
   completed: doc.completed === 1 || doc.completed === true,
   isSynced: true,
   userId: user.$id,
+  photoPath: doc.photoPath || null,
 }));
 
   // Save all tasks locally
@@ -240,7 +241,7 @@ useFocusEffect(
             <Icon
               name="search"
               size={30}
-              color="#4A90E2"
+              color="#6C63FF"
               style={{ marginRight: 8, marginLeft: 8 }}
             />
           </TouchableOpacity>
@@ -354,7 +355,8 @@ const styles = StyleSheet.create({
     paddingBottom: 20,
     paddingHorizontal: 20,
     // backgroundColor: '#FF6B6B',
-    backgroundColor: '#4A90E2',
+    // backgroundColor: '#4A90E2',
+    backgroundColor: '#6C63FF',
     // flexDirection: 'row',
     flexDirection: 'column',
     // justifyContent: 'center',
@@ -446,7 +448,7 @@ const styles = StyleSheet.create({
     position: 'absolute',
     right: 20,
     bottom: 30,
-    backgroundColor: '#4A90E2',
+    backgroundColor: '#6C63FF',
     // backgroundColor: '#FF6B6B',
     width: 70,
     height: 70,
