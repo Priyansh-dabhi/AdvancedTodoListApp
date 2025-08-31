@@ -30,7 +30,7 @@ export const initDB = () => {
             userId TEXT,
             isDeleted INTEGER DEFAULT 0,
             photoId TEXT NULL,
-            photoPath TEXT NULL
+            photoPath TEXT
             )`,
             [],
             () => console.log('Database and table are ready.'),
@@ -109,30 +109,30 @@ export const initDB = () => {
 };
 
 // insert
-export const insertTask = (task: NewTask) => {
-  console.log('Received task in insertTask:', task); // <- Debug
-    db.transaction(tx => {
-        // Updated INSERT statement to use the new `dueDateTime` column
-        tx.executeSql(
-        `INSERT INTO tasks (task, timestamp, dueDateTime, completed, isSynced) VALUES (?, ?, ?, ?, ?)`,
-        [
-            task.task,
-            task.timestamp || '',
-            task.dueDateTime || '', // Use the new single property
-            task.completed ? 1 : 0,
-            task.isSynced ? 1 : 0,
-        ],
-        (_, result) => {
-            task.success?.(result);
-            console.log('Task inserted successfully:', result);
-        },
-        (_, error) => {
-            task.error?.(error);
-            return true;
-        }
-        );
-    });
-};
+// export const insertTask = (task: NewTask) => {
+//   console.log('Received task in insertTask:', task); // <- Debug
+//     db.transaction(tx => {
+//         // Updated INSERT statement to use the new `dueDateTime` column
+//         tx.executeSql(
+//         `INSERT INTO tasks (task, timestamp, dueDateTime, completed, isSynced) VALUES (?, ?, ?, ?, ?)`,
+//         [
+//             task.task,
+//             task.timestamp || '',
+//             task.dueDateTime || '', // Use the new single property
+//             task.completed ? 1 : 0,
+//             task.isSynced ? 1 : 0,
+//         ],
+//         (_, result) => {
+//             task.success?.(result);
+//             console.log('Task inserted successfully:', result);
+//         },
+//         (_, error) => {
+//             task.error?.(error);
+//             return true;
+//         }
+//         );
+//     });
+// };
 // Insert or update task
 export const insertOrUpdateTask = (task: Task) => {
     db.transaction(tx => {
@@ -150,7 +150,7 @@ export const insertOrUpdateTask = (task: Task) => {
             task.userId,
             task.isDeleted ? 1 : 0,
             task.photoId,
-            task.photoPath,
+            task.photoPath ?? null,
         ]
     );
 });
@@ -202,28 +202,27 @@ export const clearAllTasks = (): Promise<void> => {
     });
 };
 // update
-export const updateTask = (
-    id: number,
-    updatedTask: Partial<Task>,
-    success?: () => void,
-    error?: (err: any) => void
-) => {
-    const { task, description, dueDateTime } = updatedTask;
+export const updateTaskInDB  = (task: Task): Promise<void> => {
+  return new Promise((resolve, reject) => {
     db.transaction(tx => {
-        tx.executeSql(
-            `UPDATE tasks SET task = ?, description = ?, dueDateTime = ?, isSynced = 0 WHERE id = ?`,
-            [task, description, dueDateTime, id],
-            (_, result) => {
-                console.log(`Task with id ${id} updated successfully`);
-                success?.();
-            },
-            (_, err) => {
-                console.error(`Failed to update task with id ${id}:`, err);
-                error?.(err);
-                return true; // Propagate the error
-            }
-        );
+      tx.executeSql(
+        `UPDATE tasks 
+         SET task = ?, 
+             description = ?, 
+             dueDateTime = ?, 
+             photoPath = ?, 
+             isSynced = 0 
+         WHERE id = ?`,
+        [task.task, task.description, task.dueDateTime, task.photoPath || null, task.id],
+        () => resolve(),
+        (_, error) => {
+          console.error("Failed to update task in DB:", error);
+          reject(error);
+          return false;
+        }
+      );
     });
+  });
 };
 // delete
 // export const deleteTask = (
@@ -278,7 +277,7 @@ export const permanentlyDeleteTask = (id: string): Promise<void> => {
 
 // new update
 // This function saves all changes and marks the task as unsynced.
-export const updateTaskInDB = (task: Task): Promise<void> => {
+export const updateTask= (task: Task): Promise<void> => {
     return new Promise((resolve, reject) => {
         db.transaction(tx => {
             tx.executeSql(
