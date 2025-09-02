@@ -1,10 +1,112 @@
+// import React, { useEffect } from 'react';
+// import { StyleSheet, useColorScheme, Linking } from 'react-native';
+// import { NavigationContainer } from '@react-navigation/native';
+// import { AuthProvider, useAuth } from './Context/AppwriteContext';
+// import { TaskProvider } from './Context/TaskContext';
+// import Router from './Routes/Router';
+// import { getCurrentUser, } from './Service/Service';
+// // import { requestUserPermission, getFCMToken } from '../notifications'
+// function AppInner() {
+//   const { setUser, setIsLoggedIn } = useAuth();
+
+//   // ✅ ADD THIS NEW useEffect BLOCK
+//   // This effect runs once on app startup to check for an existing session.
+//   useEffect(() => {
+//     const checkExistingSession = async () => {
+//       const user = await getCurrentUser();
+//       if (user) {
+//         setUser(user);
+//         setIsLoggedIn(true);
+//         console.log('Found existing user session:', user.email);
+//       }
+//     };
+
+//     checkExistingSession();
+//   }, [setUser, setIsLoggedIn]); // Dependencies ensure this runs once
+
+//   // This is your existing deep link handler - it is correct.
+//   useEffect(() => {
+//     const handleDeepLink = async ({ url }: { url: string }) => {
+//       console.log('Deep link received:', url);
+//       if (url.startsWith('appwrite-callback-taskmanager://')) {
+//         await new Promise(res => setTimeout(res, 500));
+//         const user = await getCurrentUser();
+//         if (user) {
+//           setUser(user);
+//           setIsLoggedIn(true);
+//           console.log('User logged in via Google:', user.email);
+//         }
+//       }
+//     };
+
+//     Linking.getInitialURL().then(url => {
+//       if (url) handleDeepLink({ url });
+//     });
+
+//     const sub = Linking.addEventListener('url', handleDeepLink);
+//     return () => sub.remove();
+//   }, [setUser, setIsLoggedIn]);
+
+// // async function registerDeviceForPush() {
+// //   const userId = await getCurrentUser();
+// //   const fcmToken = await getFCMToken();
+
+// //   if (userId && fcmToken) {
+// //     await saveToken(userId.$id, fcmToken);
+// //     console.log("FCM token saved to Appwrite!");
+// //   } else {
+// //     console.warn("User ID or FCM token missing, not saved");
+// //   }
+// // }
+// //   // Request notification permissions and get FCM token
+// //   useEffect(() => {
+// //     const setupNotifications = async () => {
+// //       const hasPermission = await requestUserPermission();
+// //       if (hasPermission) {
+// //         const token = await getFCMToken();
+// //         if (token) {
+// //           // 🔽 Send this token to Appwrite in Step 2
+// //           await registerDeviceForPush();
+// //         }
+// //       }
+// //     };
+
+// //     setupNotifications();
+// //   }, []);
+//   return (
+//     <NavigationContainer>
+//       <Router />
+//     </NavigationContainer>
+//   );
+// }
+
+// function App() {
+//   const isDarkMode = useColorScheme() === 'dark';
+
+//   return (
+//     <AuthProvider>
+//       <TaskProvider>
+//         <AppInner />
+//       </TaskProvider>
+//     </AuthProvider>
+//   );
+// }
+
+// const styles = StyleSheet.create({
+//   container: {
+//     flex: 1,
+//   },
+// });
+
+// export default App;
+
 import { StatusBar, StyleSheet, useColorScheme, View, Linking, Alert } from 'react-native';
 import { NavigationContainer } from '@react-navigation/native';
 import { useContext, useEffect } from 'react';
-import { AuthContext, AuthProvider } from './Context/AppwriteContext';
+import { AuthContext, AuthProvider, useAuth } from './Context/AppwriteContext';
 import AuthStack from './Routes/AuthStack';
 import AppStack from './Routes/AppStack';
-import { getCurrentUser } from './Service/Service'; // 
+import { getCurrentUser, saveToken } from './Service/Service'; // 
 import { GestureHandlerRootView } from 'react-native-gesture-handler';
 import Router from './Routes/Router';
 // database
@@ -12,6 +114,7 @@ import Router from './Routes/Router';
 import SQLite from 'react-native-sqlite-storage'
 import { initDB } from './DB/Database';
 import { TaskProvider } from './Context/TaskContext';
+import { getFCMToken, requestUserPermission } from '@/notifications';
 
 // const AppInner = () => {
   //   const { isLoggedIn, setIsLoggedIn } = useContext(AuthContext);
@@ -35,7 +138,61 @@ import { TaskProvider } from './Context/TaskContext';
           // };
           
 function App() {
+    // This is your existing deep link handler - it is correct.
+    const { setUser, setIsLoggedIn } = useAuth();
 
+  useEffect(() => {
+    const handleDeepLink = async ({ url }: { url: string }) => {
+      console.log('Deep link received:', url);
+      if (url.startsWith('appwrite-callback-taskmanager://')) {
+        await new Promise(res => setTimeout(res, 500));
+        const user = await getCurrentUser();
+        if (user) {
+          setUser(user);
+          setIsLoggedIn(true);
+          console.log('User logged in via Google:', user.email);
+        }
+      }
+    };
+
+    Linking.getInitialURL().then(url => {
+      if (url) handleDeepLink({ url });
+    });
+
+    const sub = Linking.addEventListener('url', handleDeepLink);
+    return () => sub.remove();
+  }, [setUser, setIsLoggedIn]);
+
+
+async function registerDeviceForPush() {
+  const userId = await getCurrentUser();
+  const fcmToken = await getFCMToken();
+
+  if (userId && fcmToken) {
+    await saveToken(userId.$id, fcmToken);
+    console.log("FCM token saved to Appwrite!");
+  } else {
+    console.warn("User ID or FCM token missing, not saved");
+  }
+}
+  // Request notification permissions and get FCM token
+  useEffect(() => {
+    const setupNotifications = async () => {
+      const hasPermission = await requestUserPermission();
+      if (hasPermission) {
+        const token = await getFCMToken();
+        if (token) {
+          // 🔽 Send this token to Appwrite in Step 2
+          await registerDeviceForPush();
+        }
+      }
+    };
+
+    setupNotifications();
+  }, []);
+
+
+  // Inititalize database when app starts
   useEffect(() => {
       initDB();
   }, []);
