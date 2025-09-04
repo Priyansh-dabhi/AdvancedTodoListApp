@@ -34,10 +34,12 @@ import { useTaskContext } from '../Context/TaskContext';
 import { TaskContext } from '../Context/TaskContext';
 import { useAuth } from '../Context/AppwriteContext';
 import { Models } from 'appwrite';
+import { useTaskStats } from '../Context/TaskSummaryContext';
 
 const Home = () => {
   //context
   const {user, isLoggedIn} = useAuth();
+  const { stats, setStats } = useTaskStats();
 
   const navigation = useNavigation<any>();
   //Greeting the user
@@ -49,7 +51,8 @@ const Home = () => {
   const [tasks, setTasks] = useState<Task[]>([]);
   const [modalVisible, setModalVisible] = useState(false);
   const [searchQuery, setSearchQuery] = useState('');
-  
+  const [completedTask,setCompletedTask] = useState(0);
+
   // pull to refresh
   const [isRefreshing, setIsRefreshing] = useState(false);
   // clear serch query
@@ -107,7 +110,7 @@ const Home = () => {
 };
 
 const fetchTasksFromDB = () => {
-  if (!user) return;
+  if (!user) return "User";
   getAllTasksByUser(user.$id, (fetchedTasks: any[]) => {
     const normalizedTasks: Task[] = fetchedTasks.map((task) => ({
       ...task,
@@ -115,6 +118,12 @@ const fetchTasksFromDB = () => {
       isSynced: task.isSynced === 1,
     }));
     setTasks(normalizedTasks);
+    // Update stats for profile
+    const total = normalizedTasks.length;
+    const completed = normalizedTasks.filter(task => task.completed).length;
+    const pending = total - completed;
+
+    setStats({ total, completed, pending });
     console.log(`Fetched Tasks for user ${user.$id}:`, normalizedTasks);
   });
 };
@@ -138,30 +147,33 @@ useEffect(() => {
 // }, []);
 
 
-const onRefresh = useCallback(async () => {
-  setIsRefreshing(true); // Start the spinner
-  await syncFromAppwrite(); // Re-fetch the data
-  setIsRefreshing(false); // Stop the spinner
-}, [user]); // Recreate the function if the user changes
+// const onRefresh = useCallback(async () => {
+//   setIsRefreshing(true); // Start the spinner
+//   await syncFromAppwrite(); // Re-fetch the data
+//   setIsRefreshing(false); // Stop the spinner
+// }, [user]); // Recreate the function if the user changes
 
   // Delete task on checkbox press
 const handleTaskDeleteOnCheckboxPress = async (taskToDelete: Task) => {
-
   const appwriteDocumentId = taskToDelete.id;
-
     if (!appwriteDocumentId) {
         console.error("Delete failed: The task object is missing its ID.", taskToDelete);
         Alert.alert("Error", "Could not delete the task because its ID is missing.");
         return;
     }
-
     setTasks(prevTasks => prevTasks.filter(task => task.id !== appwriteDocumentId));
+    const updatedTasks = tasks.filter(task => task.id !== appwriteDocumentId);
+
+    const total = updatedTasks.length;
+    const completed = updatedTasks.filter(task => task.completed).length;
+    const pending = total - completed;
+    setStats({ total, completed, pending });
 
     try {
         await markTaskAsDeleted(appwriteDocumentId);
 
         await deleteTaskFromAppwrite  (appwriteDocumentId);
-
+        
         await permanentlyDeleteTask(appwriteDocumentId);
         
         console.log(`Task ${appwriteDocumentId} was successfully deleted and synced.`);
@@ -169,39 +181,22 @@ const handleTaskDeleteOnCheckboxPress = async (taskToDelete: Task) => {
     } catch (error) {
         console.log(`Failed to sync deletion for task ${appwriteDocumentId}. It remains marked for deletion locally.`);
     }
+    setCompletedTask(prev => prev + 1);
+    console.log("Completed tasks:", completedTask+1); 
 };
 // after updating it will re fetches the tasks from db!
 useFocusEffect(
         useCallback(() => {
             console.log("Home screen is in focus, fetching tasks from DB...");
-            fetchTasksFromDB(); // This re-fetches tasks from SQLite and updates the state.
+            fetchTasksFromDB(); 
 
-            // Optional: You can return a cleanup function if needed, but it's not required here.
             return () => {
                 console.log("Home screen is no longer in focus.");
             };
-        }, []) // The empty dependency array ensures this effect doesn't re-run unnecessarily.
+        }, []) 
     );
-  // const handleTaskCompletionToggle = (
-  //   taskId: number,
-  //   currentStatus: boolean,
-  // ) => {
-  //   // The completed parameter should be a boolean, not a number.
-  //   const newStatus = !currentStatus;
+  
 
-  //   updateTaskCompletion({
-  //     id: taskId,
-  //     completed: newStatus, // Pass the boolean directly
-  //     success: () => {
-  //       console.log(`Task ${taskId} completion toggled to ${newStatus}`);
-  //       fetchTasksFromDB(); // Re-fetch all tasks to update the UI
-  //     },
-  //     error: err => {
-  //       console.error('Failed to update task completion:', err);
-  //       Alert.alert('Error', 'Could not update task status.');
-  //     },
-  //   });
-  // };
   return (
     <SafeAreaView style={styles.container}>
       {/* <Text style={styles.title}>Welcome <Text style={{color:'#f02e65'}}>{username}</Text> to Home Screen 🎉 </Text>
@@ -252,7 +247,7 @@ useFocusEffect(
         refreshControl={
           <RefreshControl
             refreshing={isRefreshing}
-            onRefresh={onRefresh}
+            // onRefresh={onRefresh}
             colors={["#4A90E2"]} // Optional: customize spinner color
           />
         }
