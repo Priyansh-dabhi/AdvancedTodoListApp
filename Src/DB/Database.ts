@@ -178,6 +178,8 @@ export const getAllTasksByUser = (
         );
     });
 };
+// Async wrapper version for easier usage with async/await
+
 
 // new delete
 // Add this function to your database.ts file
@@ -338,19 +340,19 @@ export const updateTaskCompletion = ({
 // get all tasks [used in home screen]
 
 // get all task by id
-export const getTaskById = (id: number): Promise<Task | null> => {
-    return new Promise(resolve => {
-        db.transaction(tx => {
-        tx.executeSql(`SELECT * FROM tasks WHERE id = ?`, [id], (_, { rows }) => {
-            if (rows.length > 0) {
-            resolve(rows.item(0) as Task);
-            } else {
-            resolve(null);
-            }
-        });
-        });
-    });
-};
+// export const getTaskById = (id: number): Promise<Task | null> => {
+//     return new Promise(resolve => {
+//         db.transaction(tx => {
+//         tx.executeSql(`SELECT * FROM tasks WHERE id = ?`, [id], (_, { rows }) => {
+//             if (rows.length > 0) {
+//             resolve(rows.item(0) as Task);
+//             } else {
+//             resolve(null);
+//             }
+//         });
+//         });
+//     });
+// };
 
 // get unsynced tasks
 export const getUnsyncedTasks = (callback: (tasks: Task[]) => void) => {
@@ -368,7 +370,15 @@ export const getUnsyncedTasks = (callback: (tasks: Task[]) => void) => {
         );
     });
 };
-
+export const getUnsyncedTasksAsync = (): Promise<Task[]> => {
+  return new Promise((resolve, reject) => {
+    try {
+      getUnsyncedTasks((tasks: Task[]) => resolve(tasks));
+    } catch (err) {
+      reject(err);
+    }
+  });
+};
 // export const updateTaskSyncStatus = (taskId: number) => {
 //     return new Promise((resolve, reject) => {
 //         db.transaction(tx => {
