@@ -64,6 +64,7 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
         if (currentUser) {
             // Update user details and session just in case they changed
             setUser(currentUser);
+            console.log("Verified session with server.");
             await AsyncStorage.setItem('user_session', JSON.stringify(currentUser));
             setIsLoggedIn(true);
         }
@@ -81,7 +82,7 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
 
   const handleLogout = async () => {
     try {
-      await account.deleteSession('current');
+      await account.deleteSession({sessionId:'current'});
       await clearAllTasks();
       setUser(null);
       setIsLoggedIn(false);
