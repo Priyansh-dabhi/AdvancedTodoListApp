@@ -4,6 +4,8 @@ declare module '@env' {
     export const APPWRITE_PROJECT_ID: string;
     export const APPWRITE_DATABASE_ID: string;
     export const APPWRITE_COLLECTION_ID: string;
+    export const APPWRITE_COLLECTION_ID_FCM: string;
+    export const APPWRITE_COLLECTION_ID_USER_AVATAR: string;
     export const APPWRITE_BUCKET_ID: string;
     export const APPWRITE_API_KEY: string;
     
