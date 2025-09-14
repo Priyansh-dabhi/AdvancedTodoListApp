@@ -355,30 +355,38 @@ export const updateTaskCompletion = ({
 // };
 
 // get unsynced tasks
-export const getUnsyncedTasks = (callback: (tasks: Task[]) => void) => {
-    db.transaction(tx => {
+// Database.ts
+export const getUnsyncedTasksAsync = (): Promise<Task[]> => {
+    return new Promise((resolve, reject) => {
+        db.transaction(tx => {
         tx.executeSql(
-        `SELECT * FROM tasks WHERE isSynced = ?`,
-        [0],
-        (_, { rows }) => {
-            const unsyncedTasks = [];
+            `SELECT * FROM tasks WHERE isSynced = ?`,
+            [0],
+            (_, { rows }) => {
+            const unsyncedTasks: Task[] = [];
             for (let i = 0; i < rows.length; i++) {
-            unsyncedTasks.push(rows.item(i));
+                unsyncedTasks.push(rows.item(i));
             }
-            callback(unsyncedTasks);
-        }
+            resolve(unsyncedTasks);
+            },
+            (_, error): boolean => {
+            reject(error);
+            return false;
+            }
         );
+        });
     });
 };
-export const getUnsyncedTasksAsync = (): Promise<Task[]> => {
-  return new Promise((resolve, reject) => {
-    try {
-      getUnsyncedTasks((tasks: Task[]) => resolve(tasks));
-    } catch (err) {
-      reject(err);
-    }
-  });
-};
+
+// export const getUnsyncedTasksAsync = (): Promise<Task[]> => {
+//   return new Promise((resolve, reject) => {
+//     try {
+//       getUnsyncedTasks((tasks: Task[]) => resolve(tasks));
+//     } catch (err) {
+//       reject(err);
+//     }
+//   });
+// };
 // export const updateTaskSyncStatus = (taskId: number) => {
 //     return new Promise((resolve, reject) => {
 //         db.transaction(tx => {
@@ -391,3 +399,20 @@ export const getUnsyncedTasksAsync = (): Promise<Task[]> => {
 //         });
 //     });
 // };
+export const deleteTaskById = (id: string): Promise<void> => {
+    return new Promise((resolve, reject) => {
+        db.transaction(tx => {
+            tx.executeSql(
+                `DELETE FROM tasks WHERE id = ?`,
+                [id],
+                () => {
+                    resolve(); // Successfully deleted
+                },
+                (_, error) => {
+                    reject(error); // Failed to delete
+                    return false;
+                }
+            );
+        });
+    });
+};
