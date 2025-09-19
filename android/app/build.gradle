@@ -75,6 +75,9 @@ project.ext.react = [
   enableHermes: true
 ]
     apply from: "../../node_modules/react-native-vector-icons/fonts.gradle"
+    // ✅ Firebase google services plugin
+    apply plugin: 'com.google.gms.google-services'
+
 
 android {
     ndkVersion rootProject.ext.ndkVersion
@@ -124,4 +127,12 @@ dependencies {
     } else {
         implementation jscFlavor
     }
+    // ✅ Firebase BoM (manages versions of Firebase libs)
+    implementation platform('com.google.firebase:firebase-bom:34.2.0')
+
+    // ✅ Firebase Analytics (required for most projects)
+    implementation 'com.google.firebase:firebase-analytics'
+
+    // ✅ Firebase Cloud Messaging (needed for push notifications)
+    implementation 'com.google.firebase:firebase-messaging'
 }

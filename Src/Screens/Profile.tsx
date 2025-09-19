@@ -1,4 +1,4 @@
-import React, { useContext, useState } from 'react';
+import React, { useContext, useEffect, useState } from 'react';
 import {
   StyleSheet,
   Text,
@@ -6,26 +6,37 @@ import {
   TouchableOpacity,
   ScrollView,
   Image,
+  Alert,
 } from 'react-native';
 import Ionicons from 'react-native-vector-icons/Ionicons';
 import Snackbar from 'react-native-snackbar';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { useNavigation } from '@react-navigation/native';
 
-import { AuthContext } from '../Context/AppwriteContext';
-import { logout } from '../Service/Service';
+import { AuthContext, useAuth } from '../Context/AppwriteContext';
+import { getCurrentUser, logout } from '../Service/Service';
 import { clearAllTasks } from '../DB/Database';
 import gettingUserName, { gettingUserEmail } from '../Components/GettingUserDetail';
 import EditProfileModal from '../Components/EditProfileModal';
 import icons from '../../constants/images';
+import { useTaskStats } from '../Context/TaskSummaryContext';
+import RNFS from 'react-native-fs'
+import { storeUserAvatar } from '../Service/Service';
+
 
 const PRIMARY_COLOR = '#6C63FF';
 
 const Profile = () => {
+  // context 
+  const { stats,  } = useTaskStats();
+  const {isLoggedIn} = useAuth();
   const [username, setUsername] = useState('');
   const { setIsLoggedIn, setUser } = useContext(AuthContext);
   const [avatarUri, setAvatarUri] = useState('');
   const [modalVisible, setModalVisible] = useState(false);
+  const [localPhotoPath, setLocalPhotoPath] = useState<string | null>(null);
+
+
   const navigation = useNavigation<any>();
 
   // handle logout
@@ -41,8 +52,12 @@ const Profile = () => {
 
       // Clear session and local tasks
       await AsyncStorage.removeItem('user_session');
+      await AsyncStorage.removeItem('user_avatar');
       clearAllTasks();
       setUser(null);
+
+       // Reset local state
+    setLocalPhotoPath(null);
     } catch (err) {
       console.log('Logout Error:', err);
       Snackbar.show({
@@ -55,15 +70,68 @@ const Profile = () => {
   const user = {
     name: gettingUserName(),
     email: gettingUserEmail(),
-    profilePic: 'https://via.placeholder.com/100', // Replace with real profile pic
+    // profilePic: 'https://via.placeholder.com/100', // Replace with real profile pic
   };
 
-  const stats = {
-    completed: 24,
-    pending: 6,
-    total: 30,
-  };
+  // const Stats = {
+  //   completed: 24,
+  //   pending: 6,
+  //   total: 30,
+  // };\
 
+  // fetching user id
+const gettingUserId = () => {
+      const [userId, setUserId] = useState(''); 
+      useEffect(()=> {
+          const fetchUser = async () => {
+              const user = await getCurrentUser();
+              if(user){
+                  setUserId(user.$id);
+              }
+          }
+          fetchUser();
+      },[])   
+      return userId;
+}
+  const onImageSelected = async (imageUri: string) => {
+  setModalVisible(false);
+  try {
+    if(isLoggedIn === true){
+      const fileName = `${Date.now()}-${imageUri.split('/').pop()}`;
+    const newPath = `${RNFS.DocumentDirectoryPath}/${fileName}`;
+    await RNFS.copyFile(imageUri, newPath);
+    setLocalPhotoPath(newPath);
+
+    // Save to AsyncStorage
+    await AsyncStorage.setItem("user_avatar", newPath);
+    }else{
+      await AsyncStorage.setItem("user_avatar", icons.userIcon2);
+
+    }
+  } catch {
+    Alert.alert('Error', 'Could not save the photo.');
+  }
+};
+const userId = gettingUserId();  
+const handleAvatarUpload = async () =>{
+  try {
+      const res = await storeUserAvatar(userId,localPhotoPath);
+      return res;
+  }catch(error){
+    console.error("Error uploading avatar:", error);
+    Alert.alert('Error', 'Could not upload the avatar.');
+  }
+}
+useEffect(() => {
+  const loadAvatar = async () => {
+    const savedPath = await AsyncStorage.getItem("user_avatar");
+    if (savedPath) {
+      setLocalPhotoPath(savedPath);
+    }
+  };
+  handleAvatarUpload();
+  loadAvatar();
+}, []);
   return (
     <View style={styles.container}>
       <ScrollView contentContainerStyle={{ paddingBottom: 40 }}>
@@ -71,7 +139,11 @@ const Profile = () => {
         <View style={styles.profileContainer}>
           <TouchableOpacity onPress={() => setModalVisible(true)}>
             <Image
-              source={avatarUri ? { uri: avatarUri } : icons.userIcon2}
+              source={
+    localPhotoPath && localPhotoPath.length > 0
+      ? { uri: `file://${localPhotoPath}` } // ✅ ensure proper URI
+      : icons.userIcon2 // ✅ fallback default
+  }
               style={styles.avatar}
             />
           </TouchableOpacity>
@@ -83,11 +155,7 @@ const Profile = () => {
           isVisible={modalVisible}
           onClose={() => setModalVisible(false)}
           onCreate={() => {}}
-          onImageSelected={(uri) => {
-            console.log('Selected URI:', uri);
-            setAvatarUri(uri);
-            setModalVisible(false);
-          }}
+          onImageSelected={onImageSelected}
         />
 
         {/* Task Stats */}

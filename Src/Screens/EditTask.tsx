@@ -111,6 +111,7 @@ const EditTask = () => {
         task: updatedTask.task,
         description: updatedTask.description,
         dueDateTime: updatedTask.dueDateTime,
+        photoPath: updatedTask.photoPath
       });
 
       await updateTaskSyncStatus(selectedTask.id, true);

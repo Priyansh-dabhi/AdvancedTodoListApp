@@ -1,55 +1,74 @@
-import { Pressable, Text, StyleSheet, Image, View, } from 'react-native';
+import { Pressable, Text, StyleSheet, Image, View, TouchableOpacity, } from 'react-native';
 import React from 'react'
-
+import images from '@/constants/images';
 
 type GoogleButtonProps = {
   onPress: () => void;
 };
 
 const GoogleButton: React.FC<GoogleButtonProps> = ({ onPress }) => {
-    return (
-        <Pressable style={styles.googleButton} onPress={onPress}>
-        <View style={styles.googleContent}>
-            <Image
-            source={{
-                uri: 'https://upload.wikimedia.org/wikipedia/commons/thumb/5/53/Google_%22G%22_Logo.svg/512px-Google_%22G%22_Logo.svg.png',
-            }}
-            style={styles.googleIcon}
-            />
-            <Text style={styles.googleText}>Sign in with Google</Text>
-        </View>
-        </Pressable>
-    );
+  return (
+    <Pressable
+      onPress={onPress}
+      style={{
+        flexDirection: "row",
+        alignItems: "center",
+        justifyContent: "center",
+        backgroundColor: "white",
+        borderWidth: 1,
+        borderColor: "#ddd",
+        borderRadius: 8,
+        paddingVertical: 10,
+        paddingHorizontal: 15,
+        width: "auto",
+        alignSelf: "center",
+        marginBottom: 30,
+    }}
+    >
+      {/* Google Logo */}
+      <Image
+        source={images.googleLogo}
+        style={{ width: 20, height: 20, marginRight: 10 }}
+        resizeMode="contain"
+      />
+
+      {/* Button Text */}
+      <Text style={{ fontSize: 16, fontWeight: "500", color: "#333" }}>
+        Sign in with Google
+      </Text>
+    </Pressable>        
+  );
 };
 
-export default GoogleButton
-
 const styles = StyleSheet.create({
-        googleButton: {
-        backgroundColor: '#ffffff',
-        borderColor: '#dddddd',
-        borderWidth: 1,
-        paddingVertical: 12,
-        paddingHorizontal: 20,
-        borderRadius: 6,
-        width: '80%',
-        alignSelf: 'center',
-        marginTop: 20,
-        elevation: 2,
-    },
-    googleContent: {
-        flexDirection: 'row',
-        alignItems: 'center',
-        justifyContent: 'center',
-    },
-    googleIcon: {
-        width: 20,
-        height: 20,
-        marginRight: 10,
-    },
-    googleText: {
-        fontSize: 16,
-        color: '#000',
-        fontWeight: '500',
-    },
-})
+  button: {
+    borderWidth: 1,
+    borderColor: "#dadce0",
+    borderRadius: 6,
+    backgroundColor: "#fff",
+    paddingVertical: 10,
+    paddingHorizontal: 20,
+    shadowColor: "#000",
+    shadowOpacity: 0.1,
+    shadowOffset: { width: 0, height: 2 },
+    shadowRadius: 2,
+    elevation: 1,
+  },
+  content: {
+    flexDirection: "row",
+    alignItems: "center",
+    justifyContent: "center",
+  },
+  logo: {
+    width: 20,
+    height: 20,
+    marginRight: 12,
+  },
+  text: {
+    fontSize: 16,
+    color: "#3c4043",
+    fontWeight: "500",
+  },
+});
+
+export default GoogleButton;

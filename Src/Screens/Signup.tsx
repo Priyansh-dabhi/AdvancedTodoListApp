@@ -174,7 +174,8 @@ const styles = StyleSheet.create({
     height: '100%',
   },
   appName: {
-    color: '#f02e65',
+    // color: '#f02e65',
+    color: '#6C63Ff',
     fontSize: 40,
     fontWeight: 'bold',
     alignSelf: 'center',

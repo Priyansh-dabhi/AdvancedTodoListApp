@@ -29,9 +29,11 @@ const AuthStack = () => {
               component={Login} 
               options={{
                 headerStyle: {
-                  backgroundColor: '#4A90E2',
+                  backgroundColor: '#6C63Ff',
                 },
-                
+                headerTitleStyle:{
+                  color:'#fff'
+                },
                 headerShown: true,
               }}
               />
@@ -40,8 +42,12 @@ const AuthStack = () => {
               component={Signup} 
               options={{
                 headerStyle: {
-                  backgroundColor: '#4A90E2',
+                  backgroundColor: '#6C63Ff',
                 },
+                headerTitleStyle:{
+                  color:'#fff'
+                },
+                
                 
                 headerShown: true,
               }}

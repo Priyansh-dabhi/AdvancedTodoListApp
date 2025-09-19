@@ -66,9 +66,9 @@ const EditProfileModal = ({isVisible,onClose,onCreate,onImageSelected}: Props) =
                 <TouchableOpacity style={styles.optionBtn} onPress={handleGallery}>
                     <Text style={styles.optionText}>Choose from Gallery</Text>
                 </TouchableOpacity>
-                <TouchableOpacity style={styles.optionBtn} onPress={handleGallery}>
+                {/* <TouchableOpacity style={styles.optionBtn} onPress={handleGallery}>
                     <Text style={styles.optionText}>Change Name</Text>
-                </TouchableOpacity>
+                </TouchableOpacity> */}
                 <TouchableOpacity style={[styles.optionBtn, styles.cancelBtn]} onPress={onClose}>
                     <Text style={[styles.optionText, styles.cancelText]}>Cancel</Text>
                 </TouchableOpacity>

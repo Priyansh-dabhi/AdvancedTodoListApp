@@ -106,36 +106,20 @@ import { useContext, useEffect } from 'react';
 import { AuthContext, AuthProvider, useAuth } from './Context/AppwriteContext';
 import AuthStack from './Routes/AuthStack';
 import AppStack from './Routes/AppStack';
-import { getCurrentUser, saveToken } from './Service/Service'; // 
+import { addTask, getCurrentUser, syncOfflineTasks } from './Service/Service'; // 
+// import { getCurrentUser, saveToken } from './Service/Service'; // 
 import { GestureHandlerRootView } from 'react-native-gesture-handler';
 import Router from './Routes/Router';
 // database
 // import { createTables, getDBConnection } from './DB/Database';
 import SQLite from 'react-native-sqlite-storage'
-import { initDB } from './DB/Database';
+import {  getUnsyncedTasksAsync, initDB, insertOrUpdateTask } from './DB/Database';
 import { TaskProvider } from './Context/TaskContext';
 import { getFCMToken, requestUserPermission } from '@/notifications';
+import { TaskSummaryProvider } from './Context/TaskSummaryContext';
+import NetInfo from '@react-native-community/netinfo';
+import { Task } from './Types/Task';
 
-// const AppInner = () => {
-  //   const { isLoggedIn, setIsLoggedIn } = useContext(AuthContext);
-  
-  //   useEffect(() => {
-    //   const checkDeepLink = async () => {
-      //     const url = await Linking.getInitialURL();
-      //     if (url?.startsWith('appwrite://auth')) {
-        //       const user = await getCurrentUser();
-        //       if (user) setIsLoggedIn(true);
-        //     }
-        //   };
-        // }, []);
-        
-        
-        //   return (
-          //     <NavigationContainer>
-          //       {isLoggedIn ? <AppStack/> : <AuthStack />}
-          //     </NavigationContainer>
-          //   );
-          // };
           
 function App() {
     // This is your existing deep link handler - it is correct.
@@ -164,51 +148,44 @@ function App() {
   }, [setUser, setIsLoggedIn]);
 
 
-async function registerDeviceForPush() {
-  const userId = await getCurrentUser();
-  const fcmToken = await getFCMToken();
 
-  if (userId && fcmToken) {
-    await saveToken(userId.$id, fcmToken);
-    console.log("FCM token saved to Appwrite!");
-  } else {
-    console.warn("User ID or FCM token missing, not saved");
-  }
-}
-  // Request notification permissions and get FCM token
+function SyncHandler() {
+  const { user } = useAuth();
+
   useEffect(() => {
-    const setupNotifications = async () => {
-      const hasPermission = await requestUserPermission();
-      if (hasPermission) {
-        const token = await getFCMToken();
-        if (token) {
-          // 🔽 Send this token to Appwrite in Step 2
-          await registerDeviceForPush();
-        }
+    if (!user) return Alert.alert("No user logged in, cannot sync tasks.");
+    const unsubscribe = NetInfo.addEventListener(state => {
+      if (state.isConnected && state.isInternetReachable) {
+        console.log("📶 Back online → syncing unsynced tasks...");
+        syncOfflineTasks(user.$id);
       }
-    };
+    });
+    return () => unsubscribe();
+  }, [user]);
 
-    setupNotifications();
-  }, []);
+  return null;
+}
 
 
   // Inititalize database when app starts
   useEffect(() => {
       initDB();
   }, []);
-      const isDarkMode = useColorScheme() === 'dark';
 
   return (
     // <AuthProvider>
     //   <AppInner />
     // </AuthProvider>
-    <AuthProvider>
-      <TaskProvider>
-        <NavigationContainer>
-          <Router/>
-        </NavigationContainer>
-      </TaskProvider>
-    </AuthProvider>
+<AuthProvider>
+  <SyncHandler />
+  <TaskProvider>
+    <TaskSummaryProvider>
+      <NavigationContainer>
+        <Router/>
+      </NavigationContainer>
+    </TaskSummaryProvider>
+  </TaskProvider>
+</AuthProvider>
 
   );
 }

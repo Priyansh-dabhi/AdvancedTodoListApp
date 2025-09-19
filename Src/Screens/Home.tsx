@@ -39,8 +39,7 @@ import { useTaskStats } from '../Context/TaskSummaryContext';
 const Home = () => {
   //context
   const {user, isLoggedIn} = useAuth();
-  const { stats, setStats } = useTaskStats();
-
+  const { stats,updateStats } = useTaskStats();
   const navigation = useNavigation<any>();
   //Greeting the user
   const [greeting, setGreeting] = useState('');
@@ -119,11 +118,8 @@ const fetchTasksFromDB = () => {
     }));
     setTasks(normalizedTasks);
     // Update stats for profile
-    const total = normalizedTasks.length;
-    const completed = normalizedTasks.filter(task => task.completed).length;
-    const pending = total - completed;
-
-    setStats({ total, completed, pending });
+    updateStats(normalizedTasks);
+    // setStats({ total, completed, pending });
     console.log(`Fetched Tasks for user ${user.$id}:`, normalizedTasks);
   });
 };
@@ -161,13 +157,14 @@ const handleTaskDeleteOnCheckboxPress = async (taskToDelete: Task) => {
         Alert.alert("Error", "Could not delete the task because its ID is missing.");
         return;
     }
-    setTasks(prevTasks => prevTasks.filter(task => task.id !== appwriteDocumentId));
-    const updatedTasks = tasks.filter(task => task.id !== appwriteDocumentId);
+    setTasks(prevTasks => {
+    const updatedTasks = prevTasks.filter(task => task.id !== appwriteDocumentId);
 
-    const total = updatedTasks.length;
-    const completed = updatedTasks.filter(task => task.completed).length;
-    const pending = total - completed;
-    setStats({ total, completed, pending });
+    updateStats(updatedTasks);
+
+    return updatedTasks;
+  });
+
 
     try {
         await markTaskAsDeleted(appwriteDocumentId);
@@ -218,8 +215,15 @@ useFocusEffect(
 
         <View style={styles.searchRow}>
           <View style={styles.searchContainer}>
+            <Icon
+              name="search"
+              size={25}
+              color="#6C63FF"
+              style={{ marginRight: 8, marginLeft: 8 }}
+            />
             <TextInput
-              placeholder="Search tasks..."
+              
+              placeholder={"Search tasks..."}
               clearButtonMode="always"
               placeholderTextColor="#888"
               style={styles.searchInput}
@@ -232,14 +236,14 @@ useFocusEffect(
               </TouchableOpacity>
             )}
           </View>
-          <TouchableOpacity style={styles.searchButton}>
+          {/* <TouchableOpacity style={styles.searchButton}>
             <Icon
               name="search"
               size={30}
               color="#6C63FF"
               style={{ marginRight: 8, marginLeft: 8 }}
             />
-          </TouchableOpacity>
+          </TouchableOpacity> */}
         </View>
       </View>
 
@@ -278,32 +282,48 @@ useFocusEffect(
         }
         keyExtractor={item => item.id.toString()}
         // style={{ width: '100%',borderWidth:1 }}
-        renderItem={({ item }) => (
-          <TouchableOpacity
-            delayPressIn={100}
-            delayPressOut={100}
-            delayLongPress={500}
-            hitSlop={{ top: 10, bottom: 10, left: 20, right: 20 }}
-            onPress={() => {
-              setSelectedTask(item);
-              navigation.navigate(Routes.EditTask);
-            }}
-          >
-            <View style={styles.taskCard}>
-              <View style={{ alignItems: 'center', justifyContent: 'center' }}>
-                <BouncyCheckbox
-                  fillColor="#4A90E2"
-                  isChecked={item.completed}
-                  onPress={() => handleTaskDeleteOnCheckboxPress(item)}
-                />
+        renderItem={({ item }) => {
+          // ✅ START: CODE ADDED FOR TIMESTAMP CONVERSION
+          const displayDate = item.timestamp
+            ? new Date(item.timestamp).toLocaleString('en-GB', {
+                day: '2-digit',
+                month: '2-digit',
+                year: '2-digit', // Use '2-digit' for 'yy' format
+                hour: '2-digit',
+                minute: '2-digit',
+                hour12: true,
+              })
+            : 'No date'; // Fallback text if the timestamp is missing
+          // ✅ END: CODE ADDED
+
+          return (
+            <TouchableOpacity
+              delayPressIn={100}
+              delayPressOut={100}
+              delayLongPress={500}
+              hitSlop={{ top: 10, bottom: 10, left: 20, right: 20 }}
+              onPress={() => {
+                setSelectedTask(item);
+                navigation.navigate(Routes.EditTask);
+              }}
+            >
+              <View style={styles.taskCard}>
+                <View style={{ alignItems: 'center', justifyContent: 'center' }}>
+                  <BouncyCheckbox
+                    fillColor="#4A90E2"
+                    isChecked={item.completed}
+                    onPress={() => handleTaskDeleteOnCheckboxPress(item)}
+                  />
+                </View>
+                <View style={{ flex: 1 }}>
+                  <Text style={styles.taskItem}>{item.task}</Text>
+                  {/* ♻️ MODIFIED: Display the formatted date */}
+                  <Text style={styles.taskItem}>{displayDate}</Text>
+                </View>
               </View>
-              <View style={{ flex: 1 }}>
-                <Text style={styles.taskItem}>{item.task}</Text>
-                <Text style={styles.taskItem}>{item.timestamp}</Text>
-              </View>
-            </View>
-          </TouchableOpacity>
-        )}
+            </TouchableOpacity>
+          );
+        }}
         contentContainerStyle={{
           flexGrow: 1,
           // height: '100%',
@@ -366,11 +386,11 @@ const styles = StyleSheet.create({
   welcomeText: {
     fontSize: 20,
     fontWeight: '600',
-    color: '#2D3748',
+    color: '#ffffff',
   },
   usernameText: {
-    fontSize: 14,
-    color: '#718096  ',
+    fontSize: 16,
+    color: '#ffffff',
     marginTop: 2,
   },
   // Search bar styles
@@ -385,12 +405,12 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     alignItems: 'center',
     backgroundColor: '#fff',
-    paddingHorizontal: 15,
-    marginRight: 10,
+    paddingHorizontal: 5,
+    // marginRight: 5,
     height: 55,
     // width: '50%',
     // width: 10,
-    paddingVertical: 5,
+    // paddingVertical: 5,
     borderRadius: 12,
     elevation: 4,
     shadowColor: '#000',

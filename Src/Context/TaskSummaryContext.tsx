@@ -1,4 +1,5 @@
 import React, { createContext, useContext, useState } from 'react';
+import { Task } from '../Types/Task'; // make sure you have your Task type here
 
 type TaskSummaryContextType = {
   total: number;
@@ -8,7 +9,7 @@ type TaskSummaryContextType = {
 
 type TaskSummaryContextValue = {
   stats: TaskSummaryContextType;
-  setStats: React.Dispatch<React.SetStateAction<TaskSummaryContextType>>;
+  updateStats: (tasks: Task[]) => void;
 };
 
 // Create context
@@ -22,8 +23,17 @@ export const TaskSummaryProvider: React.FC<{ children: React.ReactNode }> = ({ c
     pending: 0,
   });
 
+  // Centralized function to recalc stats
+  const updateStats = (tasks: Task[]) => {
+    const total = tasks.length;
+    const completed = tasks.filter(task => task.completed).length;
+    const pending = total - completed;
+
+    setStats({ total, completed, pending });
+  };
+
   return (
-    <TaskSummaryContext.Provider value={{ stats, setStats }}>
+    <TaskSummaryContext.Provider value={{ stats, updateStats }}>
       {children}
     </TaskSummaryContext.Provider>
   );

@@ -86,21 +86,21 @@ const My_Tab = () => {
     headerStyle: {
       backgroundColor: '#6C63FF',
     },
-    headerRight: () => (
-      <Pressable
-        onPress={() => navigation.navigate(Routes.EditProfile)}
-        style={{ marginRight: 16 }}
-      >
-        <Ionicons
-          name="create-outline"
-          size={24}
-          color="white"
-        />
-      </Pressable>
-    ),
+    // headerRight: () => (
+    //   <Pressable
+    //     onPress={() => navigation.navigate(Routes.EditProfile)}
+    //     style={{ marginRight: 16 }}
+    //   >
+    //     <Ionicons
+    //       name="create-outline"
+    //       size={24}
+    //       color="white"
+    //     />
+    //   </Pressable>
+    // ),
   })}
 />
-      <Tab.Screen
+      {/* <Tab.Screen
         name={Routes.Temperary}
         component={Temperary}
         options={{
@@ -117,7 +117,7 @@ const My_Tab = () => {
             <Ionicons name="compass" color={color} size={size} />
           ),
         }}
-      />
+      /> */}
     </Tab.Navigator>
   );
 };

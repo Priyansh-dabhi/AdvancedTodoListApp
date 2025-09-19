@@ -94,6 +94,8 @@ const AddTaskModal = ({ isVisible, onClose, onCreate }: Props) => {
       minute: '2-digit',
       hour12: true,
     }).format(new Date());
+    
+    const sortableTimestamp = new Date().toISOString();
 
     // checking network status
     const state =  await NetInfo.fetch();
@@ -106,7 +108,7 @@ const AddTaskModal = ({ isVisible, onClose, onCreate }: Props) => {
         description: '',
         dueDateTime: dueDateTimeISO,
         completed: false,
-        timestamp: formattedTimestamp,
+        timestamp: sortableTimestamp,
         userId: user.$id,
         photoId: 'temp',
         photoPath: localPhotoPath ,
@@ -128,57 +130,25 @@ const AddTaskModal = ({ isVisible, onClose, onCreate }: Props) => {
       };
       insertOrUpdateTask(taskForSQLite);
       } else {
-      // 📴 Offline → Save to SQLite with temp ID
-      const offlineId = `local-${Date.now()}`;
+      
+        const offlineId = `local-${Date.now()}`;
 
-      const offlineTask: Task = {
-        id: offlineId,
-        task: task.trim(),
-        timestamp: formattedTimestamp,
-        description: '',
-        dueDateTime: dueDateTimeISO,
-        completed: false,
-        isSynced: false, // 🚨 mark as unsynced
-        userId: user.$id,
-        photoId: 'temp',
-        photoPath: localPhotoPath ?? null,
-      };
+        const offlineTask: Task = {
+          id: offlineId,
+          task: task.trim(),
+          timestamp: sortableTimestamp,
+          description: '',
+          dueDateTime: dueDateTimeISO,
+          completed: false,
+          isSynced: false, // 🚨 mark as unsynced
+          userId: user.$id,
+          photoId: 'temp',
+          photoPath: localPhotoPath ?? null,
+        };
 
-      insertOrUpdateTask(offlineTask);
-      console.log('📴 Task saved offline:', offlineTask);
-
-      // 🔄 Try background sync after saving
-      NetInfo.addEventListener(async state => {
-        if (state.isConnected && state.isInternetReachable) {
-          console.log('📶 Back online → syncing offline task...');
-          try {
-            const syncedDoc = await addTask({
-            task: offlineTask.task ?? '',                  // string
-            description: offlineTask.description ?? '',    // string
-            dueDateTime: offlineTask.dueDateTime ?? null,  // string | null
-            completed: offlineTask.completed ?? false,     // boolean
-            timestamp: offlineTask.timestamp ?? new Date().toISOString(), // string
-            userId: offlineTask.userId ?? '',              // string
-            photoId: offlineTask.photoId ?? 'temp',        // string
-            photoPath: offlineTask.photoPath ?? null,      // string | null
-          });
-
-            if (syncedDoc?.$id) {
-              // Replace temp task with real Appwrite one
-              const syncedTask: Task = {
-                ...offlineTask,
-                id: syncedDoc.$id,
-                isSynced: true,
-              };
-              insertOrUpdateTask(syncedTask);
-              console.log('✅ Offline task synced:', syncedTask);
-            }
-          } catch (err) {
-            console.error('❌ Failed syncing offline task:', err);
-          }
-        }
-      });
-    }
+        insertOrUpdateTask(offlineTask);
+        console.log('📴 Task saved offline:', offlineTask);
+      }
 
       onCreate();
       resetForm();

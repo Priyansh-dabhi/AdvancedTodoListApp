@@ -14,7 +14,7 @@ import { getCurrentUser, login } from '../Service/Service';
 import { AuthContext, useAuth } from '../Context/AppwriteContext';
 import Snackbar from 'react-native-snackbar';
 //google signin
-// import { googleSignIn } from '../Service/Service';
+import { loginWithGoogle } from '../Service/Service';
 import GoogleButton from '../Components/GoogleButton';
 import Routes, { AppStackParamList } from '../Routes/Routes';
 import { useNavigation } from '@react-navigation/native';
@@ -108,12 +108,14 @@ const Login = () => {
           onPress={() => usenavigation.navigate(Routes.Signup)}
           style={styles.signUpContainer}
         >
+        {/* <GoogleButton onPress={loginWithGoogle}/> */}
+
+
           <Text style={styles.noAccountLabel}>
             Don't have an account?{'  '}
             <Text style={styles.signUpLabel}>Create an account</Text>
           </Text>
         </Pressable>
-        {/* <GoogleButton onPress={googleSignIn}/> */}
       </View>
     </KeyboardAvoidingView>
   );
@@ -130,7 +132,8 @@ const styles = StyleSheet.create({
     height: '100%',
   },
   appName: {
-    color: '#f02e65',
+    // color: '#f02e65',
+    color: '#6C63Ff',
     fontSize: 40,
     fontWeight: 'bold',
     alignSelf: 'center',

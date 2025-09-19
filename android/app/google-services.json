@@ -1,0 +1,29 @@
+{
+  "project_info": {
+    "project_number": "553168869928",
+    "project_id": "advancedtodolist-4e04a",
+    "storage_bucket": "advancedtodolist-4e04a.firebasestorage.app"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:553168869928:android:36f136689f69e541cb331d",
+        "android_client_info": {
+          "package_name": "com.advancedtodolistapp"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyAjZpDV66fw5JdKlZgUe01Sxwb2rtQTJ8I"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
