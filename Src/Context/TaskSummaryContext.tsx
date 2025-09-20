@@ -9,8 +9,9 @@ type TaskSummaryContextType = {
 
 type TaskSummaryContextValue = {
   stats: TaskSummaryContextType;
-  updateStats: (tasks: Task[]) => void;
+  updateStats: (tasks: Task[], incrementCompleted?: boolean) => void;
 };
+
 
 // Create context
 export const TaskSummaryContext = createContext<TaskSummaryContextValue | undefined>(undefined);
@@ -24,13 +25,17 @@ export const TaskSummaryProvider: React.FC<{ children: React.ReactNode }> = ({ c
   });
 
   // Centralized function to recalc stats
-  const updateStats = (tasks: Task[]) => {
-    const total = tasks.length;
-    const completed = tasks.filter(task => task.completed).length;
-    const pending = total - completed;
+const updateStats = (tasks: Task[], incrementCompleted = false) => {
+  const total = tasks.length;
+  const pending = tasks.filter(task => !task.completed).length;
 
-    setStats({ total, completed, pending });
-  };
+  setStats(prev => ({
+    total,
+    pending,
+    completed: incrementCompleted ? prev.completed + 1 : prev.completed,
+  }));
+};
+
 
   return (
     <TaskSummaryContext.Provider value={{ stats, updateStats }}>

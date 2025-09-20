@@ -191,6 +191,16 @@ const AddTaskModal = ({ isVisible, onClose, onCreate }: Props) => {
     }
   };
 
+  const handleCemeraModal = async () =>{
+    const state =  await NetInfo.fetch();
+    const isOnline = state.isConnected && state.isInternetReachable
+    if(!isOnline){
+      // setCameraModalVisible(false);
+      Alert.alert("You are likely offline!")
+    }else{
+      setCameraModalVisible(true);
+    }
+  }
   return (
     <Modal
       isVisible={isVisible}
@@ -214,7 +224,7 @@ const AddTaskModal = ({ isVisible, onClose, onCreate }: Props) => {
           <Text style={styles.createBtnText}>+ Create Task</Text>
         </TouchableOpacity>
 
-        <TouchableOpacity onPress={() => setCameraModalVisible(true)} style={styles.row}>
+        <TouchableOpacity onPress={handleCemeraModal} style={styles.row}>
           <CustomIcon name="camera-outline" size={20} color="#333" />
           <Text style={styles.rowText}>{takePhoto}</Text>
         </TouchableOpacity>

@@ -21,6 +21,8 @@ import { updateTaskFromAppwrite as updateTaskOnServer } from '../Service/Service
 import { updateTaskInDB, updateTaskSyncStatus } from '../DB/Database';
 import { useTaskContext } from '../Context/TaskContext';
 import RNFS from 'react-native-fs';
+import NetInfo from '@react-native-community/netinfo'
+
 
 const EditTask = () => {
   const navigation = useNavigation<any>();
@@ -82,7 +84,7 @@ const EditTask = () => {
     let finalPhotoPath = selectedTask.photoPath || null;
 
     // If user picked a new photo, copy it to RNFS and update path
-    if (photo && !photo.uri.includes(finalPhotoPath || '')) {
+    if (photo && photo.uri !== finalPhotoPath) {
         console.log('New photo selected:', photo.uri);
       try {
         const fileName = `task_${Date.now()}.jpg`;
@@ -123,7 +125,19 @@ const EditTask = () => {
       setSelectedTask(null);
     }
   };
-
+  const handleCemeraModal = async () =>{
+    const state =  await NetInfo.fetch();
+    const isOnline = state.isConnected && state.isInternetReachable
+    if(!isOnline){
+      // setCameraModalVisible(false);
+      Alert.alert(
+        "You are likely offline!",
+      "You cannot save a task with an image while offline."
+      )
+    }else{
+      setCameraModalVisible(true);
+    }
+  }
   return (
     <ScrollView style={styles.container} keyboardShouldPersistTaps="handled">
       <Text style={styles.label}>Task Title</Text>
@@ -207,7 +221,7 @@ const EditTask = () => {
       <Text style={styles.label}>Photo</Text>
       <TouchableOpacity
         style={styles.photoBtn}
-        onPress={() => setCameraModalVisible(true)}
+        onPress={handleCemeraModal}
       >
         <Icon
           name="image-outline"

@@ -158,12 +158,13 @@ const handleTaskDeleteOnCheckboxPress = async (taskToDelete: Task) => {
         return;
     }
     setTasks(prevTasks => {
-    const updatedTasks = prevTasks.filter(task => task.id !== appwriteDocumentId);
+  const updatedTasks = prevTasks.filter(task => task.id !== appwriteDocumentId);
 
-    updateStats(updatedTasks);
+  // ✅ tell updateStats that a completed task was deleted
+  updateStats(updatedTasks, true);
 
-    return updatedTasks;
-  });
+  return updatedTasks;
+});
 
 
     try {
@@ -294,7 +295,7 @@ useFocusEffect(
                 hour12: true,
               })
             : 'No date'; // Fallback text if the timestamp is missing
-          // ✅ END: CODE ADDED
+          
 
           return (
             <TouchableOpacity
@@ -317,7 +318,7 @@ useFocusEffect(
                 </View>
                 <View style={{ flex: 1 }}>
                   <Text style={styles.taskItem}>{item.task}</Text>
-                  {/* ♻️ MODIFIED: Display the formatted date */}
+                  
                   <Text style={styles.taskItem}>{displayDate}</Text>
                 </View>
               </View>
