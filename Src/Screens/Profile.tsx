@@ -7,6 +7,7 @@ import {
   ScrollView,
   Image,
   Alert,
+  Modal,
 } from 'react-native';
 import Ionicons from 'react-native-vector-icons/Ionicons';
 import Snackbar from 'react-native-snackbar';
@@ -23,19 +24,16 @@ import { useTaskStats } from '../Context/TaskSummaryContext';
 import RNFS from 'react-native-fs'
 import { storeUserAvatar } from '../Service/Service';
 
-
 const PRIMARY_COLOR = '#6C63FF';
 
 const Profile = () => {
-  // context 
-  const { stats,  } = useTaskStats();
-  const {isLoggedIn} = useAuth();
-  const [username, setUsername] = useState('');
+  const { stats } = useTaskStats();
+  const { isLoggedIn } = useAuth();
   const { setIsLoggedIn, setUser } = useContext(AuthContext);
-  const [avatarUri, setAvatarUri] = useState('');
-  const [modalVisible, setModalVisible] = useState(false);
-  const [localPhotoPath, setLocalPhotoPath] = useState<string | null>(null);
 
+  const [modalVisible, setModalVisible] = useState(false); // edit profile modal
+  const [viewerVisible, setViewerVisible] = useState(false); // ✅ big image modal
+  const [localPhotoPath, setLocalPhotoPath] = useState<string | null>(null);
 
   const navigation = useNavigation<any>();
 
@@ -50,14 +48,11 @@ const Profile = () => {
         duration: Snackbar.LENGTH_SHORT,
       });
 
-      // Clear session and local tasks
       await AsyncStorage.removeItem('user_session');
       await AsyncStorage.removeItem('user_avatar');
       clearAllTasks();
       setUser(null);
-
-       // Reset local state
-    setLocalPhotoPath(null);
+      setLocalPhotoPath(null);
     } catch (err) {
       console.log('Logout Error:', err);
       Snackbar.show({
@@ -70,80 +65,48 @@ const Profile = () => {
   const user = {
     name: gettingUserName(),
     email: gettingUserEmail(),
-    // profilePic: 'https://via.placeholder.com/100', // Replace with real profile pic
   };
 
-  // const Stats = {
-  //   completed: 24,
-  //   pending: 6,
-  //   total: 30,
-  // };\
-
-  // fetching user id
-const gettingUserId = () => {
-      const [userId, setUserId] = useState(''); 
-      useEffect(()=> {
-          const fetchUser = async () => {
-              const user = await getCurrentUser();
-              if(user){
-                  setUserId(user.$id);
-              }
-          }
-          fetchUser();
-      },[])   
-      return userId;
-}
   const onImageSelected = async (imageUri: string) => {
-  setModalVisible(false);
-  try {
-    if(isLoggedIn === true){
-      const fileName = `${Date.now()}-${imageUri.split('/').pop()}`;
-    const newPath = `${RNFS.DocumentDirectoryPath}/${fileName}`;
-    await RNFS.copyFile(imageUri, newPath);
-    setLocalPhotoPath(newPath);
+    setModalVisible(false);
+    try {
+      if (isLoggedIn === true) {
+        const fileName = `${Date.now()}-${imageUri.split('/').pop()}`;
+        const newPath = `${RNFS.DocumentDirectoryPath}/${fileName}`;
+        await RNFS.copyFile(imageUri, newPath);
+        setLocalPhotoPath(newPath);
 
-    // Save to AsyncStorage
-    await AsyncStorage.setItem("user_avatar", newPath);
-    }else{
-      await AsyncStorage.setItem("user_avatar", icons.userIcon2);
-
-    }
-  } catch {
-    Alert.alert('Error', 'Could not save the photo.');
-  }
-};
-const userId = gettingUserId();  
-const handleAvatarUpload = async () =>{
-  try {
-      const res = await storeUserAvatar(userId,localPhotoPath);
-      return res;
-  }catch(error){
-    console.error("Error uploading avatar:", error);
-    Alert.alert('Error', 'Could not upload the avatar.');
-  }
-}
-useEffect(() => {
-  const loadAvatar = async () => {
-    const savedPath = await AsyncStorage.getItem("user_avatar");
-    if (savedPath) {
-      setLocalPhotoPath(savedPath);
+        await AsyncStorage.setItem("user_avatar", newPath);
+      } else {
+        await AsyncStorage.setItem("user_avatar", icons.userIcon2);
+      }
+    } catch {
+      Alert.alert('Error', 'Could not save the photo.');
     }
   };
-  handleAvatarUpload();
-  loadAvatar();
-}, []);
+
+  useEffect(() => {
+    const loadAvatar = async () => {
+      const savedPath = await AsyncStorage.getItem("user_avatar");
+      if (savedPath) {
+        setLocalPhotoPath(savedPath);
+      }
+    };
+    loadAvatar();
+  }, []);
+
   return (
     <View style={styles.container}>
       <ScrollView contentContainerStyle={{ paddingBottom: 40 }}>
         {/* Profile Info */}
         <View style={styles.profileContainer}>
-          <TouchableOpacity onPress={() => setModalVisible(true)}>
+          <TouchableOpacity onPress={() => setViewerVisible(true)}>
             <Image
               source={
-    localPhotoPath && localPhotoPath.length > 0
-      ? { uri: `file://${localPhotoPath}` } // ✅ ensure proper URI
-      : icons.userIcon2 // ✅ fallback default
-  }
+                localPhotoPath && localPhotoPath.length > 0
+                  ? { uri: `file://${localPhotoPath}` }
+                  : icons.userIcon2
+              }
               style={styles.avatar}
             />
           </TouchableOpacity>
@@ -151,12 +114,48 @@ useEffect(() => {
           <Text style={styles.email}>{user.email}</Text>
         </View>
 
+        {/* Edit Profile Modal */}
         <EditProfileModal
           isVisible={modalVisible}
           onClose={() => setModalVisible(false)}
           onCreate={() => {}}
           onImageSelected={onImageSelected}
         />
+
+        {/* ✅ Fullscreen Image Viewer */}
+        <Modal visible={viewerVisible} transparent animationType="fade">
+          <View style={styles.viewerContainer}>
+            {/* Close button */}
+            <TouchableOpacity
+              style={styles.closeBtn}
+              onPress={() => setViewerVisible(false)}
+            >
+              <Ionicons name="close" size={28} color="#fff" />
+            </TouchableOpacity>
+
+            {/* Edit button */}
+            <TouchableOpacity
+              style={styles.editBtn}
+              onPress={() => {
+                setViewerVisible(false);
+                setModalVisible(true);
+              }}
+            >
+              <Ionicons name="pencil" size={24} color="#fff" />
+            </TouchableOpacity>
+
+            {/* Big image */}
+            <Image
+              source={
+                localPhotoPath && localPhotoPath.length > 0
+                  ? { uri: `file://${localPhotoPath}` }
+                  : icons.userIcon2
+              }
+              style={styles.bigImage}
+              resizeMode="contain"
+            />
+          </View>
+        </Modal>
 
         {/* Task Stats */}
         <View style={styles.statsRow}>
@@ -208,34 +207,29 @@ const SettingsItem = ({ icon, label }: { icon: string; label: string }) => (
 export default Profile;
 
 const styles = StyleSheet.create({
-  container: {
-    flex: 1,
-    backgroundColor: '#f6f7fb',
-  },
+  container: { flex: 1, backgroundColor: '#f6f7fb' },
   profileContainer: {
     alignItems: 'center',
     paddingVertical: 30,
     backgroundColor: '#fff',
     marginBottom: 10,
+    // borderWidth: 9
   },
-  avatar: {
-    width: 100,
-    height: 100,
-    borderRadius: 50,
-    marginBottom: 12,
-    // borderWidth: 1,
-    // borderColor: PRIMARY_COLOR,
+  avatar: { width: 100, height: 100, borderRadius: 50, marginBottom: 12 , borderWidth: 2, borderColor:"#6C63FF"},
+  name: { fontSize: 20, fontWeight: '700', color: PRIMARY_COLOR, marginBottom: 4 },
+  email: { fontSize: 14, color: '#777' },
+
+  // ✅ Big image viewer styles
+  viewerContainer: {
+    flex: 1,
+    backgroundColor: 'rgba(0,0,0,0.95)',
+    justifyContent: 'center',
+    alignItems: 'center',
   },
-  name: {
-    fontSize: 20,
-    fontWeight: '700',
-    color: PRIMARY_COLOR,
-    marginBottom: 4,
-  },
-  email: {
-    fontSize: 14,
-    color: '#777',
-  },
+  bigImage: { width: '90%', height: '70%' },
+  closeBtn: { position: 'absolute', top: 40, left: 20 },
+  editBtn: { position: 'absolute', top: 40, right: 20 },
+
   statsRow: {
     flexDirection: 'row',
     justifyContent: 'space-around',
@@ -243,18 +237,9 @@ const styles = StyleSheet.create({
     backgroundColor: '#fff',
     marginBottom: 10,
   },
-  statCard: {
-    alignItems: 'center',
-  },
-  statValue: {
-    fontSize: 20,
-    fontWeight: '700',
-    color: PRIMARY_COLOR,
-  },
-  statLabel: {
-    fontSize: 14,
-    color: '#555',
-  },
+  statCard: { alignItems: 'center' },
+  statValue: { fontSize: 20, fontWeight: '700', color: PRIMARY_COLOR },
+  statLabel: { fontSize: 14, color: '#555' },
   settingsContainer: {
     backgroundColor: '#fff',
     paddingHorizontal: 20,
@@ -268,11 +253,7 @@ const styles = StyleSheet.create({
     borderBottomColor: '#eee',
     borderBottomWidth: 1,
   },
-  settingsLabel: {
-    fontSize: 16,
-    marginLeft: 10,
-    color: '#333',
-  },
+  settingsLabel: { fontSize: 16, marginLeft: 10, color: '#333' },
   logoutButton: {
     backgroundColor: PRIMARY_COLOR,
     marginHorizontal: 20,
@@ -286,10 +267,5 @@ const styles = StyleSheet.create({
     shadowOpacity: 0.2,
     shadowRadius: 4,
   },
-  logoutText: {
-    color: '#fff',
-    marginLeft: 8,
-    fontSize: 16,
-    fontWeight: '600',
-  },
+  logoutText: { color: '#fff', marginLeft: 8, fontSize: 16, fontWeight: '600' },
 });
