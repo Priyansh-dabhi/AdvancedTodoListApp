@@ -23,6 +23,7 @@ import EditTask from '../Screens/EditTask';
 import icons from '@/constants/icons';
 // context
 import { useAuth } from '../Context/AppwriteContext';
+import GenAi from '../Screens/GenAi';
 
 
 //Drawer component
@@ -100,16 +101,16 @@ const My_Tab = () => {
     // ),
   })}
 />
-      {/* <Tab.Screen
-        name={Routes.Temperary}
-        component={Temperary}
+      <Tab.Screen
+        name={Routes.GenAi}
+        component={GenAi}
         options={{
           tabBarIcon: ({ color, size }) => (
-            <Ionicons name="calendar-outline" color={color} size={size} />
+            <Ionicons name="bulb-outline" color={color} size={size} />
           ),
         }}
       />
-      <Tab.Screen
+      {/* <Tab.Screen
         name={Routes.Map}
         component={Map}
         options={{
