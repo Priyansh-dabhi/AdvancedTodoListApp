@@ -8,8 +8,10 @@ import {
   OAuthProvider,
   Messaging,
   Databases,
+  Functions,
   
 } from 'appwrite';
+import {GoogleGenerativeAI} from '@google/generative-ai'
 import { Platform, Linking } from 'react-native';
 import Snackbar from 'react-native-snackbar';
 import { 
@@ -20,6 +22,8 @@ import {
   APPWRITE_COLLECTION_ID_FCM,
   APPWRITE_BUCKET_ID,
   APPWRITE_COLLECTION_ID_USER_AVATAR,
+  GEMINI_API_KEY,
+  APPWRITE_FUNCTION_ID
 } from '@env';
 import RNFS from 'react-native-fs';
 import { deleteTaskById, getUnsyncedTasksAsync, insertOrUpdateTask, permanentlyDeleteTask } from '../DB/Database';
@@ -41,6 +45,28 @@ export const storage = new Storage(client);
 
 export const DATABASE_ID = APPWRITE_DATABASE_ID.trim();
 export const COLLECTION_ID = APPWRITE_COLLECTION_ID.trim();
+
+// ---------------------
+// Gemini generative ai
+// ---------------------
+export const functions = new Functions(client);
+
+// Call Appwrite "ai-assistant" function
+export async function enhanceTaskWithAI(history: { role: string, text: string }[]) {
+  try {
+    const execution = await functions.createExecution({
+      functionId: APPWRITE_FUNCTION_ID,
+      body: JSON.stringify({ messages: history }),
+    });
+
+    // backend now returns { text: '...' }
+    const data = JSON.parse(execution.responseBody || '{}');
+    return data; 
+  } catch (err: any) {
+    console.error('AI service error:', err);
+    throw err;
+  }
+}
 
 // ---------------------
 // TYPES
