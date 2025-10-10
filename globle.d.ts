@@ -8,5 +8,7 @@ declare module '@env' {
     export const APPWRITE_COLLECTION_ID_USER_AVATAR: string;
     export const APPWRITE_BUCKET_ID: string;
     export const APPWRITE_API_KEY: string;
+    export const GEMINI_API_KEY: string;
+    export const APPWRITE_FUNCTION_ID: string;
     
 }
