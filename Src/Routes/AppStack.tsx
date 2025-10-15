@@ -108,6 +108,12 @@ const My_Tab = () => {
           tabBarIcon: ({ color, size }) => (
             <Ionicons name="bulb-outline" color={color} size={size} />
           ),
+          headerShown: true,
+          headerTitle: 'Ask Anything!',
+          // headerTitleStyle:{backgroundColor:'000'},
+          headerStyle: {
+            backgroundColor: '#6C63FF',
+          },
         }}
       />
       {/* <Tab.Screen
