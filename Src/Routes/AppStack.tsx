@@ -101,7 +101,7 @@ const My_Tab = () => {
     // ),
   })}
 />
-      <Tab.Screen
+      {/* <Tab.Screen
         name={Routes.GenAi}
         component={GenAi}
         options={{
@@ -115,7 +115,7 @@ const My_Tab = () => {
             backgroundColor: '#6C63FF',
           },
         }}
-      />
+      /> */}
       {/* <Tab.Screen
         name={Routes.Map}
         component={Map}
