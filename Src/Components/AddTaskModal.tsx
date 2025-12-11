@@ -11,6 +11,7 @@ import {
   Platform,
   Alert,
   StyleSheet,
+  ActivityIndicator,
 } from 'react-native';
 import Modal from 'react-native-modal';
 import DateTimePicker from '@react-native-community/datetimepicker';
@@ -49,7 +50,10 @@ type Props = {
 const AddTaskModal = ({ isVisible, onClose, onCreate }: Props) => {
   const { user } = useAuth();
   const navigation = useNavigation<any>();
-
+  // Task suggestions state
+  const [taskTitle, setTaskTitle] = useState('');
+  const [loading, setLoading] = useState(false);
+  
   const [navigateToMap, setNavigateToMap] = useState(false);
   const [task, setTask] = useState('');
   const [takePhoto, setTakePhoto] = useState('No Photo');
@@ -165,6 +169,7 @@ const AddTaskModal = ({ isVisible, onClose, onCreate }: Props) => {
     setSelectedTime(null);
     setSelectLocation('Select Location');
     setLocalPhotoPath(null);
+    // setLoading(false);
     onClose();
   };
 
@@ -201,6 +206,29 @@ const AddTaskModal = ({ isVisible, onClose, onCreate }: Props) => {
       setCameraModalVisible(true);
     }
   }
+  const handleAISuggestion = async () => {
+    if (!task) return;
+    
+    setLoading(true);
+    try {
+      // NOTE: Replace '192.168.x.x' with your Laptop's Local IP Address.
+      // 'localhost' often does not work on Android Emulators/Physical devices.
+      const response = await fetch('http://192.168.29.222:5000/suggest_task', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ text: task })
+      });
+      
+      const data = await response.json();
+      if (data.suggestion) {
+        setTask(data.suggestion); // Update the input with the AI result
+      }
+    } catch (error) {
+      console.error("AI Error:", error);
+    } finally {
+      setLoading(false);
+    }
+  };
   return (
     <Modal
       isVisible={isVisible}
@@ -213,12 +241,21 @@ const AddTaskModal = ({ isVisible, onClose, onCreate }: Props) => {
       <View style={styles.container}>
         <Text style={styles.title}>Create New Task</Text>
 
-        <TextInput
+        <View style={{flexDirection:'row' ,}}>
+          <TextInput
           style={styles.input}
           placeholder="Enter a task..."
           value={task}
           onChangeText={setTask}
         />
+        <TouchableOpacity onPress={handleAISuggestion} style={{ padding: 10, backgroundColor: '#fff' }}>
+          {loading ? (
+            <ActivityIndicator size="small" color="#000" />
+          ) : (
+            <Text>✨</Text> // Or use an Icon here
+          )}
+        </TouchableOpacity>
+        </View>
 
         <TouchableOpacity style={styles.createBtn} onPress={handleCreate}>
           <Text style={styles.createBtnText}>+ Create Task</Text>
@@ -255,7 +292,7 @@ const AddTaskModal = ({ isVisible, onClose, onCreate }: Props) => {
           </Text>
         </TouchableOpacity>
 
-        <TouchableOpacity
+        {/* <TouchableOpacity
           style={styles.row}
           onPress={() => {
             setNavigateToMap(true);
@@ -264,7 +301,7 @@ const AddTaskModal = ({ isVisible, onClose, onCreate }: Props) => {
         >
           <CustomIcon name="location-outline" size={20} color="#333" />
           <Text style={styles.rowText}>{selectLocation}</Text>
-        </TouchableOpacity>
+        </TouchableOpacity> */}
 
         {showDatePicker && (
           <DateTimePicker
@@ -312,6 +349,7 @@ const styles = StyleSheet.create({
     color: '#333',
   },
   input: {
+    width:'85%',
     borderWidth: 1,
     borderColor: '#ddd',
     borderRadius: 12,
